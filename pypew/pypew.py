@@ -23,7 +23,7 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
 
     @app.route('/')
     def index_view():
-        return render_template('index.html')
+        return render_template('index.html', nav_active='index')
 
     if pypew is not None:
         pypew.app = app
