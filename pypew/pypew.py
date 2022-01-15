@@ -6,6 +6,8 @@ from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask, render_template, url_for
 
+from pypew.models import db
+
 load_dotenv()
 
 
@@ -21,6 +23,10 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
     app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+        'SQLALCHEMY_DATABASE_URI'
+    )
+
     @app.route('/')
     def index_view():
         return render_template('index.html', nav_active='index')
@@ -28,6 +34,8 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
     if pypew is not None:
         pypew.app = app
 
+    db.init_app(app)
+    app.app_context().push()
     return app
 
 
