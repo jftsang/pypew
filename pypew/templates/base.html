@@ -12,14 +12,14 @@
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
           crossorigin="anonymous">
 </head>
-<body>
+<body class="bg-dark text-white-50">
 
 <header>
     {% include 'navbar.html' %}
 </header>
 
 <main>
-    <div class="container">
+    <div class="container p-3">
         {% block content %}
         {% endblock %}
     </div>
