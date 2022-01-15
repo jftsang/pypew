@@ -1,8 +1,10 @@
 import os
+import webbrowser
+from threading import Thread
 from typing import Optional
 
 from dotenv import load_dotenv
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for
 
 load_dotenv()
 
@@ -10,6 +12,7 @@ load_dotenv()
 class PyPew:
     def __init__(self):
         self.app: Optional[Flask] = None
+        self.thread: Optional[Thread] = None
 
 
 def create_app(pypew: Optional[PyPew] = None) -> Flask:
@@ -28,10 +31,21 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
     return app
 
 
-def main():
+def main(debug=False):
     pypew = PyPew()
     app = create_app(pypew)
-    app.run(load_dotenv=True)
+
+    if debug:
+        app.run(load_dotenv=True)
+
+    else:
+        pypew.thread = Thread(
+            target=lambda: app.run(debug=False, load_dotenv=True)
+        )
+        pypew.thread.start()
+        with app.app_context():
+            webbrowser.open(url_for('index_view'))
+        pypew.thread.join()
 
 
 if __name__ == '__main__':
