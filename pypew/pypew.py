@@ -31,14 +31,19 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
     return app
 
 
-def main(debug=False):
+def main(threaded: bool = False) -> None:
+    """
+    Start PyPew.
+    :param threaded: If true, run the Flask app in a separate thread,
+                     then open a webbrowser. Debug mode is not
+                     available in this case.
+    :return: None
+    """
     pypew = PyPew()
     app = create_app(pypew)
 
-    if debug:
-        app.run(load_dotenv=True)
-
-    else:
+    if threaded:
+        # TODO use werkzeug server instead
         pypew.thread = Thread(
             target=lambda: app.run(debug=False, load_dotenv=True)
         )
@@ -47,6 +52,10 @@ def main(debug=False):
             webbrowser.open(url_for('index_view'))
         pypew.thread.join()
 
+    else:
+        # noinspection FlaskDebugMode
+        app.run(debug=True, load_dotenv=True)
+
 
 if __name__ == '__main__':
-    main()
+    main(threaded=True)
