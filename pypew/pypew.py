@@ -6,6 +6,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask, render_template, url_for
 
+from pypew.forms import MyForm
 from pypew.models import db
 
 load_dotenv()
@@ -29,7 +30,8 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
 
     @app.route('/')
     def index_view():
-        return render_template('index.html', nav_active='index')
+        form = MyForm()
+        return render_template('index.html', nav_active='index', form=form)
 
     if pypew is not None:
         pypew.app = app
