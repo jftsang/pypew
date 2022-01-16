@@ -4,9 +4,9 @@ from threading import Thread
 from typing import Optional
 
 from dotenv import load_dotenv
-from flask import Flask, render_template, url_for
+from flask import Flask, url_for
 
-from pypew.forms import MyForm
+import pypew.views as views
 from pypew.models import db
 
 load_dotenv()
@@ -28,10 +28,9 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
         'SQLALCHEMY_DATABASE_URI'
     )
 
-    @app.route('/')
-    def index_view():
-        form = MyForm()
-        return render_template('index.html', nav_active='index', form=form)
+    app.add_url_rule(
+        '/', 'index_view', views.index_view, methods=['GET', 'POST']
+    )
 
     if pypew is not None:
         pypew.app = app

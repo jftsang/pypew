@@ -1,4 +1,6 @@
-Flask
+Flask~=1.1.2
 Flask-SQLAlchemy
 Flask-WTF
-python-dotenv
+python-dotenv~=0.19.2
+WTForms~=3.0.1
+setuptools~=50.3.2

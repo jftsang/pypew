@@ -1,0 +1,20 @@
+body {
+    --bs-body-bg: hsl(38, 23%, 5%);
+}
+
+#navbar {
+    /*background-color: black;*/
+    /*noinspection CssUnresolvedCustomProperty*/
+    background-image: var(--bs-gradient);
+}
+
+#footer {
+    background-color: hsla(38, 33%, 20%, 0.5);
+}
+
+ul#flashes {
+}
+
+li.flash {
+    list-style: none;
+}
