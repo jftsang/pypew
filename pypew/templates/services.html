@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Services{% endblock %}
+{% block content %}
+    <h1>Services</h1>
+    <ul>
+    {% for s in services %}
+        <li>
+            <a href="{{ url_for('service_view', name=s.name) }}"
+               class="link-info text-decoration-none">{{ s.name }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}
