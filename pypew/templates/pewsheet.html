@@ -15,7 +15,14 @@
 
     {% for e in service.elements %}
         <p>
-            <strong>{{ e }}</strong><br>{{ service.elements[e] }}
+            {% if 'Reading' in e %}
+                {% set extract = Extract.get(title=service.elements[e]) %}
+                <strong>{{ e }}</strong> <em>{{ extract.title }}</em><br>
+                {{ extract.text }}
+            {% else %}
+                <strong>{{ e }}</strong><br>
+                {{ service.elements[e] }}
+            {% endif %}
         </p>
     {% endfor %}
 {% endblock %}
