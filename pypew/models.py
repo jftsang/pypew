@@ -52,3 +52,9 @@ class Service(Jorm):
 
 class Extract(Jorm):
     datafile = os.path.join(os.path.dirname(__file__), 'texts.json')
+
+
+class PewSheet:
+    def __init__(self, service, title=None):
+        self.service = service
+        self.title = title or service.name

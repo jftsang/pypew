@@ -35,6 +35,7 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
     app.add_url_rule('/service/<name>', 'service_view', views.service_view)
     app.add_url_rule('/service/<name>/docx', 'service_docx_view', views.service_docx_view)
     app.add_url_rule('/service/<name>/pdf', 'service_pdf_view', views.service_pdf_view)
+    app.add_url_rule('/pewSheet/', 'pew_sheet_create_view', views.pew_sheet_create_view, methods=['GET', 'POST'])
 
     app.errorhandler(Exception)(views.internal_error_handler)
 

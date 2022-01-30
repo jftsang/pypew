@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Pew Sheet{% endblock %}
+{% block content %}
+
+    {% if pew_sheet %}
+        <div class="container">
+
+        <h1>{{ pew_sheet.title }}</h1>
+
+        <p class="text-muted">
+            You would see information about {{ pew_sheet.title }} here,
+            and some buttons to generate .docx and .pdf files.
+        </p>
+        </div>
+    {% endif %}
+
+    <div class="container">
+        <form method="post"
+              action="{{ url_for('pew_sheet_create_view') }}"
+              class="px-5">
+            {{ form.csrf_token }}
+
+            <div class="row mb-3">
+                {{ form.title.label(class='col-sm-1 col-form-label') }}
+                <div class="col-sm-5">
+                    {{ form.title(class='form-control') }}
+                    {% if form.title.errors %}
+                        {% for error in form.title.errors %}
+                            <small class="font-small text-danger">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <a class="btn btn-secondary" id="autogenerate">Autogenerate</a>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                {{ form.service_name.label(class='col-sm-1 col-form-label') }}
+                <div class="col-sm-5">
+                    {{ form.service_name(class='form-select') }}
+                    {% if form.service_name.errors %}
+                        {% for error in form.service_name.errors %}
+                            <small class="font-small text-danger">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                {{ form.date.label(class='col-sm-1 col-form-label') }}
+                <div class="col-sm-3">
+                    {{ form.date(class='form-date') }}
+                    {% if form.date.errors %}
+                        {% for error in form.date.errors %}
+                            <small class="font-small text-danger">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-4"></div>
+                <div class="col-auto">
+                    <input type="submit" class="btn btn-secondary w-100" value="Go">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const autogenerate = document.getElementById('autogenerate');
+        const titleField = document.getElementById('title');
+        const serviceNameField = document.getElementById('service_name');
+        const dateField = document.getElementById('date');
+        autogenerate.onclick = (evt) => {
+              titleField.value = serviceNameField.value + ' ' + dateField.value;
+        };
+    </script>
+
+{% endblock %}

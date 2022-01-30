@@ -4,8 +4,8 @@ from tempfile import TemporaryDirectory, NamedTemporaryFile
 from docx2pdf import convert
 from flask import render_template, flash, send_file, redirect, url_for
 
-from pypew.forms import MyForm
-from pypew.models import Service, Extract
+from pypew.forms import MyForm, PewSheetForm
+from pypew.models import Service, Extract, PewSheet
 from pypew.utils import logger
 
 
@@ -34,9 +34,21 @@ def service_view(name, **kwargs):
         return service_index_view(status=404)
 
     return render_template(
-        'pewsheet.html', service=service, Extract=Extract, **kwargs
+        'serviceDetails.html', service=service, Extract=Extract, **kwargs
     )
 
+
+def pew_sheet_create_view():
+    form = PewSheetForm()
+    pew_sheet = None
+
+    if form.validate_on_submit():
+        service = Service.get(name=form.service_name.data)
+        pew_sheet = PewSheet(service=service, title=form.title.data)
+
+    return render_template(
+        'pewSheet.html', nav_active='Pew Sheets', form=form, pew_sheet=pew_sheet
+    )
 
 def service_docx_view(name):
     filename = f'{name}.docx'
