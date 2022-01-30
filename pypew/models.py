@@ -1,6 +1,7 @@
 import json
 import os
 
+from docx import Document
 from dotmap import DotMap
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import backref
@@ -42,6 +43,11 @@ class Jorm(DotMap):
 
 class Service(Jorm):
     datafile = os.path.join(os.path.dirname(__file__), 'services.json')
+
+    def create_docx(self, path):
+        document = Document()
+        document.add_heading(self.name, 0)
+        document.save(path)
 
 
 class Extract(Jorm):

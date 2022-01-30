@@ -1,9 +1,12 @@
-from tempfile import NamedTemporaryFile
+import os
+from tempfile import TemporaryDirectory, NamedTemporaryFile
 
-from flask import render_template, flash, send_file, Response
+from docx2pdf import convert
+from flask import render_template, flash, send_file, redirect, url_for
 
 from pypew.forms import MyForm
 from pypew.models import Service, Extract
+from pypew.utils import logger
 
 
 def index_view():
@@ -23,24 +26,58 @@ def service_index_view(**kwargs):
     )
 
 
-def service_view(name):
+def service_view(name, **kwargs):
     try:
         service = Service.get(name=name)
     except Service.NotFoundError:
         flash(f'Service {name} not found.')
         return service_index_view(status=404)
 
-    return render_template('pewsheet.html', service=service, Extract=Extract)
-
+    return render_template(
+        'pewsheet.html', service=service, Extract=Extract, **kwargs
+    )
 
 
 def service_docx_view(name):
+    filename = f'{name}.docx'
     try:
         service = Service.get(name=name)
     except Service.NotFoundError:
         flash(f'Service {name} not found.')
         return service_index_view(status=404)
 
-    with NamedTemporaryFile(suffix=".docx", prefix=name) as tf:
-        ...
-        return send_file(tf.name)
+    with NamedTemporaryFile() as tf:
+        service.create_docx(path=tf.name)
+        return send_file(
+            tf.name, as_attachment=True, attachment_filename=filename
+        )
+
+
+def service_pdf_view(name):
+    filename = f'{name}.pdf'
+    try:
+        service = Service.get(name=name)
+    except Service.NotFoundError:
+        flash(f'Service {name} not found.')
+        return service_index_view(status=404)
+
+    with TemporaryDirectory() as td:
+        docx_path = os.path.join(td, 'tmp.docx')
+        service.create_docx(path=docx_path)
+
+        pdf_path = os.path.join(td, 'tmp.pdf')
+        convert(docx_path, pdf_path)
+        # The PDF file might not exist if the conversion failed for
+        # whatever reason. The problem is that convert() fails silently:
+        # https://github.com/AlJohri/docx2pdf/issues/55
+        try:
+            return send_file(
+                pdf_path, as_attachment=True, attachment_filename=filename
+            )
+        except FileNotFoundError as exc:
+            logger.exception(exc)
+            flash(
+                'Conversion from DOCX to PDF was unsuccessful. '
+                'Try downloading the .docx version instead.'
+            )
+            return redirect(url_for('service_view', name=name))

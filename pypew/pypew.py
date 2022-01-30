@@ -34,6 +34,7 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
     app.add_url_rule('/services', 'service_index_view', views.service_index_view)
     app.add_url_rule('/service/<name>', 'service_view', views.service_view)
     app.add_url_rule('/service/<name>/docx', 'service_docx_view', views.service_docx_view)
+    app.add_url_rule('/service/<name>/pdf', 'service_pdf_view', views.service_pdf_view)
 
     if pypew is not None:
         pypew.app = app
