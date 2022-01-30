@@ -81,3 +81,7 @@ def service_pdf_view(name):
                 'Try downloading the .docx version instead.'
             )
             return redirect(url_for('service_view', name=name))
+
+
+def internal_error_handler(error):
+    return render_template('exception.html', error=error)

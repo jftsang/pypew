@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}PyPew{% endblock %}
+{% block content %}
+    <h1>PyPew encountered an exception</h1>
+
+    <p>I am sorry, but PyPew encountered an exception. Please report the
+        following error message:</p>
+
+    <p class="text-danger">{{ error }}</p>
+{% endblock %}
