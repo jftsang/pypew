@@ -8,17 +8,15 @@ from sqlalchemy.orm import backref
 db = SQLAlchemy()
 
 
-class NotFoundError(Exception):
-    pass
-
-
-class MultipleReturnedError(Exception):
-    pass
-
-
 class Jorm(DotMap):
     """Lightweight ORM where data is stored in a JSON file."""
     datafile = None
+
+    class NotFoundError(Exception):
+        pass
+
+    class MultipleReturnedError(Exception):
+        pass
 
     @classmethod
     def all(cls):
@@ -36,9 +34,9 @@ class Jorm(DotMap):
         filtered = cls.filter(**kwargs)
         n = len(filtered)
         if n == 0:
-            raise NotFoundError(cls, kwargs)
+            raise cls.NotFoundError(cls, kwargs)
         if n > 1:
-            raise MultipleReturnedError(cls, kwargs, n)
+            raise cls.MultipleReturnedError(cls, kwargs, n)
         return filtered[0]
 
 
