@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from flask import Flask, url_for
 
 import pypew.views as views
-from pypew.models import db
 
 load_dotenv()
 
@@ -42,7 +41,6 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
     if pypew is not None:
         pypew.app = app
 
-    db.init_app(app)
     app.app_context().push()
     return app
 
