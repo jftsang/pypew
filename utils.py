@@ -1,4 +1,4 @@
 import logging
-from . import __name__
+from pypew import __name__
 
 logger = logging.getLogger(__name__)

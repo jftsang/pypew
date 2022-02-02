@@ -1,4 +1,5 @@
 import os
+import sys
 import webbrowser
 from threading import Thread
 from typing import Optional
@@ -6,7 +7,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask, url_for
 
-import pypew.views as views
+import views
 
 load_dotenv()
 
@@ -18,7 +19,16 @@ class PyPew:
 
 
 def create_app(pypew: Optional[PyPew] = None) -> Flask:
-    app = Flask(__name__)
+    # https://stackoverflow.com/a/50132788
+    base_dir = '.'
+    if hasattr(sys, '_MEIPASS'):
+        base_dir = os.path.join(sys._MEIPASS)
+
+    app = Flask(
+        __name__,
+        static_folder=os.path.join(base_dir, 'static'),
+        template_folder=os.path.join(base_dir, 'templates'),
+    )
 
     app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')

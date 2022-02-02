@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, RadioField, DateField
 from wtforms.validators import DataRequired
 
-from pypew.models import Service
+from models import Service
 
 
 class MyForm(FlaskForm):

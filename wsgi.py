@@ -1,4 +1,4 @@
-from pypew.pypew import create_app
+from pypew import create_app
 
 
 app = create_app()

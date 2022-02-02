@@ -4,9 +4,9 @@ from tempfile import TemporaryDirectory, NamedTemporaryFile
 from docx2pdf import convert
 from flask import render_template, flash, send_file, redirect, url_for
 
-from pypew.forms import MyForm, PewSheetForm
-from pypew.models import Service, Extract, PewSheet
-from pypew.utils import logger
+from forms import MyForm, PewSheetForm
+from models import Service, Extract, PewSheet
+from utils import logger
 
 
 def index_view():

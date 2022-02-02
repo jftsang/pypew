@@ -2,7 +2,7 @@ import unittest
 
 from flask import url_for
 
-from pypew.pypew import create_app
+from pypew import create_app
 
 
 class TestViews(unittest.TestCase):
