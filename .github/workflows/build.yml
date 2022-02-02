@@ -38,4 +38,4 @@ jobs:
     - name: Run unit tests
       run: |
         pip install pytest
-        SERVER_NAME=localhost:5000 pytest
+        cd tests && pytest
