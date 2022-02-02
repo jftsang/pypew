@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from flask import url_for
 
-from pypew import create_app
+from ..pypew import create_app
 
 
 class TestViews(unittest.TestCase):
@@ -40,8 +40,10 @@ class TestViews(unittest.TestCase):
         )
         m_create_docx.assert_called()
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.headers['Content-Disposition'],
-            'attachment; filename="Christmas Day.docx"')
+        self.assertEqual(
+            r.headers['Content-Disposition'],
+            'attachment; filename="Christmas Day.docx"'
+        )
         self.assertEqual(
             r.headers['Content-Type'],
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
