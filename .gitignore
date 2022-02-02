@@ -130,3 +130,6 @@ dmypy.json
 
 # SQLite3 databases
 *.db
+
+# MacOS
+.DS_Store
