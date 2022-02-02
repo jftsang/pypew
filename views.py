@@ -49,8 +49,12 @@ def pew_sheet_create_view():
         pew_sheet = PewSheet(service=service, title=form.title.data)
 
     return render_template(
-        'pewSheet.html', nav_active='Pew Sheets', form=form, pew_sheet=pew_sheet
+        'pewSheet.html',
+        nav_active='Pew Sheets',
+        form=form,
+        pew_sheet=pew_sheet,
     )
+
 
 def service_docx_view(name):
     filename = f'{name}.docx'

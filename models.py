@@ -22,9 +22,10 @@ class Jorm(DotMap):
 
     @classmethod
     def filter(cls, **kwargs):
-        return [x for x in cls.all() if
-                    all(x[k] == kwargs[k] for k in kwargs.keys())]
-
+        return [
+            x for x in cls.all()
+            if all(x[k] == kwargs[k] for k in kwargs.keys())
+        ]
 
     @classmethod
     def get(cls, **kwargs):
