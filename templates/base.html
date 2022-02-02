@@ -35,8 +35,8 @@
     <div class="container p-2" id="flashes-div">
     {% if get_flashed_messages() %}
         <ul id="flashes">
-        {% for msg in get_flashed_messages() %}
-            <li class="flash text-warning">{{ msg }}</li>
+        {% for category, msg in get_flashed_messages(with_categories=True) %}
+            <li class="flash text-{{ category }}">{{ msg }}</li>
         {% endfor %}
         </ul>
     {% endif %}

@@ -84,21 +84,24 @@ def service_pdf_view(name):
         service.create_docx(path=docx_path)
 
         pdf_path = os.path.join(td, 'tmp.pdf')
-        convert(docx_path, pdf_path)
-        # The PDF file might not exist if the conversion failed for
-        # whatever reason. The problem is that convert() fails silently:
-        # https://github.com/AlJohri/docx2pdf/issues/55
         try:
+            # Note that convert() may fail silently:
+            # https://github.com/AlJohri/docx2pdf/issues/56
+            # https://github.com/AlJohri/docx2pdf/pull/57
+            convert(docx_path, pdf_path)
             return send_file(
                 pdf_path, as_attachment=True, attachment_filename=filename
             )
-        except FileNotFoundError as exc:
+        except Exception as exc:
             logger.exception(exc)
             flash(
                 'Conversion from DOCX to PDF was unsuccessful. '
-                'Try downloading the .docx version instead.'
+                'Try downloading the .docx version instead. '
+                'The server reported:',
+                'warning'
             )
-            return redirect(url_for('service_detail_view', name=name))
+            flash(str(exc), 'danger')
+            return redirect(url_for('service_detail_view', name=name), 302)
 
 
 def internal_error_handler(error):
