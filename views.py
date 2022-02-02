@@ -2,7 +2,9 @@ import os
 from tempfile import TemporaryDirectory, NamedTemporaryFile
 
 from docx2pdf import convert
-from flask import render_template, flash, send_file, redirect, url_for
+from flask import (
+    render_template, flash, send_file, redirect, url_for, make_response
+)
 
 from forms import MyForm, PewSheetForm
 from models import Service, Extract, PewSheet
@@ -19,19 +21,19 @@ def index_view():
     return render_template('index.html', nav_active='Home', form=form)
 
 
-def service_index_view(**kwargs):
+def service_index_view():
     services = Service.all()
     return render_template(
-        'services.html', nav_active='Services', services=services, **kwargs
+        'services.html', nav_active='Services', services=services
     )
 
 
-def service_view(name, **kwargs):
+def service_detail_view(name, **kwargs):
     try:
         service = Service.get(name=name)
     except Service.NotFoundError:
         flash(f'Service {name} not found.')
-        return service_index_view(status=404)
+        return make_response(service_index_view(), 404)
 
     return render_template(
         'serviceDetails.html', service=service, Extract=Extract, **kwargs
@@ -56,7 +58,7 @@ def service_docx_view(name):
         service = Service.get(name=name)
     except Service.NotFoundError:
         flash(f'Service {name} not found.')
-        return service_index_view(status=404)
+        return make_response(service_index_view(), 404)
 
     with NamedTemporaryFile() as tf:
         service.create_docx(path=tf.name)
@@ -71,7 +73,7 @@ def service_pdf_view(name):
         service = Service.get(name=name)
     except Service.NotFoundError:
         flash(f'Service {name} not found.')
-        return service_index_view(status=404)
+        return make_response(service_index_view(), 404)
 
     with TemporaryDirectory() as td:
         docx_path = os.path.join(td, 'tmp.docx')
@@ -92,8 +94,9 @@ def service_pdf_view(name):
                 'Conversion from DOCX to PDF was unsuccessful. '
                 'Try downloading the .docx version instead.'
             )
-            return redirect(url_for('service_view', name=name))
+            return redirect(url_for('service_detail_view', name=name))
 
 
 def internal_error_handler(error):
-    return render_template('exception.html', error=error)
+    logger.exception(error)
+    return make_response(render_template('exception.html', error=error), 500)

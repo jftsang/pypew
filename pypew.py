@@ -18,7 +18,7 @@ class PyPew:
         self.thread: Optional[Thread] = None
 
 
-def create_app(pypew: Optional[PyPew] = None) -> Flask:
+def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     # https://stackoverflow.com/a/50132788
     base_dir = '.'
     if hasattr(sys, '_MEIPASS'):
@@ -28,6 +28,7 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
         __name__,
         static_folder=os.path.join(base_dir, 'static'),
         template_folder=os.path.join(base_dir, 'templates'),
+        **kwargs
     )
 
     app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
@@ -41,7 +42,7 @@ def create_app(pypew: Optional[PyPew] = None) -> Flask:
         '/', 'index_view', views.index_view, methods=['GET', 'POST']
     )
     app.add_url_rule('/services', 'service_index_view', views.service_index_view)
-    app.add_url_rule('/service/<name>', 'service_view', views.service_view)
+    app.add_url_rule('/service/<name>', 'service_detail_view', views.service_detail_view)
     app.add_url_rule('/service/<name>/docx', 'service_docx_view', views.service_docx_view)
     app.add_url_rule('/service/<name>/pdf', 'service_pdf_view', views.service_pdf_view)
     app.add_url_rule('/pewSheet/', 'pew_sheet_create_view', views.pew_sheet_create_view, methods=['GET', 'POST'])
