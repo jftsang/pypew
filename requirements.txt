@@ -7,3 +7,5 @@ python-docx~=0.8.11
 python-dotenv~=0.19.2
 WTForms~=3.0.1
 setuptools~=50.3.2
+openpyxl==3.0.9
+pandas==1.1.4

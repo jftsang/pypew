@@ -43,6 +43,13 @@
                         Pew Sheets
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if nav_active == 'Texts' %}active{% endif %}"
+                       href="{{ url_for('texts_view') }}">
+                        Texts
+                    </a>
+                </li>
+
             </ul>
         </div>
     </div>
