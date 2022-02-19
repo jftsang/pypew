@@ -17,26 +17,26 @@ class TestViews(unittest.TestCase):
         r = self.client.get(url_for('index_view'))
         self.assertEqual(r.status_code, 200)
 
-    def test_service_index_view(self):
-        r = self.client.get(url_for('service_index_view'))
+    def test_feast_index_view(self):
+        r = self.client.get(url_for('feast_index_view'))
         self.assertEqual(r.status_code, 200)
 
-    def test_service_detail_view(self):
+    def test_feast_detail_view(self):
         r = self.client.get(
-            url_for('service_detail_view', name='Christmas Day')
+            url_for('feast_detail_view', name='Christmas Day')
         )
         self.assertEqual(r.status_code, 200)
 
-    def test_service_detail_view_handles_not_found(self):
+    def test_feast_detail_view_handles_not_found(self):
         r = self.client.get(
-            url_for('service_detail_view', name='Notmas Day')
+            url_for('feast_detail_view', name='Notmas Day')
         )
         self.assertEqual(r.status_code, 404)
 
-    @patch('pypew.views.Service.create_docx')
-    def test_service_docx_view(self, m_create_docx):
+    @patch('pypew.views.Feast.create_docx')
+    def test_feast_docx_view(self, m_create_docx):
         r = self.client.get(
-            url_for('service_docx_view', name='Christmas Day')
+            url_for('feast_docx_view', name='Christmas Day')
         )
         m_create_docx.assert_called()
         self.assertEqual(r.status_code, 200)
@@ -51,10 +51,10 @@ class TestViews(unittest.TestCase):
 
     @unittest.expectedFailure
     @patch('pypew.views.convert')
-    @patch('pypew.views.Service.create_docx')
-    def test_service_pdf_view(self, m_create_docx, m_convert):
+    @patch('pypew.views.Feast.create_docx')
+    def test_feast_pdf_view(self, m_create_docx, m_convert):
         r = self.client.get(
-            url_for('service_pdf_view', name='Christmas Day')
+            url_for('feast_pdf_view', name='Christmas Day')
         )
         m_convert.assert_called()
         self.assertEqual(r.status_code, 200)

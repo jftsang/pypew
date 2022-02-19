@@ -1,27 +1,27 @@
 {% extends 'base.html' %}
-{% block title %}Service {{ service.name }}{% endblock %}
+{% block title %}Feast {{ feast.name }}{% endblock %}
 {% block content %}
     <div class="row">
         <div class="col">
-            <h1>{{ service.name }}</h1>
+            <h1>{{ feast.name }}</h1>
         </div>
         <div class="col">
             <p>
-                <a class="btn btn-primary mx-1" href="{{ url_for('service_docx_view', name=service.name) }}">.docx</a>
-                <a class="btn btn-danger mx-1" href="{{ url_for('service_pdf_view', name=service.name) }}">.pdf</a>
+                <a class="btn btn-primary mx-1" href="{{ url_for('feast_docx_view', name=feast.name) }}">.docx</a>
+                <a class="btn btn-danger mx-1" href="{{ url_for('feast_pdf_view', name=feast.name) }}">.pdf</a>
             </p>
         </div>
     </div>
 
-    {% for e in service.elements %}
+    {% for e in feast.elements %}
         <p>
             {% if 'Reading' in e %}
-                {% set extract = Extract.get(title=service.elements[e]) %}
+                {% set extract = Extract.get(title=feast.elements[e]) %}
                 <strong>{{ e }}</strong> <em>{{ extract.title }}</em><br>
                 {{ extract.text }}
             {% else %}
                 <strong>{{ e }}</strong><br>
-                {{ service.elements[e] }}
+                {{ feast.elements[e] }}
             {% endif %}
         </p>
     {% endfor %}

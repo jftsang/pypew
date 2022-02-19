@@ -38,11 +38,11 @@
             </div>
 
             <div class="row mb-3">
-                {{ form.service_name.label(class='col-sm-1 col-form-label') }}
+                {{ form.feast_name.label(class='col-sm-1 col-form-label') }}
                 <div class="col-sm-5">
-                    {{ form.service_name(class='form-select') }}
-                    {% if form.service_name.errors %}
-                        {% for error in form.service_name.errors %}
+                    {{ form.feast_name(class='form-select') }}
+                    {% if form.feast_name.errors %}
+                        {% for error in form.feast_name.errors %}
                             <small class="font-small text-danger">
                                 {{ error }}
                             </small>
@@ -78,10 +78,10 @@
     <script>
         const autogenerate = document.getElementById('autogenerate');
         const titleField = document.getElementById('title');
-        const serviceNameField = document.getElementById('service_name');
+        const feastNameField = document.getElementById('feast_name');
         const dateField = document.getElementById('date');
         autogenerate.onclick = (evt) => {
-              titleField.value = serviceNameField.value + ' ' + dateField.value;
+              titleField.value = feastNameField.value + ' ' + dateField.value;
         };
 
         const todayBtn = document.getElementById('today-btn');

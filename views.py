@@ -8,7 +8,7 @@ from flask import (
 )
 
 from forms import MyForm, PewSheetForm, UpdateTextsForm
-from models import Service, Extract, PewSheet
+from models import Feast, Extract, PewSheet
 from utils import logger
 
 TEXTS_CSV = os.path.join(os.path.dirname(__file__), 'texts.csv')
@@ -24,22 +24,22 @@ def index_view():
     return render_template('index.html', nav_active='Home', form=form)
 
 
-def service_index_view():
-    services = Service.all()
+def feast_index_view():
+    feasts = Feast.all()
     return render_template(
-        'services.html', nav_active='Services', services=services
+        'feasts.html', nav_active='Feasts', feasts=feasts
     )
 
 
-def service_detail_view(name, **kwargs):
+def feast_detail_view(name, **kwargs):
     try:
-        service = Service.get(name=name)
-    except Service.NotFoundError:
-        flash(f'Service {name} not found.')
-        return make_response(service_index_view(), 404)
+        feast = Feast.get(name=name)
+    except Feast.NotFoundError:
+        flash(f'Feast {name} not found.')
+        return make_response(feast_index_view(), 404)
 
     return render_template(
-        'serviceDetails.html', service=service, Extract=Extract, **kwargs
+        'feastDetails.html', feast=feast, Extract=Extract, **kwargs
     )
 
 
@@ -48,8 +48,8 @@ def pew_sheet_create_view():
     pew_sheet = None
 
     if form.validate_on_submit():
-        service = Service.get(name=form.service_name.data)
-        pew_sheet = PewSheet(service=service, title=form.title.data)
+        feast = Feast.get(name=form.feast_name.data)
+        pew_sheet = PewSheet(feast=feast, title=form.title.data)
 
     return render_template(
         'pewSheet.html',
@@ -59,32 +59,32 @@ def pew_sheet_create_view():
     )
 
 
-def service_docx_view(name):
+def feast_docx_view(name):
     filename = f'{name}.docx'
     try:
-        service = Service.get(name=name)
-    except Service.NotFoundError:
-        flash(f'Service {name} not found.')
-        return make_response(service_index_view(), 404)
+        feast = Feast.get(name=name)
+    except Feast.NotFoundError:
+        flash(f'Feast {name} not found.')
+        return make_response(feast_index_view(), 404)
 
     with NamedTemporaryFile() as tf:
-        service.create_docx(path=tf.name)
+        feast.create_docx(path=tf.name)
         return send_file(
             tf.name, as_attachment=True, attachment_filename=filename
         )
 
 
-def service_pdf_view(name):
+def feast_pdf_view(name):
     filename = f'{name}.pdf'
     try:
-        service = Service.get(name=name)
-    except Service.NotFoundError:
-        flash(f'Service {name} not found.')
-        return make_response(service_index_view(), 404)
+        feast = Feast.get(name=name)
+    except Feast.NotFoundError:
+        flash(f'Feast {name} not found.')
+        return make_response(feast_index_view(), 404)
 
     with TemporaryDirectory() as td:
         docx_path = os.path.join(td, 'tmp.docx')
-        service.create_docx(path=docx_path)
+        feast.create_docx(path=docx_path)
 
         pdf_path = os.path.join(td, 'tmp.pdf')
         try:
@@ -104,7 +104,7 @@ def service_pdf_view(name):
                 'warning'
             )
             flash(str(exc), 'danger')
-            return redirect(url_for('service_detail_view', name=name), 302)
+            return redirect(url_for('feast_detail_view', name=name), 302)
 
 
 def texts_view():

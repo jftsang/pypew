@@ -7,7 +7,7 @@ from wtforms import StringField, SelectField, RadioField, DateField, FileField
 from wtforms.validators import DataRequired, StopValidation
 from wtforms.widgets import TextArea
 
-from models import Service
+from models import Feast
 
 
 class IsCsv:
@@ -33,7 +33,7 @@ class MyForm(FlaskForm):
 
 class PewSheetForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    service_name = SelectField('Service', choices=[s.name for s in Service.all()])
+    feast_name = SelectField('Feast', choices=[feast.name for feast in Feast.all()])
     date = DateField('Date', validators=[DataRequired()])
 
 

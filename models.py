@@ -38,8 +38,9 @@ class Jorm(DotMap):
         return filtered[0]
 
 
-class Service(Jorm):
-    datafile = os.path.join(os.path.dirname(__file__), 'data', 'services.json')
+class Feast:
+
+    datafile = os.path.join(os.path.dirname(__file__), 'data', 'feasts.json')
 
     def create_docx(self, path):
         document = Document()
@@ -52,6 +53,6 @@ class Extract(Jorm):
 
 
 class PewSheet:
-    def __init__(self, service, title=None):
-        self.service = service
-        self.title = title or service.name
+    def __init__(self, feast, title=None):
+        self.feast = feast
+        self.title = title or feast.name

@@ -41,10 +41,10 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.add_url_rule(
         '/', 'index_view', views.index_view, methods=['GET', 'POST']
     )
-    app.add_url_rule('/services', 'service_index_view', views.service_index_view)
-    app.add_url_rule('/service/<name>', 'service_detail_view', views.service_detail_view)
-    app.add_url_rule('/service/<name>/docx', 'service_docx_view', views.service_docx_view)
-    app.add_url_rule('/service/<name>/pdf', 'service_pdf_view', views.service_pdf_view)
+    app.add_url_rule('/feasts', 'feast_index_view', views.feast_index_view)
+    app.add_url_rule('/feast/<name>', 'feast_detail_view', views.feast_detail_view)
+    app.add_url_rule('/feast/<name>/docx', 'feast_docx_view', views.feast_docx_view)
+    app.add_url_rule('/feast/<name>/pdf', 'feast_pdf_view', views.feast_pdf_view)
     app.add_url_rule('/pewSheet/', 'pew_sheet_create_view', views.pew_sheet_create_view, methods=['GET', 'POST'])
     app.add_url_rule('/texts', 'texts_view', views.texts_view, methods=['GET', 'POST'])
     app.add_url_rule('/texts/csv', 'texts_download_csv_view', views.texts_download_csv_view)
