@@ -20,7 +20,13 @@
             <div class="row mb-3">
                 {{ form.csv.label(class='col-sm-1 col-form-label') }}
                 <div class="col">
-                    {{ form.csv(class='form-control', rows=15, cols=80, style='font-family: monospace;') }}
+                    {{ form.csv(
+                        class='form-control',
+                        rows=15,
+                        cols=80,
+                        style='font-family: monospace; white-space: pre;
+  overflow-wrap: normal; overflow-x: scroll;'
+                    ) }}
                     {% if form.csv.errors %}
                         {% for error in form.csv.errors %}
                             <small class="font-small text-danger">
