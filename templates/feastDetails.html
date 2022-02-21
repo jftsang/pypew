@@ -55,7 +55,8 @@
                 {% for f in feasts %}
                     <li>
                         <a href="{{ url_for('feast_detail_view', name=f.name) }}"
-                           class="link-info text-decoration-none">
+                           class="{% if f.name == feast.name %}link-info{% else %}link-secondary{% endif %}
+                           text-decoration-none">
                             {{ f.name }}
                         </a>
                     </li>

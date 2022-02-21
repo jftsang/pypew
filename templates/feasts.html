@@ -2,7 +2,7 @@
 {% block title %}Feasts{% endblock %}
 {% block content %}
     <h1>Feasts</h1>
-    <ul>
+    <ul class="list-unstyled">
     {% for feast in feasts %}
         <li>
             <a href="{{ url_for('feast_detail_view', name=feast.name) }}"
