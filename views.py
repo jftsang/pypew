@@ -8,10 +8,10 @@ from flask import (
 )
 
 from forms import MyForm, PewSheetForm, UpdateTextsForm
-from models import Feast, Extract, PewSheet
+from models import Feast, PewSheet, NotFoundError, get
 from utils import logger
 
-TEXTS_CSV = os.path.join(os.path.dirname(__file__), 'texts.csv')
+TEXTS_CSV = os.path.join(os.path.dirname(__file__), 'data', 'feasts.csv')
 
 
 def index_view():
@@ -33,14 +33,13 @@ def feast_index_view():
 
 def feast_detail_view(name, **kwargs):
     try:
-        feast = Feast.get(name=name)
-    except Feast.NotFoundError:
+        feasts = Feast.all()
+        feast = get(feasts, name=name)
+    except NotFoundError:
         flash(f'Feast {name} not found.')
         return make_response(feast_index_view(), 404)
 
-    return render_template(
-        'feastDetails.html', feast=feast, Extract=Extract, **kwargs
-    )
+    return render_template('feastDetails.html', feast=feast, feasts=feasts, **kwargs)
 
 
 def pew_sheet_create_view():
@@ -128,7 +127,7 @@ def texts_view():
 
 def texts_download_csv_view():
     return send_file(
-        TEXTS_CSV, as_attachment=True, attachment_filename='texts.csv'
+        TEXTS_CSV, as_attachment=True, attachment_filename='feasts.csv'
     )
 
 
@@ -138,7 +137,7 @@ def texts_download_xlsx_view():
         df = pd.read_csv(TEXTS_CSV)
         df.to_excel(xlsx_path, index=False)
         return send_file(
-            xlsx_path, as_attachment=True, attachment_filename='texts.xlsx'
+            xlsx_path, as_attachment=True, attachment_filename='feasts.xlsx'
         )
 
 

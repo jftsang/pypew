@@ -7,7 +7,7 @@ from wtforms import StringField, SelectField, RadioField, DateField, FileField
 from wtforms.validators import DataRequired, StopValidation
 from wtforms.widgets import TextArea
 
-from models import Feast
+from models import Feast, feasts_fields
 
 
 class IsCsv:
@@ -15,12 +15,15 @@ class IsCsv:
         self.field_flags = {"required": True}
 
     def __call__(self, form, field):
-        """Checks that the submitted text is valid csv."""
+        """Checks that the submitted text is valid csv and that the
+        expected columns are present."""
         try:
-            pd.read_csv(StringIO(field.data))
+            df = pd.read_csv(StringIO(field.data))
         except pandas.errors.ParserError:
             field.errors[:] = []
             raise StopValidation("This needs to be valid CSV.")
+        if set(df.columns) != set(feasts_fields):
+            raise StopValidation(f'The CSV is expected to have the field names {feasts_fields}')
 
 
 class MyForm(FlaskForm):
@@ -32,8 +35,10 @@ class MyForm(FlaskForm):
 
 
 class PewSheetForm(FlaskForm):
+    feast_names = [feast.name for feast in Feast.all()]
     title = StringField('Title', validators=[DataRequired()])
-    feast_name = SelectField('Feast', choices=[feast.name for feast in Feast.all()])
+    primary_feast_name = SelectField('Feast', choices=feast_names)
+    secondary_feast_name = SelectField('Feast', choices=feast_names)
     date = DateField('Date', validators=[DataRequired()])
 
 

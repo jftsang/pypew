@@ -2,6 +2,14 @@ body {
     --bs-body-bg: hsl(38, 23%, 5%);
 }
 
+main {
+    padding-bottom: 2in;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Book Antiqua", serif;
+}
+
 #navbar {
     /*background-color: black;*/
     /*noinspection CssUnresolvedCustomProperty*/
