@@ -26,14 +26,6 @@ class IsCsv:
             raise StopValidation(f'The CSV is expected to have the field names {feasts_fields}')
 
 
-class MyForm(FlaskForm):
-    name = StringField('name', validators=[DataRequired()])
-    selectable_one = SelectField('selectable one', choices=['Foo', 'Bar', 'Baz'])
-    selectable_two = SelectField('selectable two', choices=['Foo', 'Bar', 'Baz'])
-    radio = RadioField('radio', choices=[(1, 'option 1'), (2, 'option 2')],
-                       validators=[DataRequired()])
-
-
 class PewSheetForm(FlaskForm):
     feast_names = [feast.name for feast in Feast.all()]
     title = StringField('Title', validators=[DataRequired()])

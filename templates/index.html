@@ -1,91 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}PyPew{% endblock %}
 {% block content %}
-
     <h1>Welcome to PyPew</h1>
 
     <p>PyPew is a pew sheet generator.</p>
 
-    <p>The form that you see on this page is just for UI experimental purposes.
-        Please turn your attention to the Feasts or Pew Sheet views: look up
-        about three centimetres.</p>
-
-
-
-    <h1>Example form</h1>
-
-    <p>This is an example of what a form would look like.</p>
-    <div class="container">
-        <form method="post" action="/">
-            {{ form.csrf_token }}
-
-            <div class="row mb-3">
-                {{ form.name.label(class='col-sm-1 col-form-label') }}
-                <div class="col-sm-5">
-                    {{ form.name(class='form-control') }}
-                    {% if form.name.errors %}
-                        {% for error in form.name.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                {{ form.selectable_one.label(class='col-sm-1 col-form-label') }}
-                <div class="col-sm-3">
-                    {{ form.selectable_one(class='form-select') }}
-                    {% if form.selectable_one.errors %}
-                        {% for error in form.selectable_one.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-
-                {{ form.selectable_two.label(class='col-sm-1 col-form-label') }}
-                <div class="col-sm-3">
-                    {{ form.selectable_two(class='form-select') }}
-                    {% if form.selectable_two.errors %}
-                        {% for error in form.selectable_two.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                {{ form.radio.label(class='col-sm-1 col-form-label') }}
-                <div class="col-sm-5 row">
-                    {#                {{ form.radio(class='form-radio-input') }}#}
-                    {% for option in form.radio %}
-                        <div class="col-auto">
-                            {{ option }}
-                            {{ option.label }}
-                        </div>
-                    {% endfor %}
-                    {% if form.radio.errors %}
-                        {% for error in form.radio.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-
-
-            <div class="row">
-                <div class="col-sm-4"></div>
-                <div class="col-auto">
-                    <input type="submit" class="btn btn-secondary w-100" value="Go">
-                </div>
-            </div>
-        </form>
-    </div>
+    <p>Please turn your attention to the <a class="link link-info" href="{{ url_for('feast_index_view') }}">
+        list of feasts</a>, or <a class="link-info" href="{{ url_for('pew_sheet_create_view') }}">
+        create a service</a>.</p>
 {% endblock %}

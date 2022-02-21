@@ -7,7 +7,7 @@ from flask import (
     render_template, flash, send_file, redirect, url_for, make_response
 )
 
-from forms import MyForm, PewSheetForm, UpdateTextsForm
+from forms import PewSheetForm, UpdateTextsForm
 from models import Feast, PewSheet, NotFoundError, get
 from utils import logger
 
@@ -15,13 +15,7 @@ TEXTS_CSV = os.path.join(os.path.dirname(__file__), 'data', 'feasts.csv')
 
 
 def index_view():
-    form = MyForm()
-    if form.validate_on_submit():
-        flash(f"Hello, {form.name.data}, you selected "
-              f"{form.selectable_one.data} and {form.selectable_two.data} "
-              f"and option {form.radio.data}")
-
-    return render_template('index.html', nav_active='Home', form=form)
+    return render_template('index.html', nav_active='Home')
 
 
 def feast_index_view():
