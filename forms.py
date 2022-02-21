@@ -29,9 +29,10 @@ class IsCsv:
 class PewSheetForm(FlaskForm):
     feast_names = [feast.name for feast in Feast.all()]
     title = StringField('Title', validators=[DataRequired()])
-    primary_feast_name = SelectField('Feast', choices=feast_names)
-    secondary_feast_name = SelectField('Feast', choices=feast_names)
     date = DateField('Date', validators=[DataRequired()])
+    primary_feast_name = SelectField('Primary Feast', choices=feast_names)
+    secondary_feast_name = SelectField('Secondary Feast', choices=[''] + feast_names)
+    anthem = StringField('Anthem')
 
 
 class UpdateTextsForm(FlaskForm):

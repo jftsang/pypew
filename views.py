@@ -8,7 +8,7 @@ from flask import (
 )
 
 from forms import PewSheetForm, UpdateTextsForm
-from models import Feast, PewSheet, NotFoundError, get
+from models import Feast, NotFoundError, get, Service
 from utils import logger
 
 TEXTS_CSV = os.path.join(os.path.dirname(__file__), 'data', 'feasts.csv')
@@ -38,17 +38,28 @@ def feast_detail_view(name, **kwargs):
 
 def pew_sheet_create_view():
     form = PewSheetForm()
-    pew_sheet = None
+    service = None
 
     if form.validate_on_submit():
-        feast = Feast.get(name=form.feast_name.data)
-        pew_sheet = PewSheet(feast=feast, title=form.title.data)
+        primary_feast = Feast.get(name=form.primary_feast_name.data)
+        if form.secondary_feast_name.data:
+            secondary_feast = Feast.get(name=form.secondary_feast_name.data)
+        else:
+            secondary_feast = None
+
+        service = Service(
+            title=form.title.data,
+            date=form.date.data,
+            primary_feast=primary_feast,
+            secondary_feast=secondary_feast,
+            anthem=form.anthem.data,
+        )
 
     return render_template(
         'pewSheet.html',
         nav_active='Pew Sheets',
         form=form,
-        pew_sheet=pew_sheet,
+        service=service,
     )
 
 

@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import pandas as pd
 from attr import define, field
@@ -68,11 +69,8 @@ class Feast:
 
 @define
 class Service:
+    title: str = field()
+    date: str = field()
     primary_feast: Feast = field()
-    secondary_feast: Feast = field()
-
-
-class PewSheet:
-    def __init__(self, feast, title=None):
-        self.feast = feast
-        self.title = title or feast.name
+    secondary_feast: Optional[Feast] = field()
+    anthem: str = field()
