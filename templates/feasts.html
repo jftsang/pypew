@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Feasts{% endblock %}
+{% block content %}
+    <h1>Feasts</h1>
+    <ul class="list-unstyled">
+    {% for feast in feasts %}
+        <li>
+            <a href="{{ url_for('feast_detail_view', name=feast.name) }}"
+               class="link-info text-decoration-none">{{ feast.name }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}

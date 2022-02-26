@@ -2,15 +2,16 @@
 {% block title %}Pew Sheet{% endblock %}
 {% block content %}
 
-    {% if pew_sheet %}
+    {% if service %}
         <div class="container">
 
-        <h1>{{ pew_sheet.title }}</h1>
+        <h1>{{ service.title }}</h1>
 
-        <p class="text-muted">
-            You would see information about {{ pew_sheet.title }} here,
-            and some buttons to generate .docx and .pdf files.
-        </p>
+            <p class="text-muted">
+                You would see information about <strong>{{ service.title }}</strong> here,
+                and some buttons to generate .docx and .pdf files.</p>
+
+            <p class="text-muted">{{ service }}</p>
         </div>
     {% endif %}
 
@@ -21,7 +22,7 @@
             {{ form.csrf_token }}
 
             <div class="row mb-3">
-                {{ form.title.label(class='col-sm-1 col-form-label') }}
+                {{ form.title.label(class='col-sm-2 col-form-label') }}
                 <div class="col-sm-5">
                     {{ form.title(class='form-control') }}
                     {% if form.title.errors %}
@@ -34,20 +35,6 @@
                 </div>
                 <div class="col">
                     <a class="btn btn-secondary" id="autogenerate">Autogenerate</a>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                {{ form.service_name.label(class='col-sm-1 col-form-label') }}
-                <div class="col-sm-5">
-                    {{ form.service_name(class='form-select') }}
-                    {% if form.service_name.errors %}
-                        {% for error in form.service_name.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
                 </div>
             </div>
 
@@ -66,11 +53,52 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-sm-4"></div>
-                <div class="col-auto">
-                    <input type="submit" class="btn btn-secondary w-100" value="Go">
+            <div class="row mb-3">
+                {{ form.primary_feast_name.label(class='col-sm-2 col-form-label') }}
+                <div class="col-sm-5">
+                    {{ form.primary_feast_name(class='form-select') }}
+                    {% if form.primary_feast_name.errors %}
+                        {% for error in form.primary_feast_name.errors %}
+                            <small class="font-small text-danger">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+                    {% endif %}
                 </div>
+            </div>
+
+            <div class="row mb-3">
+                {{ form.secondary_feast_name.label(class='col-sm-2 col-form-label') }}
+                <div class="col-sm-5">
+                    {{ form.secondary_feast_name(class='form-select') }}
+                    {% if form.secondary_feast_name.errors %}
+                        {% for error in form.secondary_feast_name.errors %}
+                            <small class="font-small text-danger">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                {{ form.anthem.label(class='col-sm-2 col-form-label') }}
+                <div class="col-sm-5">
+                    {{ form.anthem(class='form-control') }}
+                    {% if form.anthem.errors %}
+                        {% for error in form.anthem.errors %}
+                            <small class="font-small text-danger">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                    <a id="auto-btn" class="btn btn-secondary w-25">Auto</a>
+                <br/>
+                    <input type="submit" class="btn btn-success w-50" value="Create">
             </div>
         </form>
     </div>
@@ -78,16 +106,28 @@
     <script>
         const autogenerate = document.getElementById('autogenerate');
         const titleField = document.getElementById('title');
-        const serviceNameField = document.getElementById('service_name');
+        const primaryFeastNameField = document.getElementById('primary_feast_name');
+        const secondaryFeastNameField = document.getElementById('secondary_feast_name');
         const dateField = document.getElementById('date');
-        autogenerate.onclick = (evt) => {
-              titleField.value = serviceNameField.value + ' ' + dateField.value;
+        const autoButton = document.getElementById('auto-btn');
+
+        autogenerate.onclick = () => {
+            if (secondaryFeastNameField.value)
+                titleField.value = primaryFeastNameField.value + ' (' + secondaryFeastNameField.value + ') ' + dateField.value;
+            else
+                titleField.value = primaryFeastNameField.value + ' ' + dateField.value;
         };
 
         const todayBtn = document.getElementById('today-btn');
         todayBtn.onclick = () => {
             dateField.value = (new Date()).toISOString().split('T')[0];
         }
+
+        autoButton.onclick = () => {
+            todayBtn.onclick();
+            autogenerate.onclick();
+        }
+
     </script>
 
 {% endblock %}
