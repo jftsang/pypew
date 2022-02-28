@@ -1,0 +1,141 @@
+<form method="post"
+      action="{{ url_for('pew_sheet_create_view') }}"
+      class="px-5">
+    {{ form.csrf_token }}
+
+    <div class="row mb-3">
+        {{ form.title.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.title(class='form-control') }}
+            {% if form.title.errors %}
+                {% for error in form.title.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="col">
+            <a class="btn btn-secondary" id="autogenerate">Autogenerate</a>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.date.label(class='col-sm-1 col-form-label') }}
+        <div class="col">
+            {{ form.date(class='form-date') }}
+            <a class="btn btn-secondary btn-sm px-1" id="today-btn">Today</a>
+            {% if form.date.errors %}
+                {% for error in form.date.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.celebrant.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.celebrant(class='form-control') }}
+            {% if form.celebrant.errors %}
+                {% for error in form.celebrant.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.preacher.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.preacher(class='form-control') }}
+            {% if form.preacher.errors %}
+                {% for error in form.preacher.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.primary_feast_name.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.primary_feast_name(class='form-select') }}
+            {% if form.primary_feast_name.errors %}
+                {% for error in form.primary_feast_name.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.secondary_feast_name.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.secondary_feast_name(class='form-select') }}
+            {% if form.secondary_feast_name.errors %}
+                {% for error in form.secondary_feast_name.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.anthem_title.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.anthem_title(class='form-control') }}
+            {% if form.anthem_title.errors %}
+                {% for error in form.anthem_title.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.anthem_composer.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.anthem_composer(class='form-control') }}
+            {% if form.anthem_composer.errors %}
+                {% for error in form.anthem_composer.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.anthem_lyrics.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.anthem_lyrics(class='form-control') }}
+            {% if form.anthem_lyrics.errors %}
+                {% for error in form.anthem_lyrics.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <a id="auto-btn" class="btn btn-secondary w-25" title="Automatically complete some fields">Autocomplete</a>
+        <br/>
+        <input type="submit" class="btn btn-success w-50" value="Create">
+    </div>
+</form>

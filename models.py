@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, List
 
 import pandas as pd
 from attr import define, field
@@ -68,9 +68,31 @@ class Feast:
 
 
 @define
+class Music:
+    title: str = field()
+    composer: str = field()
+    lyrics: Optional[str] = field()
+
+
+@define
 class Service:
     title: str = field()
     date: str = field()
+    celebrant: str = field()
+    preacher: str = field()
     primary_feast: Feast = field()
     secondary_feast: Optional[Feast] = field()
-    anthem: str = field()
+    anthem: Music = field()
+
+    @property
+    def collects(self) -> List[str]:
+        out = []
+        if self.primary_feast.collect:
+            out.append(self.primary_feast.collect)
+        if self.secondary_feast and self.secondary_feast.collect:
+            out.append(self.secondary_feast.collect)
+        return out
+
+    @property
+    def introit(self) -> str:
+        return self.primary_feast.introit

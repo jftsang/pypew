@@ -7,6 +7,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask, url_for
 
+import filters
 import views
 
 load_dotenv()
@@ -52,6 +53,11 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
 
     app.errorhandler(404)(views.not_found_handler)
     app.errorhandler(Exception)(views.internal_error_handler)
+
+    app.template_filter('celebrant_and_preacher')(filters.celebrant_and_preacher)
+    app.template_filter('english_date')(filters.english_date)
+
+    app.jinja_env.globals.update(len=len)
 
     if pypew is not None:
         pypew.app = app

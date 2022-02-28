@@ -30,9 +30,13 @@ class PewSheetForm(FlaskForm):
     feast_names = [feast.name for feast in Feast.all()]
     title = StringField('Title', validators=[DataRequired()])
     date = DateField('Date', validators=[DataRequired()])
+    celebrant = StringField('Celebrant')
+    preacher = StringField('Preacher')
     primary_feast_name = SelectField('Primary Feast', choices=feast_names)
     secondary_feast_name = SelectField('Secondary Feast', choices=[''] + feast_names)
-    anthem = StringField('Anthem')
+    anthem_title = StringField('Anthem')
+    anthem_composer = StringField('Anthem composer')
+    anthem_lyrics = StringField('Anthem lyrics', widget=TextArea())
 
 
 class UpdateTextsForm(FlaskForm):

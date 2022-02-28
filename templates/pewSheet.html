@@ -5,102 +5,46 @@
     {% if service %}
         <div class="container">
 
-        <h1>{{ service.title }}</h1>
+            <h1>{{ service.title }}</h1>
+
+            <p>{{ service.date | english_date }}. {{ service | celebrant_and_preacher }}</p>
 
             <p class="text-muted">
                 You would see information about <strong>{{ service.title }}</strong> here,
                 and some buttons to generate .docx and .pdf files.</p>
 
             <p class="text-muted">{{ service }}</p>
+
+            <h2>Introit</h2>
+            <p class="pewbody">{{ service.introit }}</p>
+
+            {% if len(service.collects) > 1 %}
+                <h2>Collects</h2>
+            {% elif len(service.collects) == 1 %}
+                <h2>Collect</h2>
+            {% endif %}
+            {% for c in service.collects %}
+                <p>{{ c }}</p>
+            {% endfor %}
+
+            <h2>Offertory Proper</h2>
+            <p class="pewbody">{{ service.primary_feast.offertory }}</p>
+
+            <h2>Communion Proper</h2>
+            <p class="pewbody">{{ service.primary_feast.communion }}</p>
+
+
+            {% if service.anthem %}
+                <h2>Anthem: {{ service.anthem.title }}</h2>
+                <p class="pewbody">{{ service.anthem.lyrics }}</p>
+            {% endif %}
+
+
         </div>
     {% endif %}
 
     <div class="container">
-        <form method="post"
-              action="{{ url_for('pew_sheet_create_view') }}"
-              class="px-5">
-            {{ form.csrf_token }}
-
-            <div class="row mb-3">
-                {{ form.title.label(class='col-sm-2 col-form-label') }}
-                <div class="col-sm-5">
-                    {{ form.title(class='form-control') }}
-                    {% if form.title.errors %}
-                        {% for error in form.title.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-                <div class="col">
-                    <a class="btn btn-secondary" id="autogenerate">Autogenerate</a>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                {{ form.date.label(class='col-sm-1 col-form-label') }}
-                <div class="col">
-                    {{ form.date(class='form-date') }}
-                    <a class="btn btn-secondary btn-sm px-1" id="today-btn">Today</a>
-                    {% if form.date.errors %}
-                        {% for error in form.date.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                {{ form.primary_feast_name.label(class='col-sm-2 col-form-label') }}
-                <div class="col-sm-5">
-                    {{ form.primary_feast_name(class='form-select') }}
-                    {% if form.primary_feast_name.errors %}
-                        {% for error in form.primary_feast_name.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                {{ form.secondary_feast_name.label(class='col-sm-2 col-form-label') }}
-                <div class="col-sm-5">
-                    {{ form.secondary_feast_name(class='form-select') }}
-                    {% if form.secondary_feast_name.errors %}
-                        {% for error in form.secondary_feast_name.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                {{ form.anthem.label(class='col-sm-2 col-form-label') }}
-                <div class="col-sm-5">
-                    {{ form.anthem(class='form-control') }}
-                    {% if form.anthem.errors %}
-                        {% for error in form.anthem.errors %}
-                            <small class="font-small text-danger">
-                                {{ error }}
-                            </small>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="row">
-                    <a id="auto-btn" class="btn btn-secondary w-25">Auto</a>
-                <br/>
-                    <input type="submit" class="btn btn-success w-50" value="Create">
-            </div>
-        </form>
+        {% include 'serviceForm.html' %}
     </div>
 
     <script>
@@ -113,9 +57,9 @@
 
         autogenerate.onclick = () => {
             if (secondaryFeastNameField.value)
-                titleField.value = primaryFeastNameField.value + ' (' + secondaryFeastNameField.value + ') ' + dateField.value;
+                titleField.value = primaryFeastNameField.value + ' (' + secondaryFeastNameField.value + ') ';
             else
-                titleField.value = primaryFeastNameField.value + ' ' + dateField.value;
+                titleField.value = primaryFeastNameField.value;
         };
 
         const todayBtn = document.getElementById('today-btn');
@@ -123,6 +67,13 @@
             dateField.value = (new Date()).toISOString().split('T')[0];
         }
 
+        const autoFields = [titleField, dateField];
+        autoButton.onmouseover = () => {
+            autoFields.forEach((e) => {e.classList.add('bg-warning')});
+        }
+        autoButton.onmouseout = () => {
+            autoFields.forEach((e) => {e.classList.remove('bg-warning')});
+        }
         autoButton.onclick = () => {
             todayBtn.onclick();
             autogenerate.onclick();
