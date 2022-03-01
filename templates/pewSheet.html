@@ -1,46 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Pew Sheet{% endblock %}
 {% block content %}
-
     {% if service %}
-        <div class="container">
-
-            <h1>{{ service.title }}</h1>
-
-            <p>{{ service.date | english_date }}. {{ service | celebrant_and_preacher }}</p>
-
-            <p class="text-muted">
-                You would see information about <strong>{{ service.title }}</strong> here,
-                and some buttons to generate .docx and .pdf files.</p>
-
-            <p class="text-muted">{{ service }}</p>
-
-            <h2>Introit</h2>
-            <p class="pewbody">{{ service.introit }}</p>
-
-            {% if len(service.collects) > 1 %}
-                <h2>Collects</h2>
-            {% elif len(service.collects) == 1 %}
-                <h2>Collect</h2>
-            {% endif %}
-            {% for c in service.collects %}
-                <p>{{ c }}</p>
-            {% endfor %}
-
-            <h2>Offertory Proper</h2>
-            <p class="pewbody">{{ service.primary_feast.offertory }}</p>
-
-            <h2>Communion Proper</h2>
-            <p class="pewbody">{{ service.primary_feast.communion }}</p>
-
-
-            {% if service.anthem %}
-                <h2>Anthem: {{ service.anthem.title }}</h2>
-                <p class="pewbody">{{ service.anthem.lyrics }}</p>
-            {% endif %}
-
-
-        </div>
+        {% include 'serviceDetails.html' %}
     {% endif %}
 
     <div class="container">

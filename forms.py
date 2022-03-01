@@ -4,12 +4,14 @@ from unittest import TestCase
 import pandas as pd
 import pandas.errors
 from attr import fields
+from flask import request
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, DateField, FileField
 from wtforms.validators import DataRequired, StopValidation
 from wtforms.widgets import TextArea
 
-from models import Feast
+from models import Feast, Music
+from utils import get_neh_df
 
 
 class IsCsv:
@@ -40,9 +42,23 @@ class PewSheetForm(FlaskForm):
     preacher = StringField('Preacher')
     primary_feast_name = SelectField('Primary Feast', choices=feast_names)
     secondary_feast_name = SelectField('Secondary Feast', choices=[''] + feast_names)
+
+    hymns = [('', 'None')] + [(h.ref, h.title) for h in Music.neh_hymns()]
+    # hymn_numbers = [x.number + ': ' + x.displayTitle for x in df.itertuples()]
+    introit_hymn = SelectField('Introit Hymn', choices=hymns)
+    offertory_hymn = SelectField('Offertory Hymn', choices=hymns)
+    recessional_hymn = SelectField('Recessional Hymn', choices=hymns)
+
     anthem_title = StringField('Anthem')
     anthem_composer = StringField('Anthem composer')
     anthem_lyrics = StringField('Anthem lyrics', widget=TextArea())
+
+    class Meta:
+        csrf = False
+
+    # https://discord.com/channels/531221516914917387/590290790241009673/948217938459107339
+    def is_submitted(self):
+        return bool(request.args)
 
 
 class UpdateTextsForm(FlaskForm):

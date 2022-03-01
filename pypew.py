@@ -54,7 +54,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.errorhandler(404)(views.not_found_handler)
     app.errorhandler(Exception)(views.internal_error_handler)
 
-    app.template_filter('celebrant_and_preacher')(filters.celebrant_and_preacher)
+    app.template_filter('service_subtitle')(filters.service_subtitle)
     app.template_filter('english_date')(filters.english_date)
 
     app.jinja_env.globals.update(len=len)

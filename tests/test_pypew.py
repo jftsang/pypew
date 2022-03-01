@@ -9,7 +9,7 @@ from ..pypew import create_app
 
 class TestModels(unittest.TestCase):
     def test_neh_lookup(self):
-        music = Music.neh_hymn('1a')
+        music = Music.get_neh_hymn_by_number('1a')
         self.assertEqual(
             music,
             Music(title='Creator of the stars of night',

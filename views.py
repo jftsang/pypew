@@ -4,7 +4,8 @@ from tempfile import TemporaryDirectory, NamedTemporaryFile
 import pandas as pd
 from docx2pdf import convert
 from flask import (
-    render_template, flash, send_file, redirect, url_for, make_response
+    render_template, flash, send_file, redirect, url_for, make_response,
+    request
 )
 
 from forms import PewSheetForm, UpdateTextsForm
@@ -37,7 +38,7 @@ def feast_detail_view(name, **kwargs):
 
 
 def pew_sheet_create_view():
-    form = PewSheetForm()
+    form = PewSheetForm(request.args)
     service = None
 
     if form.validate_on_submit():
@@ -48,9 +49,13 @@ def pew_sheet_create_view():
             secondary_feast = None
 
         if form.anthem_title.data:
-            anthem = Music(title=form.anthem_title.data,
-                           composer=form.anthem_composer.data,
-                           lyrics=form.anthem_lyrics.data)
+            anthem = Music(
+                title=form.anthem_title.data,
+                composer=form.anthem_composer.data,
+                lyrics=form.anthem_lyrics.data,
+                category='Anthem',
+                ref=None
+            )
         else:
             anthem = None
 
@@ -61,6 +66,9 @@ def pew_sheet_create_view():
             preacher=form.preacher.data,
             primary_feast=primary_feast,
             secondary_feast=secondary_feast,
+            introit_hymn=Music.get_neh_hymn_by_ref(form.introit_hymn.data),
+            offertory_hymn=Music.get_neh_hymn_by_ref(form.offertory_hymn.data),
+            recessional_hymn=Music.get_neh_hymn_by_ref(form.recessional_hymn.data),
             anthem=anthem,
         )
 

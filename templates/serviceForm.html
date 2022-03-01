@@ -1,8 +1,5 @@
-<form method="post"
-      action="{{ url_for('pew_sheet_create_view') }}"
+<form action="{{ url_for('pew_sheet_create_view') }}"
       class="px-5">
-    {{ form.csrf_token }}
-
     <div class="row mb-3">
         {{ form.title.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
@@ -88,6 +85,21 @@
                     </small>
                 {% endfor %}
             {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-2">
+            {{ form.introit_hymn.label }}
+            {{ form.introit_hymn(class='form-select') }}
+        </div>
+        <div class="col-sm-2">
+            {{ form.offertory_hymn.label }}
+            {{ form.offertory_hymn(class='form-select') }}
+        </div>
+        <div class="col-sm-2">
+            {{ form.recessional_hymn.label }}
+            {{ form.recessional_hymn(class='form-select') }}
         </div>
     </div>
 

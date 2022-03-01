@@ -1,0 +1,90 @@
+<div class="container">
+
+    <div class="row">
+        <div class="col">
+            <h1>{{ service.title }}</h1>
+        </div>
+        <div class="col">
+            <p>
+{#                <a class="btn btn-primary mx-1" href="{{ url_for('feast_docx_view', name=feast.name) }}">.docx</a>#}
+{#                <a class="btn btn-danger mx-1" href="{{ url_for('feast_pdf_view', name=feast.name) }}">.pdf</a>#}
+                <a id="copyUrlBtn" class="btn btn-secondary mx-1">copy link</a>
+            </p>
+        </div>
+    </div>
+
+    <p class="small"><em>{{ service.date | english_date }}<br/>
+    {{ service | service_subtitle }}</em></p>
+
+<!--
+    <p class="text-muted">
+        You would see information about <strong>{{ service.title }}</strong> here,
+        and some buttons to generate .docx and .pdf files.</p>
+
+    <p class="text-muted">{{ service }}</p>
+-->
+
+    {% if service.introit_hymn %}
+        <h2>Introit Hymn</h2>
+        <p class="pewbody">{{ service.introit_hymn }}</p>
+    {% endif %}
+
+    <h2>Introit Proper</h2>
+    <p class="pewbody">{{ service.introit_proper }}</p>
+
+    {% if len(service.collects) > 1 %}
+        <h2>Collects</h2>
+    {% elif len(service.collects) == 1 %}
+        <h2>Collect</h2>
+    {% endif %}
+    {% for collect in service.collects %}
+        <p>{{ collect }}</p>
+    {% endfor %}
+
+    <h2>Epistle</h2>
+    <p><i>{{ service.epistle_ref }}</i><br/>
+    {{ service.epistle }}</p>
+
+    <!-- TODO Gradual, Alleluia, Tract -->
+
+    <h2>Gospel</h2>
+    <p><i>{{ service.gospel_ref }}</i><br/>
+    {{ service.gospel }}</p>
+
+    <h2>Offertory Proper</h2>
+    <p class="pewbody">{{ service.offertory_proper }}</p>
+
+    {% if service.offertory_hymn %}
+        <h2>Offertory Hymn</h2>
+        <p class="pewbody">{{ service.offertory_hymn }}</p>
+    {% endif %}
+
+    <h2>Communion Proper</h2>
+    <p class="pewbody">{{ service.communion_proper }}</p>
+
+    {% if service.anthem %}
+        <h2>Anthem</h2>
+        <p class="pewbody">
+            <em>{{ service.anthem.title }}</em>. {{ service.anthem.composer }}<br/>
+            {{ service.anthem.lyrics }}
+        </p>
+    {% endif %}
+
+    {% if service.recesional_hymn %}
+        <h2>Recessional Hymn</h2>
+        <p class="pewbody">{{ service.recessional_hymn }}</p>
+    {% endif %}
+</div>
+
+<!-- https://github.com/azzalfauzi/notify, https://azzalfauzi.github.io/notify/ -->
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='notify.css') }}">
+<script src="{{ url_for('static', filename='notify.js') }}"></script>
+
+<script>
+    const copyUrlBtn = document.getElementById('copyUrlBtn');
+    copyUrlBtn.onclick = () => {
+        navigator.clipboard.writeText(window.location);
+        notify({message: 'Link copied to clipboard.', color: 'success', timeout: 2000});
+    };
+</script>

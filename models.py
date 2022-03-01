@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+from functools import lru_cache
 from typing import Optional, List
 
 import pandas as pd
@@ -77,30 +79,41 @@ class Music:
     category: str = field()  # Anthem or Hymn or Plainsong
     composer: Optional[str] = field()
     lyrics: Optional[str] = field()
+    ref: Optional[str] = field()
 
     @classmethod
-    def neh_hymn(cls, number: str):
-        q = cls.hymns_df.query(f'number == "{number}"')
-        assert q.shape[0] == 1
-        record = next(q.itertuples())
-        print(record)
-        # noinspection PyArgumentList
-        return cls(
-            title=record.displayTitle,
-            category='Hymn',
-            composer=None,
-            lyrics=f'NEH: {number}'
-        )
+    def neh_hymns(cls) -> List['Music']:
+        return [
+            Music(
+                title=record.firstLine,
+                category='Hymn',
+                composer=None,
+                lyrics=None,
+                ref=f'NEH: {record.number}'
+            ) for record in get_neh_df().itertuples()
+        ]
+
+    @classmethod
+    def get_neh_hymn_by_ref(cls, ref: str) -> 'Music':
+        return next(filter(lambda h: h.ref == ref, cls.neh_hymns()))
+
+    def __str__(self):
+        if self.category == 'Hymn':
+            return f'{self.ref}, {self.title}'
+        return super().__str__()
 
 
 @define
 class Service:
     title: str = field()
-    date: str = field()
+    date: datetime.date = field()
     celebrant: str = field()
     preacher: str = field()
     primary_feast: Feast = field()
     secondary_feast: Optional[Feast] = field()
+    introit_hymn: Optional[Music] = field()
+    offertory_hymn: Optional[Music] = field()
+    recessional_hymn: Optional[Music] = field()
     anthem: Music = field()
 
     @property
@@ -112,6 +125,43 @@ class Service:
             out.append(self.secondary_feast.collect)
         return out
 
+    # TODO primary or secondary?
     @property
-    def introit(self) -> str:
+    def introit_proper(self) -> str:
         return self.primary_feast.introit
+
+    @property
+    def offertory_proper(self) -> str:
+        return self.primary_feast.offertory
+
+    @property
+    def communion_proper(self) -> str:
+        return self.primary_feast.communion
+
+    @property
+    def epistle_ref(self) -> str:
+        return self.primary_feast.epistle_ref
+
+    @property
+    def epistle(self) -> str:
+        return self.primary_feast.epistle
+
+    @property
+    def gospel_ref(self) -> str:
+        return self.primary_feast.gospel_ref
+
+    @property
+    def gospel(self) -> str:
+        return self.primary_feast.gospel
+
+    def create_docx(self, path):
+        import filters  # local import to avoid circular import
+
+        document = Document()
+        document.add_heading(self.title, 0)
+        p = document.add_paragraph('')
+        if self.date:
+            run = p.add_run(filters.english_date(self.date))
+            run.italic = True
+        (filters.english_date(self.date))
+        document.save(path)
