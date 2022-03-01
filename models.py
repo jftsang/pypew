@@ -5,6 +5,8 @@ import pandas as pd
 from attr import define, field
 from docx import Document
 
+from utils import get_neh_df
+
 feasts_fields = ['name', 'introit', 'collect', 'epistle_ref', 'epistle',
                  'gat', 'gradual', 'alleluia', 'tract', 'gospel_ref',
                  'gospel', 'offertory', 'communion']
@@ -69,9 +71,26 @@ class Feast:
 
 @define
 class Music:
+    hymns_df = get_neh_df()
+
     title: str = field()
-    composer: str = field()
+    category: str = field()  # Anthem or Hymn or Plainsong
+    composer: Optional[str] = field()
     lyrics: Optional[str] = field()
+
+    @classmethod
+    def neh_hymn(cls, number: str):
+        q = cls.hymns_df.query(f'number == "{number}"')
+        assert q.shape[0] == 1
+        record = next(q.itertuples())
+        print(record)
+        # noinspection PyArgumentList
+        return cls(
+            title=record.displayTitle,
+            category='Hymn',
+            composer=None,
+            lyrics=f'NEH: {number}'
+        )
 
 
 @define

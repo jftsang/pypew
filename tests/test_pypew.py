@@ -3,7 +3,20 @@ from unittest.mock import patch
 
 from flask import url_for
 
+from models import Music
 from ..pypew import create_app
+
+
+class TestModels(unittest.TestCase):
+    def test_neh_lookup(self):
+        music = Music.neh_hymn('1a')
+        self.assertEqual(
+            music,
+            Music(title='Creator of the stars of night',
+                  category='Hymn',
+                  composer=None,
+                  lyrics='NEH: 1a')
+        )
 
 
 class TestViews(unittest.TestCase):
