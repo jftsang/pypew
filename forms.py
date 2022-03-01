@@ -1,13 +1,15 @@
 from io import StringIO
+from unittest import TestCase
 
 import pandas as pd
 import pandas.errors
+from attr import fields
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, RadioField, DateField, FileField
+from wtforms import StringField, SelectField, DateField, FileField
 from wtforms.validators import DataRequired, StopValidation
 from wtforms.widgets import TextArea
 
-from models import Feast, feasts_fields
+from models import Feast
 
 
 class IsCsv:
@@ -22,8 +24,12 @@ class IsCsv:
         except pandas.errors.ParserError:
             field.errors[:] = []
             raise StopValidation("This needs to be valid CSV.")
-        if set(df.columns) != set(feasts_fields):
-            raise StopValidation(f'The CSV is expected to have the field names {feasts_fields}')
+
+        expected_columns = {f.name for f in fields(Feast)}
+        try:
+                TestCase().assertSetEqual(set(df.columns), expected_columns)
+        except AssertionError as exc:
+            raise StopValidation(f'The CSV is expected to have the field names {expected_columns} but you provided {set(df.columns)}. {exc}')
 
 
 class PewSheetForm(FlaskForm):
