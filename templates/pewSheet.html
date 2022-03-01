@@ -46,39 +46,4 @@
     <div class="container">
         {% include 'serviceForm.html' %}
     </div>
-
-    <script>
-        const autogenerate = document.getElementById('autogenerate');
-        const titleField = document.getElementById('title');
-        const primaryFeastNameField = document.getElementById('primary_feast_name');
-        const secondaryFeastNameField = document.getElementById('secondary_feast_name');
-        const dateField = document.getElementById('date');
-        const autoButton = document.getElementById('auto-btn');
-
-        autogenerate.onclick = () => {
-            if (secondaryFeastNameField.value)
-                titleField.value = primaryFeastNameField.value + ' (' + secondaryFeastNameField.value + ') ';
-            else
-                titleField.value = primaryFeastNameField.value;
-        };
-
-        const todayBtn = document.getElementById('today-btn');
-        todayBtn.onclick = () => {
-            dateField.value = (new Date()).toISOString().split('T')[0];
-        }
-
-        const autoFields = [titleField, dateField];
-        autoButton.onmouseover = () => {
-            autoFields.forEach((e) => {e.classList.add('bg-warning')});
-        }
-        autoButton.onmouseout = () => {
-            autoFields.forEach((e) => {e.classList.remove('bg-warning')});
-        }
-        autoButton.onclick = () => {
-            todayBtn.onclick();
-            autogenerate.onclick();
-        }
-
-    </script>
-
 {% endblock %}
