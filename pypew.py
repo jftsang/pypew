@@ -6,6 +6,7 @@ from typing import Optional
 
 from dotenv import load_dotenv
 from flask import Flask, url_for
+from jinja2 import StrictUndefined
 
 import filters
 import views
@@ -31,6 +32,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
         template_folder=os.path.join(base_dir, 'templates'),
         **kwargs
     )
+    app.jinja_env.undefined = StrictUndefined
 
     app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
@@ -46,7 +48,11 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.add_url_rule('/feast/<name>', 'feast_detail_view', views.feast_detail_view)
     app.add_url_rule('/feast/<name>/docx', 'feast_docx_view', views.feast_docx_view)
     app.add_url_rule('/feast/<name>/pdf', 'feast_pdf_view', views.feast_pdf_view)
-    app.add_url_rule('/pewSheet/', 'pew_sheet_create_view', views.pew_sheet_create_view, methods=['GET', 'POST'])
+    app.add_url_rule('/pewSheet/', 'pew_sheet_create_view', views.pew_sheet_create_view, methods=['GET'])
+    app.add_url_rule('/pewSheet/clearHistory',
+                     'pew_sheet_clear_history_endpoint',
+                     views.pew_sheet_clear_history_endpoint,
+                     methods=['DELETE'])
     app.add_url_rule('/texts', 'texts_view', views.texts_view, methods=['GET', 'POST'])
     app.add_url_rule('/texts/csv', 'texts_download_csv_view', views.texts_download_csv_view)
     app.add_url_rule('/texts/xlsx', 'texts_download_xlsx_view', views.texts_download_xlsx_view)
@@ -54,6 +60,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.errorhandler(404)(views.not_found_handler)
     app.errorhandler(Exception)(views.internal_error_handler)
 
+    app.template_filter('service_summary')(filters.service_summary)
     app.template_filter('service_subtitle')(filters.service_subtitle)
     app.template_filter('english_date')(filters.english_date)
 

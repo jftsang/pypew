@@ -19,6 +19,10 @@ class TestModels(unittest.TestCase):
                   ref='NEH: 1a')
         )
 
+    def test_neh_lookup_unsuccessful(self):
+        music = Music.get_neh_hymn_by_ref('NEHHH: 10000k')
+        self.assertIsNone(music)
+
 
 class TestViews(unittest.TestCase):
     def setUp(self) -> None:

@@ -1,28 +1,33 @@
+import json
+import logging
 import os
-from tempfile import TemporaryDirectory, NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
+from time import time
+from typing import List
+from urllib.parse import urlencode
 
 import pandas as pd
 from docx2pdf import convert
-from flask import (
-    render_template, flash, send_file, redirect, url_for, make_response,
-    request
-)
+from flask import (flash, make_response, redirect, render_template, request,
+                   send_file, url_for)
+from werkzeug.datastructures import ImmutableMultiDict
 
 from forms import PewSheetForm, UpdateTextsForm
-from models import Feast, NotFoundError, get, Service, Music
+from models import Feast, Music, NotFoundError, Service, get
 from utils import logger
 
 TEXTS_CSV = os.path.join(os.path.dirname(__file__), 'data', 'feasts.csv')
 
+COOKIE_NAME = 'previousPewSheets'
 
 def index_view():
-    return render_template('index.html', nav_active='Home')
+    return render_template('index.html')
 
 
 def feast_index_view():
     feasts = Feast.all()
     return render_template(
-        'feasts.html', nav_active='Feasts', feasts=feasts
+        'feasts.html', feasts=feasts
     )
 
 
@@ -39,45 +44,63 @@ def feast_detail_view(name, **kwargs):
 
 def pew_sheet_create_view():
     form = PewSheetForm(request.args)
+
     service = None
 
+    # Update the history of previous services before creating the
+    # response, so that the newly created service gets displayed.
+    # However, this history needs to be generated anyway even if no
+    # service was generated (either because no data was given or because
+    # validation failed).
     if form.validate_on_submit():
-        primary_feast = Feast.get(name=form.primary_feast_name.data)
-        if form.secondary_feast_name.data:
-            secondary_feast = Feast.get(name=form.secondary_feast_name.data)
-        else:
-            secondary_feast = None
+        service = Service.from_form(form)
 
-        if form.anthem_title.data:
-            anthem = Music(
-                title=form.anthem_title.data,
-                composer=form.anthem_composer.data,
-                lyrics=form.anthem_lyrics.data,
-                category='Anthem',
-                ref=None
-            )
-        else:
-            anthem = None
+    try:
+        hist = json.loads(request.cookies.get(COOKIE_NAME))
+    except Exception as exc:
+        logger.warning(exc)
+        hist = []
 
-        service = Service(
-            title=form.title.data,
-            date=form.date.data,
-            celebrant=form.celebrant.data,
-            preacher=form.preacher.data,
-            primary_feast=primary_feast,
-            secondary_feast=secondary_feast,
-            introit_hymn=Music.get_neh_hymn_by_ref(form.introit_hymn.data),
-            offertory_hymn=Music.get_neh_hymn_by_ref(form.offertory_hymn.data),
-            recessional_hymn=Music.get_neh_hymn_by_ref(form.recessional_hymn.data),
-            anthem=anthem,
+    previous_services = []
+    for x in hist:
+        try:
+            args = ImmutableMultiDict(x['args'])
+            previous_service = Service.from_form(PewSheetForm(args))
+            # Don't duplicate the current service, but make sure it's always at
+            # the top
+            if previous_service != service:
+                previous_services.append((urlencode(args), previous_service))
+        except Exception as exc:
+            logger.warning(exc)
+            pass
+
+    if service is not None:
+        hist.append({
+            'timestamp': time(),
+            'args': request.args,
+        })
+        previous_services.append((urlencode(request.args), service))
+
+        resp = make_response(render_template(
+            'pewSheet.html', form=form, service=service,
+            previous_services=previous_services[::-1],
+            cookie_name=COOKIE_NAME
+        ))
+        resp.set_cookie(COOKIE_NAME, json.dumps(hist))
+        return resp
+
+    else:
+        return render_template(
+            'pewSheet.html', form=form, service=service,
+            previous_services=previous_services[::-1],
+            cookie_name = COOKIE_NAME
         )
 
-    return render_template(
-        'pewSheet.html',
-        nav_active='Pew Sheets',
-        form=form,
-        service=service,
-    )
+
+def pew_sheet_clear_history_endpoint():
+    resp = make_response('', 204)
+    resp.set_cookie(COOKIE_NAME, '')
+    return resp
 
 
 def feast_docx_view(name):
@@ -144,7 +167,7 @@ def texts_view():
         except FileNotFoundError:
             form.csv.data = ''
 
-    return render_template('texts.html', form=form, nav_active='Texts')
+    return render_template('texts.html', form=form)
 
 
 def texts_download_csv_view():
@@ -169,4 +192,4 @@ def internal_error_handler(error):
 
 
 def not_found_handler(error):
-    return make_response(render_template('404.html'), 404)
+    return make_response(render_template('404.html', error=error), 404)

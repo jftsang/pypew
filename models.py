@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
-from functools import lru_cache
-from typing import Optional, List
+from typing import List, Optional
 
 import pandas as pd
 from attr import define, field
@@ -94,8 +93,11 @@ class Music:
         ]
 
     @classmethod
-    def get_neh_hymn_by_ref(cls, ref: str) -> 'Music':
-        return next(filter(lambda h: h.ref == ref, cls.neh_hymns()))
+    def get_neh_hymn_by_ref(cls, ref: str) -> Optional['Music']:
+        try:
+            return next(filter(lambda h: h.ref == ref, cls.neh_hymns()))
+        except StopIteration:
+            return None
 
     def __str__(self):
         if self.category == 'Hymn':
@@ -131,6 +133,21 @@ class Service:
         return self.primary_feast.introit
 
     @property
+    def gat(self) -> str:
+        return self.primary_feast.gat
+
+    @property
+    def gat_propers(self) -> List[str]:
+        propers = []
+        if 'Gradual' in self.primary_feast.gat:
+            propers.append(self.primary_feast.gradual)
+        if 'Alleluia' in self.primary_feast.gat:
+            propers.append(self.primary_feast.alleluia)
+        if 'Tract' in self.primary_feast.gat:
+            propers.append(self.primary_feast.tract)
+        return propers
+
+    @property
     def offertory_proper(self) -> str:
         return self.primary_feast.offertory
 
@@ -153,6 +170,38 @@ class Service:
     @property
     def gospel(self) -> str:
         return self.primary_feast.gospel
+
+    @classmethod
+    def from_form(cls, form: 'PewSheetForm') -> 'Service':
+        primary_feast = Feast.get(name=form.primary_feast_name.data)
+        if form.secondary_feast_name.data:
+            secondary_feast = Feast.get(name=form.secondary_feast_name.data)
+        else:
+            secondary_feast = None
+
+        if form.anthem_title.data or form.anthem_composer.data or form.anthem_lyrics.data:
+            anthem = Music(
+                title=form.anthem_title.data,
+                composer=form.anthem_composer.data,
+                lyrics=form.anthem_lyrics.data,
+                category='Anthem',
+                ref=None
+            )
+        else:
+            anthem = None
+
+        return Service(
+            title=form.title.data,
+            date=form.date.data,
+            celebrant=form.celebrant.data,
+            preacher=form.preacher.data,
+            primary_feast=primary_feast,
+            secondary_feast=secondary_feast,
+            introit_hymn=Music.get_neh_hymn_by_ref(form.introit_hymn.data),
+            offertory_hymn=Music.get_neh_hymn_by_ref(form.offertory_hymn.data),
+            recessional_hymn=Music.get_neh_hymn_by_ref(form.recessional_hymn.data),
+            anthem=anthem,
+        )
 
     def create_docx(self, path):
         import filters  # local import to avoid circular import

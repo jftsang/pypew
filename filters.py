@@ -7,6 +7,10 @@ def english_date(date: datetime.date) -> str:
     return date.strftime('%A %-d %B %Y')
 
 
+def service_summary(service: Service) -> str:
+    return service.date.strftime('%Y-%m-%d') + ' ' + service_subtitle(service)
+
+
 def service_subtitle(service: Service) -> str:
     c, p = service.celebrant, service.preacher
     if service.secondary_feast:
