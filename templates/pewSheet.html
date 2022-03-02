@@ -17,7 +17,7 @@
             <ul class="list-unstyled">
                 <li>(<a id="clearHistLink" href="#" class="link-warning text-decoration-none">clear history</a>)</li>
                 {% for args, ps in previous_services %}
-                <li>
+                <li class="previous-service">
                     <a href="{{ url_for('pew_sheet_create_view') }}?{{args}}"
                        class="link-secondary text-decoration-none">
                         {{ ps | service_summary }}
@@ -36,6 +36,11 @@
                 fetch("{{ url_for('pew_sheet_clear_history_endpoint') }}",
                     {
                         method: 'delete'
+                    }
+                ).then((r) =>
+                    {
+                        document.querySelectorAll('li.previous-service').forEach((e) => {e.remove()});
+                        notify({message: 'History cleared.', color: 'success', timeout: 2000});
                     }
                 );
             };
