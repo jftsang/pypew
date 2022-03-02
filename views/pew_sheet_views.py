@@ -14,7 +14,7 @@ from utils import logger
 __all__ = ['pew_sheet_create_view', 'pew_sheet_clear_history_endpoint']
 
 dotenv.load_dotenv()
-COOKIE_NAME = os.environ.get('COOKIE_NAME')
+COOKIE_NAME = os.environ.get('COOKIE_NAME', 'previousPewSheets')
 
 
 def pew_sheet_create_view():
