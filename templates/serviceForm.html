@@ -21,8 +21,10 @@
         {{ form.date.label(class='col-sm-1 col-form-label') }}
         <div class="col">
             {{ form.date(class='form-date') }}
+            <a class="btn btn-secondary btn-sm px-1" id="prev-week-btn">-week</a>
             <a class="btn btn-secondary btn-sm px-1" id="today-btn">Today</a>
             <a class="btn btn-secondary btn-sm px-1" id="sunday-btn">Sunday</a>
+            <a class="btn btn-secondary btn-sm px-1" id="next-week-btn">+week</a>
             {% if form.date.errors %}
                 {% for error in form.date.errors %}
                     <small class="font-small text-danger">
@@ -169,16 +171,35 @@
     };
 
     const today = new Date()
+    const day = 1000 * 60 * 60 * 24;  // milliseconds in a day
+    const sunday = new Date(today.getTime() + (7 - today.getDay())*day);
+
+    function toISO(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    dateField.value = toISO(today);
+
     const todayBtn = document.getElementById('today-btn');
     todayBtn.onclick = () => {
-        dateField.value = today.toISOString().split('T')[0];
-    }
+        dateField.value = toISO(today);
+    };
 
     const sundayBtn = document.getElementById('sunday-btn');
     sundayBtn.onclick = () => {
-        const day = 1000 * 60 * 60 * 24;
-        const sunday = new Date(today.getTime() + (7 - today.getDay())*day);
-        dateField.value = sunday.toISOString().split('T')[0];
+        dateField.value = toISO(sunday);
+    };
+
+    const prevWeekBtn = document.getElementById('prev-week-btn');
+    prevWeekBtn.onclick = () => {
+        const prevWeek = (new Date(dateField.value)).getTime() - 7 * day;
+        dateField.value = toISO(new Date(prevWeek));
+    };
+
+    const nextWeekBtn = document.getElementById('next-week-btn');
+    nextWeekBtn.onclick = () => {
+        const nextWeek = (new Date(dateField.value)).getTime() + 7 * day;
+        dateField.value = toISO(new Date(nextWeek));
     };
 
     /**
@@ -204,11 +225,12 @@
     highlightOnMouseover(autoTitleBtn, 'bg-warning', [titleField]);
     highlightOnMouseover(todayBtn, 'bg-warning', [dateField]);
     highlightOnMouseover(sundayBtn, 'bg-warning', [dateField]);
-    highlightOnMouseover(autoButton, 'bg-warning', [titleField, dateField]);
+    highlightOnMouseover(prevWeekBtn, 'bg-warning', [dateField]);
+    highlightOnMouseover(nextWeekBtn, 'bg-warning', [dateField]);
+    highlightOnMouseover(autoButton, 'bg-warning', [titleField]);
 
     autoButton.onclick = () => {
         sundayBtn.onclick();
-        autoTitleBtn.onclick();
     };
 
 </script>
