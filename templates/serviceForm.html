@@ -149,9 +149,7 @@
     </div>
 
     <div class="row">
-        <a id="auto-btn" class="btn btn-secondary w-25" title="Automatically complete some fields">Autocomplete</a>
-        <br/>
-        <input type="submit" class="btn btn-success w-50" value="Create">
+        <input type="submit" class="btn btn-success w-100" value="Create">
     </div>
 </form>
 
@@ -161,7 +159,6 @@
     const primaryFeastNameField = document.getElementById('primary_feast_name');
     const secondaryFeastNameField = document.getElementById('secondary_feast_name');
     const dateField = document.getElementById('date');
-    const autoButton = document.getElementById('auto-btn');
 
     autoTitleBtn.onclick = () => {
         if (secondaryFeastNameField.value)
@@ -227,15 +224,9 @@
     highlightOnMouseover(sundayBtn, 'bg-warning', [dateField]);
     highlightOnMouseover(prevWeekBtn, 'bg-warning', [dateField]);
     highlightOnMouseover(nextWeekBtn, 'bg-warning', [dateField]);
-    highlightOnMouseover(autoButton, 'bg-warning', [titleField]);
 
     addTooltip(prevWeekBtn, '7 days earlier');
     addTooltip(todayBtn, 'Set the date to today');
     addTooltip(sundayBtn, 'Set the date to this Sunday');
     addTooltip(nextWeekBtn, '7 days later');
-
-    autoButton.onclick = () => {
-        sundayBtn.onclick();
-    };
-
 </script>
