@@ -51,7 +51,7 @@ class TestViews(unittest.TestCase):
         )
         self.assertEqual(r.status_code, 404)
 
-    @patch('pypew.views.Feast.create_docx')
+    @patch('pypew.views.feast_views.Feast.create_docx')
     def test_feast_docx_view(self, m_create_docx):
         r = self.client.get(
             url_for('feast_docx_view', name='Christmas Day')

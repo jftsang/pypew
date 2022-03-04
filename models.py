@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional
 
 import pandas as pd
@@ -11,6 +12,8 @@ from utils import get_neh_df
 feasts_fields = ['name', 'introit', 'collect', 'epistle_ref', 'epistle',
                  'gat', 'gradual', 'alleluia', 'tract', 'gospel_ref',
                  'gospel', 'offertory', 'communion']
+
+FEASTS_CSV = Path(os.path.dirname(__file__)) / 'data' / 'feasts.csv'
 
 
 class NotFoundError(Exception):
@@ -50,7 +53,7 @@ class Feast:
     communion: str = field()
 
     feasts_df = pd.read_csv(
-        os.path.join(os.path.dirname(__file__), 'data', 'feasts.csv')
+        FEASTS_CSV
     )
     assert list(feasts_df.columns) == feasts_fields
 
