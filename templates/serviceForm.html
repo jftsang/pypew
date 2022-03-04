@@ -13,7 +13,7 @@
             {% endif %}
         </div>
         <div class="col">
-            <a class="btn btn-secondary" id="autogenerate">Autogenerate</a>
+            <a class="btn btn-secondary" id="auto-title-btn">Autogenerate</a>
         </div>
     </div>
 
@@ -22,6 +22,7 @@
         <div class="col">
             {{ form.date(class='form-date') }}
             <a class="btn btn-secondary btn-sm px-1" id="today-btn">Today</a>
+            <a class="btn btn-secondary btn-sm px-1" id="sunday-btn">Sunday</a>
             {% if form.date.errors %}
                 {% for error in form.date.errors %}
                     <small class="font-small text-danger">
@@ -153,35 +154,61 @@
 </form>
 
 <script>
-    const autogenerate = document.getElementById('autogenerate');
+    const autoTitleBtn = document.getElementById('auto-title-btn');
     const titleField = document.getElementById('title');
     const primaryFeastNameField = document.getElementById('primary_feast_name');
     const secondaryFeastNameField = document.getElementById('secondary_feast_name');
     const dateField = document.getElementById('date');
     const autoButton = document.getElementById('auto-btn');
 
-    autogenerate.onclick = () => {
+    autoTitleBtn.onclick = () => {
         if (secondaryFeastNameField.value)
             titleField.value = primaryFeastNameField.value + ' (' + secondaryFeastNameField.value + ') ';
         else
             titleField.value = primaryFeastNameField.value;
     };
 
+    const today = new Date()
     const todayBtn = document.getElementById('today-btn');
     todayBtn.onclick = () => {
-        dateField.value = (new Date()).toISOString().split('T')[0];
+        dateField.value = today.toISOString().split('T')[0];
     }
 
-    const autoFields = [titleField, dateField];
-    autoButton.onmouseover = () => {
-        autoFields.forEach((e) => {e.classList.add('bg-warning')});
+    const sundayBtn = document.getElementById('sunday-btn');
+    sundayBtn.onclick = () => {
+        const day = 1000 * 60 * 60 * 24;
+        const sunday = new Date(today.getTime() + (7 - today.getDay())*day);
+        dateField.value = sunday.toISOString().split('T')[0];
+    };
+
+    /**
+     * Cause a class to be applied to the specified fields when the
+     * specified element is mouseovered. Note that this overwrites
+     * btn.onmouseover and btn.onmouseout, so it can only be used once
+     * for each btn.
+     *
+     * @param btn the element that should highlight when mouseovered, probably a button
+     * @param cls the class to apply, e.g. bg-warning
+     * @param fields the elements that should be modified, probably input fields
+     */
+    function highlightOnMouseover(btn, cls, fields)
+    {
+        btn.onmouseover = () => {
+            fields.forEach((e) => {e.classList.add(cls)});
+        };
+        btn.onmouseout = () => {
+            fields.forEach((e) => {e.classList.remove(cls)});
+        };
     }
-    autoButton.onmouseout = () => {
-        autoFields.forEach((e) => {e.classList.remove('bg-warning')});
-    }
+
+    highlightOnMouseover(autoTitleBtn, 'bg-warning', [titleField]);
+    highlightOnMouseover(todayBtn, 'bg-warning', [dateField]);
+    highlightOnMouseover(sundayBtn, 'bg-warning', [dateField]);
+    highlightOnMouseover(autoButton, 'bg-warning', [titleField, dateField]);
+
     autoButton.onclick = () => {
-        todayBtn.onclick();
-        autogenerate.onclick();
-    }
+        sundayBtn.onclick();
+        autoTitleBtn.onclick();
+    };
 
 </script>
