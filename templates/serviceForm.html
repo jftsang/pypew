@@ -229,6 +229,11 @@
     highlightOnMouseover(nextWeekBtn, 'bg-warning', [dateField]);
     highlightOnMouseover(autoButton, 'bg-warning', [titleField]);
 
+    addTooltip(prevWeekBtn, '7 days earlier');
+    addTooltip(todayBtn, 'Set the date to today');
+    addTooltip(sundayBtn, 'Set the date to this Sunday');
+    addTooltip(nextWeekBtn, '7 days later');
+
     autoButton.onclick = () => {
         sundayBtn.onclick();
     };
