@@ -61,7 +61,7 @@ def pew_sheet_create_view():
             previous_services=previous_services[::-1],
             cookie_name=COOKIE_NAME
         ))
-        resp.set_cookie(COOKIE_NAME, json.dumps(hist))
+        resp.set_cookie(COOKIE_NAME, json.dumps(hist), secure=True)
         return resp
 
     else:
