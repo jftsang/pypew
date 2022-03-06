@@ -1,0 +1,11 @@
+<ul class="list-unstyled">
+    {% for f in feasts %}
+        <li>
+            <a href="{{ url_for('feast_detail_view', name=f.name) }}"
+               class="{% if not feast_name or f.name == feast_name %}link-info{% else %}link-secondary{% endif %}
+                           text-decoration-none">
+                {{ f.name }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>

@@ -51,8 +51,17 @@
     </div>
 
     <div class="container w-75">
-        {% block content %}
-        {% endblock %}
+        <div class="row">
+            <div class="col">
+                {% block content %}
+                {% endblock %}
+            </div>
+
+            <div class="col-2">
+                {% block sidebar %}
+                {% endblock %}
+            </div>
+        </div>
     </div>
 </main>
 

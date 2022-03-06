@@ -3,65 +3,51 @@
 {% block content %}
     <div class="row">
         <div class="col">
-            <div class="row">
-                <div class="col">
-                    <h1>{{ feast.name }}</h1>
-                </div>
-                <div class="col">
-                    <p>
-                        <a class="btn btn-primary mx-1" href="{{ url_for('feast_docx_view', name=feast.name) }}">.docx</a>
-                        <a class="btn btn-danger mx-1" href="{{ url_for('feast_pdf_view', name=feast.name) }}">.pdf</a>
-                    </p>
-                </div>
-            </div>
-
-            <h2>Introit</h2>
-            <p>{{ feast.introit }}</p>
-
-            <h2>Collect</h2>
-            <p>{{ feast.collect }}</p>
-
-            <h2>Epistle</h2>
-            <p><i>{{ feast.epistle_ref }}</i></p>
-            <p>{{ feast.epistle }}</p>
-
-            {% if 'Gradual' in feast.gat %}
-                <h2>Gradual</h2>
-                <p>{{ feast.gradual }}</p>
-            {% endif %}
-            {% if 'Alleluia' in feast.gat %}
-                <h2>Alleluia</h2>
-                <p>{{ feast.alleluia }}</p>
-            {% endif %}
-            {% if 'Tract' in feast.gat %}
-                <h2>Tract</h2>
-                <p>{{ feast.tract }}</p>
-            {% endif %}
-
-            <h2>Gospel</h2>
-            <p><i>{{ feast.gospel_ref }}</i></p>
-            <p>{{ feast.gospel }}</p>
-
-            <h2>Offertory</h2>
-            <p>{{ feast.offertory }}</p>
-
-            <h2>Communion</h2>
-            <p>{{ feast.communion }}</p>
+            <h1>{{ feast.name }}</h1>
         </div>
-
-
-        <div class="col-2">
-            <ul class="list-unstyled">
-                {% for f in feasts %}
-                    <li>
-                        <a href="{{ url_for('feast_detail_view', name=f.name) }}"
-                           class="{% if f.name == feast.name %}link-info{% else %}link-secondary{% endif %}
-                           text-decoration-none">
-                            {{ f.name }}
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
+        <div class="col">
+            <p>
+                <a class="btn btn-primary mx-1" href="{{ url_for('feast_docx_view', name=feast.name) }}">.docx</a>
+                <a class="btn btn-danger mx-1" href="{{ url_for('feast_pdf_view', name=feast.name) }}">.pdf</a>
+            </p>
         </div>
     </div>
+
+    <h2>Introit</h2>
+    <p>{{ feast.introit }}</p>
+
+    <h2>Collect</h2>
+    <p>{{ feast.collect }}</p>
+
+    <h2>Epistle</h2>
+    <p><i>{{ feast.epistle_ref }}</i></p>
+    <p>{{ feast.epistle }}</p>
+
+    {% if 'Gradual' in feast.gat %}
+        <h2>Gradual</h2>
+        <p>{{ feast.gradual }}</p>
+    {% endif %}
+    {% if 'Alleluia' in feast.gat %}
+        <h2>Alleluia</h2>
+        <p>{{ feast.alleluia }}</p>
+    {% endif %}
+    {% if 'Tract' in feast.gat %}
+        <h2>Tract</h2>
+        <p>{{ feast.tract }}</p>
+    {% endif %}
+
+    <h2>Gospel</h2>
+    <p><i>{{ feast.gospel_ref }}</i></p>
+    <p>{{ feast.gospel }}</p>
+
+    <h2>Offertory</h2>
+    <p>{{ feast.offertory }}</p>
+
+    <h2>Communion</h2>
+    <p>{{ feast.communion }}</p>
+{% endblock %}
+{% block sidebar %}
+    {% with feast_name = feast.name %}
+        {% include 'feastList.html' %}
+    {% endwith %}
 {% endblock %}

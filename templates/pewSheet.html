@@ -1,49 +1,46 @@
 {% extends 'base.html' %}
 {% block title %}Pew Sheet{% endblock %}
+
 {% block content %}
-    <div class="row">
-        <div class="col">
-            {% if service %}
-                {% include 'serviceDetails.html' %}
-            {% endif %}
+    {% if service %}
+        {% include 'serviceDetails.html' %}
+    {% endif %}
 
-            <div class="container">
-                {% include 'serviceForm.html' %}
-            </div>
-        </div>
-
-        <div class="col-2">
-            <h2>Recent services</h2>
-            <ul class="list-unstyled">
-                <li>(<a id="clearHistLink" href="#" class="link-warning text-decoration-none">clear history</a>)</li>
-                {% for args, ps in previous_services %}
-                <li class="previous-service">
-                    <a href="{{ url_for('pew_sheet_create_view') }}?{{args}}"
-                       class="link-secondary text-decoration-none">
-                        {{ ps | service_summary }}
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <script>
-            const clearHistLink = document.getElementById('clearHistLink');
-            clearHistLink.onclick = () => {
-                if (!confirm('Clear pew sheet history? This cannot be undone!')) {
-                    return;
-                }
-                fetch("{{ url_for('pew_sheet_clear_history_endpoint') }}",
-                    {
-                        method: 'delete'
-                    }
-                ).then((r) =>
-                    {
-                        document.querySelectorAll('li.previous-service').forEach((e) => {e.remove()});
-                        notify({message: 'History cleared.', color: 'success', timeout: 2000});
-                    }
-                );
-            };
-        </script>
+    <div class="container">
+        {% include 'serviceForm.html' %}
     </div>
+{% endblock %}
+
+{% block sidebar %}
+    <h2>Recent services</h2>
+    <ul class="list-unstyled">
+        <li>(<a id="clearHistLink" href="#" class="link-warning text-decoration-none">clear history</a>)</li>
+        {% for args, ps in previous_services %}
+            <li class="previous-service">
+                <a href="{{ url_for('pew_sheet_create_view') }}?{{args}}"
+                   class="link-secondary text-decoration-none">
+                    {{ ps | service_summary }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        const clearHistLink = document.getElementById('clearHistLink');
+        clearHistLink.onclick = () => {
+            if (!confirm('Clear pew sheet history? This cannot be undone!')) {
+                return;
+            }
+            fetch("{{ url_for('pew_sheet_clear_history_endpoint') }}",
+                {
+                    method: 'delete'
+                }
+            ).then((r) =>
+                {
+                    document.querySelectorAll('li.previous-service').forEach((e) => {e.remove()});
+                    notify({message: 'History cleared.', color: 'success', timeout: 2000});
+                }
+            );
+        };
+    </script>
 {% endblock %}
