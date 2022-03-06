@@ -71,8 +71,13 @@
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
-
 </script>
+
+<!-- https://github.com/azzalfauzi/notify, https://azzalfauzi.github.io/notify/ -->
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='notify.css') }}">
+<script src="{{ url_for('static', filename='notify.js') }}"></script>
+
 
 </body>
 </html>
