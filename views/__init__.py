@@ -1,5 +1,6 @@
 import os
 from tempfile import TemporaryDirectory
+from traceback import format_exc
 
 import pandas as pd
 from flask import (flash, make_response, render_template, send_file)
@@ -52,7 +53,7 @@ def texts_download_xlsx_view():
 
 def internal_error_handler(error):
     logger.exception(error)
-    return make_response(render_template('exception.html', error=error), 500)
+    return make_response(render_template('exception.html', error=format_exc()), 500)
 
 
 def not_found_handler(error):
