@@ -26,3 +26,12 @@ def service_subtitle(service: Service) -> str:
         if p:
             s += f' Preacher: {p}.'
     return s
+
+
+# For passing into docxtpl. (For use in Flask, these filters are also
+# registered when the app is created.)
+filters_context = {
+   'english_date': english_date,
+   'service_summary': service_summary,
+   'service_subtitle': service_subtitle
+}

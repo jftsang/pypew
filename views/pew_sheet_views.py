@@ -1,17 +1,20 @@
-import json
 import os
-from time import time
+from tempfile import NamedTemporaryFile
 from urllib.parse import parse_qs, urlencode
 
 import dotenv
-from flask import (make_response, render_template, request, session)
+import jinja2
+from docxtpl import DocxTemplate
+from flask import (flash, make_response, redirect, render_template, request,
+                   send_file, session, url_for)
 from werkzeug.datastructures import ImmutableMultiDict
 
+from filters import filters_context
 from forms import PewSheetForm
 from models import Service
 from utils import logger
 
-__all__ = ['pew_sheet_create_view', 'pew_sheet_clear_history_endpoint']
+__all__ = ['pew_sheet_create_view', 'pew_sheet_clear_history_endpoint', 'pew_sheet_docx_view']
 
 dotenv.load_dotenv()
 COOKIE_NAME = os.environ.get('COOKIE_NAME', 'previousPewSheets')
@@ -57,3 +60,25 @@ def pew_sheet_create_view():
 def pew_sheet_clear_history_endpoint():
     session[COOKIE_NAME] = {}
     return make_response('', 204)
+
+
+def pew_sheet_docx_view():
+    form = PewSheetForm(request.args)
+    if not form.validate_on_submit():
+        flash('Sorry, I could not create a service from that information. Please check the values that you provided.', 'danger')
+        for k, es in form.errors.items():
+            for e in es:
+                flash(f'{k}: {e}', 'danger')
+        return redirect(url_for('pew_sheet_create_view') + '?' + urlencode(request.args), 400)
+
+    service = Service.from_form(form)
+    doc = DocxTemplate(os.path.join('templates', 'pewSheetTemplate.docx'))
+    jinja_env = jinja2.Environment(autoescape=True)
+    jinja_env.globals['len'] = len
+    jinja_env.filters.update(filters_context)
+    doc.render({'service': service}, jinja_env)
+    with NamedTemporaryFile() as tf:
+        doc.save(tf.name)
+        return send_file(
+            tf.name, as_attachment=True, attachment_filename='pew_sheet.docx'
+        )

@@ -53,6 +53,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.add_url_rule('/feast/<name>/docx', 'feast_docx_view', views.feast_docx_view)
     app.add_url_rule('/feast/<name>/pdf', 'feast_pdf_view', views.feast_pdf_view)
     app.add_url_rule('/pewSheet/', 'pew_sheet_create_view', views.pew_sheet_create_view, methods=['GET'])
+    app.add_url_rule('/pewSheet/docx', 'pew_sheet_docx_view', views.pew_sheet_docx_view, methods=['GET'])
     app.add_url_rule('/pewSheet/clearHistory',
                      'pew_sheet_clear_history_endpoint',
                      views.pew_sheet_clear_history_endpoint,
