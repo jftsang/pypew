@@ -110,16 +110,20 @@ class Music:
 
 @define
 class Service:
+    # Mandatory fields first, then fields with default values.
     title: str = field()
     date: datetime.date = field()
-    celebrant: str = field()
-    preacher: str = field()
     primary_feast: Feast = field()
-    secondary_feast: Optional[Feast] = field()
-    introit_hymn: Optional[Music] = field()
-    offertory_hymn: Optional[Music] = field()
-    recessional_hymn: Optional[Music] = field()
-    anthem: Music = field()
+    secondary_feast: Optional[Feast] = field(default=None)
+    celebrant: str = field(default='')
+    preacher: str = field(default='')
+    introit_hymn: Optional[Music] = field(default=None)
+    offertory_hymn: Optional[Music] = field(default=None)
+    recessional_hymn: Optional[Music] = field(default=None)
+    anthem: Optional[Music] = field(default=None)
+
+    # One can't call methods in jinja2 templates, so one must provide
+    # everything as member properties instead.
 
     @property
     def collects(self) -> List[str]:
@@ -128,6 +132,18 @@ class Service:
             out.append(self.primary_feast.collect)
         if self.secondary_feast and self.secondary_feast.collect:
             out.append(self.secondary_feast.collect)
+
+        # Collects for Advent I and Ash Wednesday are repeated
+        # throughout Advent and Lent respectively.
+        advent1 = get(Feast.all(), name='Advent I')
+        ash_wednesday = get(Feast.all(), name='Ash Wednesday')
+
+        if 'Advent' in self.primary_feast.name and self.primary_feast != advent1:
+            out.append(advent1.collect)
+
+        if 'Lent' in self.primary_feast.name:
+            out.append(ash_wednesday.collect)
+
         return out
 
     # TODO primary or secondary?
