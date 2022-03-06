@@ -37,6 +37,10 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
+    # store session information server-side to avoid large cookies
+    # https://stackoverflow.com/questions/53551637/session-cookie-is-too-large-flask-application
+    app.config['SESSION_TYPE'] = 'filesystem'
+
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
         'SQLALCHEMY_DATABASE_URI'
     )

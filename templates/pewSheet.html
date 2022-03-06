@@ -14,13 +14,14 @@
 {% block sidebar %}
     <h2>Recent services</h2>
     <ul class="list-unstyled">
-        <li>(<a id="clearHistLink" href="#" class="link-warning text-decoration-none">clear history</a>)</li>
+        <li><small>(<a id="clearHistLink" href="#" class="link-warning text-decoration-none">clear history</a>)</small></li>
         {% for args, ps in previous_services %}
-            <li class="previous-service">
+            <li class="previous-service"><small>
                 <a href="{{ url_for('pew_sheet_create_view') }}?{{args}}"
-                   class="link-secondary text-decoration-none">
+                   class="{% if ps == service %}link-info{% else %}link-secondary{% endif %}
+                   text-decoration-none">
                     {{ ps | service_summary }}
-                </a>
+                </a></small>
             </li>
         {% endfor %}
     </ul>
