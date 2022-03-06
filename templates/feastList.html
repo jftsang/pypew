@@ -4,7 +4,7 @@
             <a href="{{ url_for('feast_detail_view', name=f.name) }}"
                class="{% if not feast_name or f.name == feast_name %}link-info{% else %}link-secondary{% endif %}
                            text-decoration-none">
-                {{ f.name }}
+                <small>{{ f.name }}</small>
             </a>
         </li>
     {% endfor %}
