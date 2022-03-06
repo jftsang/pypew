@@ -1,4 +1,5 @@
 import os
+import typing
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
@@ -6,6 +7,9 @@ from typing import List, Optional
 import pandas as pd
 from attr import define, field
 from docx import Document
+
+if typing.TYPE_CHECKING:
+    from forms import PewSheetForm
 
 from utils import get_neh_df
 
