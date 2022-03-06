@@ -5,7 +5,7 @@ from unittest.mock import patch
 from flask import url_for
 
 from models import Feast, Music, Service, get
-from pypew import create_app
+from ..pypew import create_app
 
 
 class TestModels(unittest.TestCase):
