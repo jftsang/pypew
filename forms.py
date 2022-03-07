@@ -11,7 +11,9 @@ from wtforms.validators import DataRequired, StopValidation
 from wtforms.widgets import TextArea
 
 from models import Feast, Music
-from utils import get_neh_df
+
+
+hymns = [('', 'None')] + [(h.ref, h.title) for h in Music.neh_hymns()]
 
 
 class IsCsv:
@@ -43,8 +45,6 @@ class PewSheetForm(FlaskForm):
     primary_feast_name = SelectField('Primary Feast', choices=feast_names)
     secondary_feast_name = SelectField('Secondary Feast', choices=[''] + feast_names)
 
-    hymns = [('', 'None')] + [(h.ref, h.title) for h in Music.neh_hymns()]
-    # hymn_numbers = [x.number + ': ' + x.displayTitle for x in df.itertuples()]
     introit_hymn = SelectField('Introit Hymn', choices=hymns)
     offertory_hymn = SelectField('Offertory Hymn', choices=hymns)
     recessional_hymn = SelectField('Recessional Hymn', choices=hymns)
