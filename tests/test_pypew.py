@@ -1,6 +1,7 @@
 import unittest
 from datetime import datetime
 from unittest.mock import patch
+from urllib.parse import urlencode
 
 from flask import url_for
 
@@ -107,6 +108,24 @@ class TestViews(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.headers['Content-Disposition'],
                          'attachment; filename="Christmas Day.pdf"')
+
+    @patch('pypew.views.pew_sheet_views.Service.create_docx')
+    def test_pew_sheet_docx_view(self, m_create_docx):
+        r = self.client.get(
+            url_for('pew_sheet_docx_view') + '?' + urlencode(
+                {'title': 'Feast of Foo', 'date': '2022-01-01', 'primary_feast_name': 'Advent I',
+                 'secondary_feast_name': '', 'introit_hymn': '', 'offertory_hymn': '', 'recessional_hymn': ''})
+        )
+        m_create_docx.assert_called()
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.headers['Content-Disposition'],
+            'attachment; filename="Feast of Foo.docx"'
+        )
+        self.assertEqual(
+            r.headers['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
 
 
 if __name__ == '__main__':

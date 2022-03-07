@@ -4,9 +4,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
+import jinja2
 import pandas as pd
 from attr import define, field
 from docx import Document
+from docxtpl import DocxTemplate
 
 if typing.TYPE_CHECKING:
     from forms import PewSheetForm
@@ -18,6 +20,8 @@ feasts_fields = ['name', 'introit', 'collect', 'epistle_ref', 'epistle',
                  'gospel', 'offertory', 'communion']
 
 FEASTS_CSV = Path(os.path.dirname(__file__)) / 'data' / 'feasts.csv'
+
+PEW_SHEET_TEMPLATE = os.path.join('templates', 'pewSheetTemplate.docx')
 
 
 class NotFoundError(Exception):
@@ -227,13 +231,13 @@ class Service:
         )
 
     def create_docx(self, path):
-        import filters  # local import to avoid circular import
+        doc = DocxTemplate(PEW_SHEET_TEMPLATE)
+        jinja_env = jinja2.Environment(autoescape=True)
+        jinja_env.globals['len'] = len
 
-        document = Document()
-        document.add_heading(self.title, 0)
-        p = document.add_paragraph('')
-        if self.date:
-            run = p.add_run(filters.english_date(self.date))
-            run.italic = True
-        (filters.english_date(self.date))
-        document.save(path)
+        # local import to avoid circular import
+        from filters import filters_context
+
+        jinja_env.filters.update(filters_context)
+        doc.render({'service': self}, jinja_env)
+        doc.save(path)

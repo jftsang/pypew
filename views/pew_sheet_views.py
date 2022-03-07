@@ -3,13 +3,10 @@ from tempfile import NamedTemporaryFile
 from urllib.parse import parse_qs, urlencode
 
 import dotenv
-import jinja2
-from docxtpl import DocxTemplate
 from flask import (flash, make_response, redirect, render_template, request,
                    send_file, session, url_for)
 from werkzeug.datastructures import ImmutableMultiDict
 
-from filters import filters_context
 from forms import PewSheetForm
 from models import Service
 from utils import logger
@@ -72,13 +69,10 @@ def pew_sheet_docx_view():
         return redirect(url_for('pew_sheet_create_view') + '?' + urlencode(request.args), 400)
 
     service = Service.from_form(form)
-    doc = DocxTemplate(os.path.join('templates', 'pewSheetTemplate.docx'))
-    jinja_env = jinja2.Environment(autoescape=True)
-    jinja_env.globals['len'] = len
-    jinja_env.filters.update(filters_context)
-    doc.render({'service': service}, jinja_env)
     with NamedTemporaryFile() as tf:
-        doc.save(tf.name)
+        service.create_docx(tf.name)
         return send_file(
-            tf.name, as_attachment=True, attachment_filename='pew_sheet.docx'
+            tf.name,
+            as_attachment=True,
+            attachment_filename=f'{service.title}.docx'
         )
