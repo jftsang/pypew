@@ -41,10 +41,6 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     # https://stackoverflow.com/questions/53551637/session-cookie-is-too-large-flask-application
     app.config['SESSION_TYPE'] = 'filesystem'
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-        'SQLALCHEMY_DATABASE_URI'
-    )
-
     app.add_url_rule(
         '/', 'index_view', views.index_view, methods=['GET', 'POST']
     )
