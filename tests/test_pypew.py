@@ -65,6 +65,10 @@ class TestViews(unittest.TestCase):
         r = self.client.get(url_for('index_view'))
         self.assertEqual(r.status_code, 200)
 
+    def test_acknowledgements_view(self):
+        r = self.client.get(url_for('acknowledgements_view'))
+        self.assertEqual(r.status_code, 200)
+
     def test_feast_index_view(self):
         r = self.client.get(url_for('feast_index_view'))
         self.assertEqual(r.status_code, 200)

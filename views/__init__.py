@@ -16,6 +16,10 @@ def index_view():
     return render_template('index.html')
 
 
+def acknowledgements_view():
+    return render_template('acknowledgements.html')
+
+
 def texts_view():
     form = UpdateTextsForm()
 

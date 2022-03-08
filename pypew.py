@@ -44,6 +44,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.add_url_rule(
         '/', 'index_view', views.index_view, methods=['GET', 'POST']
     )
+    app.add_url_rule('/acknowledgements', 'acknowledgements_view', views.acknowledgements_view)
     app.add_url_rule('/feasts', 'feast_index_view', views.feast_index_view)
     app.add_url_rule('/feast/<name>', 'feast_detail_view', views.feast_detail_view)
     app.add_url_rule('/feast/<name>/docx', 'feast_docx_view', views.feast_docx_view)
