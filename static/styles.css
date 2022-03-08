@@ -3,7 +3,7 @@ body {
 }
 
 main {
-    padding-bottom: 2in;
+    padding-bottom: 4em;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -16,12 +16,11 @@ h2 {
 }
 
 #navbar {
-    /*background-color: black;*/
-    /*noinspection CssUnresolvedCustomProperty*/
     background-image: var(--bs-gradient);
 }
 
 #footer {
+    height: 3em;
     background-color: hsla(38, 33%, 20%, 0.5);
 }
 
