@@ -17,7 +17,7 @@ from utils import get_neh_df
 
 feasts_fields = ['name', 'introit', 'collect', 'epistle_ref', 'epistle',
                  'gat', 'gradual', 'alleluia', 'tract', 'gospel_ref',
-                 'gospel', 'offertory', 'communion']
+                 'gospel', 'offertory', 'communion', 'month', 'day']
 
 FEASTS_CSV = Path(os.path.dirname(__file__)) / 'data' / 'feasts.csv'
 
@@ -47,6 +47,14 @@ def get(collection, **kwargs):
 @define
 class Feast:
     name: str = field()
+
+    # Specified for the fixed holy days, None for the movable feasts.
+    # TODO - what about Remembrance Sunday and Advent Sunday? Not fixed
+    #  days but also not comoving with Easter. As a hack go with 11 Nov
+    #  and 30 Nov respectively but the exact dates are
+    month: Optional[int] = field()
+    day: Optional[int] = field()
+
     introit: str = field()
     collect: str = field()
     epistle_ref: str = field()
