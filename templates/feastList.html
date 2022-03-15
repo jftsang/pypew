@@ -1,11 +1,18 @@
 <ul class="list-unstyled">
     {% for f in feasts %}
         <li>
-            <a href="{{ url_for('feast_detail_view', name=f.name) }}"
-               class="{% if not feast_name or f.name == feast_name %}link-info{% else %}link-secondary{% endif %}
-                           text-decoration-none">
+            <a data-feast-name="{{ f.name }}" data-feast-date="{{ f.date | english_date }}"
+               href="{{ url_for('feast_detail_view', name=f.name) }}"
+               class="feast-link
+                   {% if not feast_name or f.name == feast_name %}link-info{% else %}link-secondary{% endif %}
+                   text-decoration-none">
                 <small>{{ f.name }}</small>
             </a>
         </li>
     {% endfor %}
 </ul>
+<script>
+    document.querySelectorAll('.feast-link').forEach(elem => {
+        addTooltip(elem, elem.dataset['feastDate']);
+    });
+</script>

@@ -1,8 +1,17 @@
 from datetime import datetime
+from functools import wraps
 
 from models import Service
 
 
+def nullsafe(f):
+    @wraps(f)
+    def ns(x):
+        return f(x) if x is not None else ''
+    return ns
+
+
+@nullsafe
 def english_date(date: datetime.date) -> str:
     return date.strftime('%A %-d %B %Y')
 

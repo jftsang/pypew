@@ -1,12 +1,13 @@
 import os
 import typing
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from pathlib import Path
 from typing import List, Optional
 
 import jinja2
 import pandas as pd
 from attr import define, field
+from dateutil.easter import easter
 from docx import Document
 from docxtpl import DocxTemplate
 
@@ -17,7 +18,8 @@ from utils import get_neh_df
 
 feasts_fields = ['name', 'introit', 'collect', 'epistle_ref', 'epistle',
                  'gat', 'gradual', 'alleluia', 'tract', 'gospel_ref',
-                 'gospel', 'offertory', 'communion', 'month', 'day']
+                 'gospel', 'offertory', 'communion', 'month', 'day',
+                 'coeaster']
 
 FEASTS_CSV = Path(os.path.dirname(__file__)) / 'data' / 'feasts.csv'
 
@@ -44,8 +46,22 @@ def get(collection, **kwargs):
     return filtered[0]
 
 
+class AllGetMixin:
+    _df = None
+
+    @classmethod
+    def all(cls):
+        # attrs provides a __init__ that takes kwargs
+        # noinspection PyArgumentList
+        return [cls(**info) for _, info in cls._df.iterrows()]
+
+    @classmethod
+    def get(cls, **kwargs):
+        return get(cls.all(), **kwargs)
+
+
 @define
-class Feast:
+class Feast(AllGetMixin):
     name: str = field()
 
     # Specified for the fixed holy days, None for the movable feasts.
@@ -54,6 +70,9 @@ class Feast:
     #  and 30 Nov respectively but the exact dates are
     month: Optional[int] = field()
     day: Optional[int] = field()
+
+    # For the feasts synced with Easter, the number of days since Easter
+    coeaster: Optional[int] = field()
 
     introit: str = field()
     collect: str = field()
@@ -68,20 +87,23 @@ class Feast:
     offertory: str = field()
     communion: str = field()
 
-    feasts_df = pd.read_csv(
-        FEASTS_CSV
-    )
-    assert list(feasts_df.columns) == feasts_fields
+    _df = pd.read_csv(FEASTS_CSV)
+    # Int64, not int, to allow null values
+    _df = _df.astype({'month': 'Int64', 'day': 'Int64', 'coeaster': 'Int64'})
+    assert list(_df.columns) == feasts_fields
 
-    @classmethod
-    def all(cls):
-        # attrs provides a __init__ that takes kwargs
-        # noinspection PyArgumentList
-        return [cls(**info) for _, info in cls.feasts_df.iterrows()]
+    @property
+    def date(self, year=None) -> Optional[date]:
+        if year is None:
+            year = datetime.now().year
 
-    @classmethod
-    def get(cls, **kwargs):
-        return get(cls.all(), **kwargs)
+        if self.month is not pd.NA and self.day is not pd.NA:
+            return date(year, self.month, self.day)
+
+        if self.coeaster is not pd.NA:
+            return easter(year) + timedelta(days=self.coeaster)
+
+        return None
 
     def create_docx(self, path):
         document = Document()
@@ -151,8 +173,8 @@ class Service:
 
         # Collects for Advent I and Ash Wednesday are repeated
         # throughout Advent and Lent respectively.
-        advent1 = get(Feast.all(), name='Advent I')
-        ash_wednesday = get(Feast.all(), name='Ash Wednesday')
+        advent1 = Feast.get(name='Advent I')
+        ash_wednesday = Feast.get(name='Ash Wednesday')
 
         if 'Advent' in self.primary_feast.name and self.primary_feast != advent1:
             out.append(advent1.collect)
