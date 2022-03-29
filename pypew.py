@@ -47,6 +47,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.add_url_rule('/acknowledgements', 'acknowledgements_view', views.acknowledgements_view)
     app.add_url_rule('/feasts', 'feast_index_view', views.feast_index_view)
     app.add_url_rule('/feast/<name>', 'feast_detail_view', views.feast_detail_view)
+    app.add_url_rule('/feast/<name>/date', 'feast_date_api', views.feast_date_api)
     app.add_url_rule('/feast/<name>/docx', 'feast_docx_view', views.feast_docx_view)
     app.add_url_rule('/feast/<name>/pdf', 'feast_pdf_view', views.feast_pdf_view)
     app.add_url_rule('/pewSheet/', 'pew_sheet_create_view', views.pew_sheet_create_view, methods=['GET'])
@@ -62,9 +63,8 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.errorhandler(404)(views.not_found_handler)
     app.errorhandler(Exception)(views.internal_error_handler)
 
-    app.template_filter('service_summary')(filters.service_summary)
-    app.template_filter('service_subtitle')(filters.service_subtitle)
-    app.template_filter('english_date')(filters.english_date)
+    for filter_name, filter_func in filters.filters_context.items():
+        app.template_filter(filter_name)(filter_func)
 
     app.jinja_env.globals.update(len=len)
 

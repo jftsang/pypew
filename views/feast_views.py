@@ -3,12 +3,13 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 from docx2pdf import convert
 from flask import (flash, make_response, redirect, render_template, send_file,
-                   url_for)
+                   url_for, request, jsonify)
 
 from models import Feast, NotFoundError, get
 from utils import logger
 
-__all__ = ['feast_index_view', 'feast_detail_view', 'feast_docx_view', 'feast_pdf_view']
+__all__ = ['feast_index_view', 'feast_date_api', 'feast_detail_view',
+           'feast_docx_view', 'feast_pdf_view']
 
 
 def feast_index_view():
@@ -16,6 +17,15 @@ def feast_index_view():
     return render_template(
         'feasts.html', feasts=feasts
     )
+
+
+def feast_date_api(name):
+    try:
+        year = request.args.get('year')
+        feast = Feast.get(name=name)
+        return jsonify(feast.get_date(year=year))
+    except NotFoundError:
+        return make_response(f"Feast {name} not found", 404)
 
 
 def feast_detail_view(name, **kwargs):

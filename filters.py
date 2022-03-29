@@ -37,8 +37,8 @@ def service_subtitle(service: Service) -> str:
     return s
 
 
-# For passing into docxtpl. (For use in Flask, these filters are also
-# registered when the app is created.)
+# These get registered by the Flask app, and also need to be passed into
+# docxtpl.
 filters_context = {
    'english_date': english_date,
    'service_summary': service_summary,

@@ -92,8 +92,7 @@ class Feast(AllGetMixin):
     _df = _df.astype({'month': 'Int64', 'day': 'Int64', 'coeaster': 'Int64'})
     assert list(_df.columns) == feasts_fields
 
-    @property
-    def date(self, year=None) -> Optional[date]:
+    def get_date(self, year=None) -> Optional[date]:
         if year is None:
             year = datetime.now().year
 
@@ -104,6 +103,8 @@ class Feast(AllGetMixin):
             return easter(year) + timedelta(days=self.coeaster)
 
         return None
+
+    date = property(get_date)
 
     def create_docx(self, path):
         document = Document()
