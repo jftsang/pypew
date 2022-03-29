@@ -1,12 +1,12 @@
-<div class="container">
-
+<div class="container w-print-100">
     <div class="row">
         <div class="col">
             <h1>{{ service.title }}</h1>
         </div>
-        <div class="col">
+        <div class="col d-print-none">
             <p>
                 <a id="copyUrlBtn" class="btn btn-secondary mx-1">copy link</a>
+                <a id="printBtn" class="btn btn-light mx-1">print</a>
                 <a id="makeDocxBtn" class="btn btn-primary mx-1" href="{{ url_for('pew_sheet_docx_view') }}">.docx</a>
 {#                <a class="btn btn-danger mx-1" href="{{ url_for('feast_pdf_view', name=feast.name) }}">.pdf</a>#}
             </p>
@@ -76,6 +76,11 @@
     copyUrlBtn.onclick = () => {
         navigator.clipboard.writeText(window.location);
         notify({message: 'Link copied to clipboard.', color: 'success', timeout: 2000});
+    };
+
+    const printBtn = document.getElementById('printBtn');
+    printBtn.onclick = () => {
+        window.print();
     };
 
     const makeDocxBtn = document.getElementById('makeDocxBtn');

@@ -6,9 +6,10 @@
             <h1>{{ feast.name }}</h1>
             <p><small>{{ feast.date | english_date }}</small></p>
         </div>
-        <div class="col">
+        <div class="col d-print-none">
             <p>
                 <a class="btn btn-primary mx-1" href="{{ url_for('feast_docx_view', name=feast.name) }}">.docx</a>
+                <a id="printBtn" class="btn btn-light mx-1">print</a>
                 <a class="btn btn-danger mx-1" href="{{ url_for('feast_pdf_view', name=feast.name) }}">.pdf</a>
             </p>
         </div>
@@ -46,6 +47,13 @@
 
     <h2>Communion</h2>
     <p>{{ feast.communion }}</p>
+
+    <script>
+        const printBtn = document.getElementById('printBtn');
+        printBtn.onclick = () => {
+            window.print();
+        };
+    </script>
 {% endblock %}
 {% block sidebar %}
     {% with feast_name = feast.name %}

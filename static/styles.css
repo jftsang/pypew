@@ -30,3 +30,19 @@ ul#flashes {
 li.flash {
     list-style: none;
 }
+
+@media print {
+    body {
+        font-family: serif;
+    }
+
+    p {
+        line-height: normal;
+        text-align: justify;
+    }
+
+    .w-print-100 {
+        width: 100% !important;
+        max-width: none;
+    }
+}
