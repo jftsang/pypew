@@ -22,6 +22,26 @@ def get_neh_df():
     return df
 
 
+def sunday_after(d: date) -> date:
+    # 1 for Monday, 7 for Sunday
+    dow = d.isoweekday()
+    if dow == 7:
+        return d + timedelta(days=7)
+    else:
+        return d + timedelta(days=7 - dow)
+
+
+def closest_sunday_to(d: date) -> date:
+    # 1 for Monday, 7 for Sunday
+    dow = d.isoweekday()
+    if dow in {1, 2, 3}:
+        return d - timedelta(days=dow)
+    if dow in {4, 5, 6}:
+        return d + timedelta(days=7-dow)
+
+    return d
+
+
 def advent(year: int) -> date:
     """Date of Advent Sunday. Fourth Sunday before Christmas Day."""
     christmas = date(year=year, month=12, day=25)

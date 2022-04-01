@@ -29,6 +29,8 @@ class TestDates(unittest.TestCase):
         ('Christmas Day', 2022, date(2022, 12, 25)),  # fixed
         ('Easter Day', 2022, date(2022, 4, 17)),  # coeaster
         ('Trinity Sunday', 2022, date(2022, 6, 12)),  # coeaster
+        ('Remembrance Sunday', 2022, date(2022, 11, 13)),  # closest Sunday
+        ('Remembrance Sunday', 2024, date(2024, 11, 10)),  # closest Sunday
     ])
     def test_get_date(self, name, year, expected_date):
         self.assertEqual(Feast.get(name=name).get_date(year), expected_date)

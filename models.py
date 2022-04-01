@@ -14,7 +14,7 @@ from docxtpl import DocxTemplate
 if typing.TYPE_CHECKING:
     from forms import PewSheetForm
 
-from utils import get_neh_df, advent
+from utils import get_neh_df, advent, closest_sunday_to
 
 feasts_fields = ['name', 'month', 'day', 'coeaster', 'coadvent',
                  'introit', 'collect', 'epistle_ref', 'epistle',
@@ -105,6 +105,10 @@ class Feast(AllGetMixin):
             year = datetime.now().year
 
         if self.month is not pd.NA and self.day is not pd.NA:
+            # TODO Check this definition
+            if self.name == 'Remembrance Sunday':
+                return closest_sunday_to(date(year, self.month, self.day))
+
             return date(year, self.month, self.day)
 
         assert not (self.coeaster is not pd.NA and self.coadvent is not pd.NA)
