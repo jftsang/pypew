@@ -1,8 +1,9 @@
 import unittest
-from datetime import date, datetime
+from datetime import date
 from unittest.mock import patch
 from urllib.parse import urlencode
 
+from dateutil.utils import today
 from flask import url_for
 from parameterized import parameterized
 
@@ -51,30 +52,30 @@ class TestModels(unittest.TestCase):
 
     def test_collects_normal(self):
         primary = get(Feast.all(), name='Septuagesima')
-        service = Service(title='', date=datetime.now(), primary_feast=primary)
+        service = Service(title='', date=today(), primary_feast=primary)
         self.assertListEqual(service.collects, [primary.collect])
 
     def test_collects_with_secondary_feast(self):
         primary = get(Feast.all(), name='Septuagesima')
         secondary = get(Feast.all(), name='Christmas Day')
-        service = Service(title='', date=datetime.now(), primary_feast=primary, secondary_feast=secondary)
+        service = Service(title='', date=today(), primary_feast=primary, secondary_feast=secondary)
         self.assertListEqual(service.collects, [primary.collect, secondary.collect])
 
     def test_collect_on_advent1(self):
         advent1 = get(Feast.all(), name='Advent I')
-        service = Service(title='', date=datetime.now(), primary_feast=advent1)
+        service = Service(title='', date=today(), primary_feast=advent1)
         self.assertListEqual(service.collects, [advent1.collect])
 
     def test_collects_during_advent(self):
         advent1 = get(Feast.all(), name='Advent I')
         advent2 = get(Feast.all(), name='Advent II')
-        service = Service(title='', date=datetime.now(), primary_feast=advent2)
+        service = Service(title='', date=today(), primary_feast=advent2)
         self.assertListEqual(service.collects, [advent2.collect, advent1.collect])
 
     def test_collects_during_lent(self):
         ash_wednesday = get(Feast.all(), name='Ash Wednesday')
         lent1 = get(Feast.all(), name='Lent I')
-        service = Service(title='', date=datetime.now(), primary_feast=lent1)
+        service = Service(title='', date=today(), primary_feast=lent1)
         self.assertListEqual(service.collects, [lent1.collect, ash_wednesday.collect])
 
 
