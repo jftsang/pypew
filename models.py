@@ -14,12 +14,12 @@ from docxtpl import DocxTemplate
 if typing.TYPE_CHECKING:
     from forms import PewSheetForm
 
-from utils import get_neh_df
+from utils import get_neh_df, advent
 
-feasts_fields = ['name', 'introit', 'collect', 'epistle_ref', 'epistle',
+feasts_fields = ['name', 'month', 'day', 'coeaster', 'coadvent',
+                 'introit', 'collect', 'epistle_ref', 'epistle',
                  'gat', 'gradual', 'alleluia', 'tract', 'gospel_ref',
-                 'gospel', 'offertory', 'communion', 'month', 'day',
-                 'coeaster']
+                 'gospel', 'offertory', 'communion']
 
 FEASTS_CSV = Path(os.path.dirname(__file__)) / 'data' / 'feasts.csv'
 
@@ -73,6 +73,7 @@ class Feast(AllGetMixin):
 
     # For the feasts synced with Easter, the number of days since Easter
     coeaster: Optional[int] = field()
+    coadvent: Optional[int] = field()
 
     introit: str = field()
     collect: str = field()
@@ -89,7 +90,14 @@ class Feast(AllGetMixin):
 
     _df = pd.read_csv(FEASTS_CSV)
     # Int64, not int, to allow null values
-    _df = _df.astype({'month': 'Int64', 'day': 'Int64', 'coeaster': 'Int64'})
+    _df = _df.astype(
+        {
+            'month': 'Int64',
+            'day': 'Int64',
+            'coeaster': 'Int64',
+            'coadvent': 'Int64'
+         }
+    )
     assert list(_df.columns) == feasts_fields
 
     def get_date(self, year=None) -> Optional[date]:
@@ -99,8 +107,13 @@ class Feast(AllGetMixin):
         if self.month is not pd.NA and self.day is not pd.NA:
             return date(year, self.month, self.day)
 
+        assert not (self.coeaster is not pd.NA and self.coadvent is not pd.NA)
+
         if self.coeaster is not pd.NA:
             return easter(year) + timedelta(days=self.coeaster)
+
+        if self.coadvent is not pd.NA:
+            return advent(year) + timedelta(days=self.coadvent)
 
         return None
 

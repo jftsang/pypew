@@ -1,12 +1,36 @@
 import unittest
-from datetime import datetime
+from datetime import date, datetime
 from unittest.mock import patch
 from urllib.parse import urlencode
 
 from flask import url_for
+from parameterized import parameterized
 
 from models import Feast, Music, Service, get
+from utils import advent
 from ..pypew import create_app
+
+
+class TestDates(unittest.TestCase):
+    @parameterized.expand([
+        # Christmas Day in 2021 was a Saturday
+        (2021, date(2021, 11, 28)),
+        # Sunday (special case!)
+        (2022, date(2022, 11, 27)),
+        # Monday
+        (2023, date(2023, 12, 3)),
+    ])
+    def test_advent(self, year, expected_date):
+        self.assertEqual(advent(year), expected_date)
+
+    @parameterized.expand([
+        ('Advent I', 2022, date(2022, 11, 27)),  # coadvent
+        ('Christmas Day', 2022, date(2022, 12, 25)),  # fixed
+        ('Easter Day', 2022, date(2022, 4, 17)),  # coeaster
+        ('Trinity Sunday', 2022, date(2022, 6, 12)),  # coeaster
+    ])
+    def test_get_date(self, name, year, expected_date):
+        self.assertEqual(Feast.get(name=name).get_date(year), expected_date)
 
 
 class TestModels(unittest.TestCase):
