@@ -10,6 +10,7 @@ from jinja2 import StrictUndefined
 
 import filters
 import views
+from utils import logger
 
 load_dotenv()
 
@@ -87,11 +88,14 @@ def main(threaded: bool = False) -> None:
     app = create_app(pypew)
 
     if threaded:
+        logger.info('Starting Flask app thread...')
         # TODO use werkzeug server instead
         pypew.thread = Thread(
             target=lambda: app.run(debug=False, load_dotenv=True)
         )
         pypew.thread.start()
+        logger.info('Started Flask app. Close this terminal window to terminate PyPew.')
+        logger.info('Opening web browser...')
         with app.app_context():
             webbrowser.open(url_for('index_view'))
         pypew.thread.join()

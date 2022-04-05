@@ -13,7 +13,11 @@ def nullsafe(f):
 
 @nullsafe
 def english_date(date: datetime.date) -> str:
-    return date.strftime('%A %-d %B %Y')
+    try:
+        return date.strftime('%A %-d %B %Y')
+    except ValueError:  # Windows
+        # https://stackoverflow.com/questions/904928/python-strftime-date-without-leading-0
+        return date.strftime('%A %#d %B %Y')
 
 
 def service_summary(service: Service) -> str:

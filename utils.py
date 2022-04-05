@@ -6,6 +6,7 @@ from functools import lru_cache
 import pandas as pd
 
 logger = logging.getLogger("pypew")
+logger.setLevel(logging.INFO)
 
 
 @lru_cache()
