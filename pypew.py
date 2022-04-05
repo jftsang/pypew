@@ -34,8 +34,8 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     )
     app.jinja_env.undefined = StrictUndefined
 
-    app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME')
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+    app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME', 'localhost:5000')
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'password')
 
     # store session information server-side to avoid large cookies
     # https://stackoverflow.com/questions/53551637/session-cookie-is-too-large-flask-application
