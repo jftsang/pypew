@@ -9,7 +9,8 @@ from parameterized import parameterized
 
 from models import Feast, Music, Service, get
 from utils import advent
-from ..pypew import create_app
+import views
+from pypew import create_app
 
 
 class TestDates(unittest.TestCase):
@@ -87,6 +88,14 @@ class TestViews(unittest.TestCase):
         self.app.config['SERVER_NAME'] = 'localhost:5000'
         self.app.app_context().push()
         self.client = self.app.test_client()
+
+    def test_all_views_registered(self):
+        """All the views in the 'views' module (and its imports) should
+        be registered.
+        """
+        for x in dir(views):
+            if (x.endswith('_view') or x.endswith('_api')):
+                self.assertIn(x, self.app.view_functions)
 
     def test_index_view(self):
         r = self.client.get(url_for('index_view'))

@@ -1,6 +1,7 @@
 import os
 import typing
-from datetime import datetime, timedelta, date
+import datetime as dt  # avoid namespace conflict over 'date'
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
 
@@ -100,16 +101,16 @@ class Feast(AllGetMixin):
     )
     assert list(_df.columns) == feasts_fields
 
-    def get_date(self, year=None) -> Optional[date]:
+    def get_date(self, year=None) -> Optional[dt.date]:
         if year is None:
             year = datetime.now().year
 
         if self.month is not pd.NA and self.day is not pd.NA:
             # TODO Check this definition
             if self.name == 'Remembrance Sunday':
-                return closest_sunday_to(date(year, self.month, self.day))
+                return closest_sunday_to(dt.date(year, self.month, self.day))
 
-            return date(year, self.month, self.day)
+            return dt.date(year, self.month, self.day)
 
         assert not (self.coeaster is not pd.NA and self.coadvent is not pd.NA)
 
@@ -121,7 +122,32 @@ class Feast(AllGetMixin):
 
         return None
 
-    date = property(get_date)
+    @property
+    def date(self):
+        """The date of the feast in the present year."""
+        return self.get_date()
+
+    def get_next_date(self, d: Optional[dt.date] = None) -> Optional[dt.date]:
+        """Returns the next occurrence of this feast from the specified
+        date, which may be in the next calendar year.
+        """
+        if d is None:
+            d = dt.date.today()
+
+        next_occurrence = self.get_date(year=d.year)
+        if next_occurrence is None:
+            return None
+        if (next_occurrence - d).days < 0:
+            next_occurrence = self.get_date(year=d.year + 1)
+
+        return next_occurrence
+
+    @property
+    def next_date(self):
+        """The next occurrence of the feast, which may be in the next
+        calendar year.
+        """
+        return self.get_next_date()
 
     def create_docx(self, path):
         document = Document()

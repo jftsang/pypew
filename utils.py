@@ -2,11 +2,21 @@ import logging
 import os
 from datetime import timedelta, date
 from functools import lru_cache
+from typing import Optional
 
 import pandas as pd
 
 logger = logging.getLogger("pypew")
 logger.setLevel(logging.INFO)
+
+
+def str2date(s: Optional[str]) -> date:
+    """Parse the date string if one is given. If None or empty, return
+    today.
+    """
+    if not s:
+        return date.today()
+    return date.fromisoformat(s)
 
 
 @lru_cache()

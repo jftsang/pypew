@@ -47,6 +47,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     )
     app.add_url_rule('/acknowledgements', 'acknowledgements_view', views.acknowledgements_view)
     app.add_url_rule('/feasts', 'feast_index_view', views.feast_index_view)
+    app.add_url_rule('/feasts/upcoming', 'feast_upcoming_api', views.feast_upcoming_api)
     app.add_url_rule('/feast/<name>', 'feast_detail_view', views.feast_detail_view)
     app.add_url_rule('/feast/<name>/date', 'feast_date_api', views.feast_date_api)
     app.add_url_rule('/feast/<name>/docx', 'feast_docx_view', views.feast_docx_view)

@@ -1,15 +1,18 @@
 import os
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 
+import datetime as dt
+from typing import Optional
+
 from docx2pdf import convert
 from flask import (flash, make_response, redirect, render_template, send_file,
                    url_for, request, jsonify)
 
 from models import Feast, NotFoundError, get
-from utils import logger
+from utils import logger, str2date
 
-__all__ = ['feast_index_view', 'feast_date_api', 'feast_detail_view',
-           'feast_docx_view', 'feast_pdf_view']
+__all__ = ['feast_index_view', 'feast_date_api', 'feast_upcoming_api',
+           'feast_detail_view', 'feast_docx_view', 'feast_pdf_view']
 
 
 def feast_index_view():
@@ -17,6 +20,28 @@ def feast_index_view():
     return render_template(
         'feasts.html', feasts=feasts
     )
+
+
+def feast_upcoming_api():
+    """API to get a list of upcoming feasts relative to the specified
+    date, with the soonest first.
+    """
+    s = request.args.get('date')
+    try:
+        date = str2date(s)
+    except ValueError:
+        return make_response(f'Bad date {s}', 400)
+
+    def none2datemax(d: Optional[dt.date]) -> dt.date:
+        """Put unspecified dates at the end of the list."""
+        if d is None:
+            return dt.date.max
+        return d
+
+    upcoming_dates = sorted([{'name': f.name, 'next': f.get_next_date(date)}
+                             for f in Feast.all()],
+                            key=lambda nd: none2datemax(nd['next']))
+    return jsonify(upcoming_dates)
 
 
 def feast_date_api(name):
