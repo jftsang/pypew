@@ -8,6 +8,7 @@ from docx2pdf import convert
 from flask import (flash, make_response, redirect, render_template, send_file,
                    url_for, request, jsonify)
 
+from filters import english_date
 from models import Feast, NotFoundError, get
 from utils import logger, str2date
 
@@ -38,10 +39,11 @@ def feast_upcoming_api():
             return dt.date.max
         return d
 
-    upcoming_dates = sorted([{'name': f.name, 'next': f.get_next_date(date)}
-                             for f in Feast.all()],
-                            key=lambda nd: none2datemax(nd['next']))
-    return jsonify(upcoming_dates)
+    sorted_feasts = sorted(Feast.all(),
+                           key=lambda f: none2datemax(f.get_next_date(date)))
+    return jsonify([{
+        'name': f.name, 'next': english_date(f.get_next_date(date))
+    } for f in sorted_feasts])
 
 
 def feast_date_api(name):

@@ -1,18 +1,44 @@
-<ul class="list-unstyled">
-    {% for f in feasts %}
-        <li>
-            <a data-feast-name="{{ f.name }}" data-feast-date="{{ f.date | english_date }}"
-               href="{{ url_for('feast_detail_view', name=f.name) }}"
-               class="feast-link
-                   {% if not feast_name or f.name == feast_name %}link-info{% else %}link-secondary{% endif %}
-                   text-decoration-none">
-                <small>{{ f.name }}</small>
-            </a>
-        </li>
-    {% endfor %}
+<ul id="feastList" class="list-unstyled">
 </ul>
 <script>
-    document.querySelectorAll('.feast-link').forEach(elem => {
-        addTooltip(elem, elem.dataset['feastDate']);
-    });
+    {% if feast_name %}
+        const currentFeast = "{{ feast_name }}";
+    {% else %}
+        const currentFeast = null;
+    {% endif %}
+    function feastDetailUrl(name) {
+        const feastUrlXXX = "{{ url_for('feast_detail_view', name='XXX') }}";
+        return feastUrlXXX.replace('XXX', name);
+    }
+    const feastsUrl = "{{ url_for('feast_upcoming_api') }}";
+
+    (async () => {
+        const resp = await fetch(feastsUrl);
+        const feastsArray = await resp.json();
+
+        const feastListUl = document.getElementById('feastList');
+        feastsArray.forEach((feast) => {
+            const li = feastListUl.appendChild(document.createElement('li'));
+            const link = li.appendChild(document.createElement('a'));
+            const small = link.appendChild(document.createElement('small'));
+            link.dataset['feastName'] = feast.name;
+            link.dataset['feastDate'] = feast.next;
+            link.href = feastDetailUrl(feast.name);
+            link.classList.add('feast-link');
+            link.classList.add('text-decoration-none');
+            if (feast.name === currentFeast || currentFeast === null)
+                link.classList.add('link-info');
+            else
+                link.classList.add('link-secondary');
+
+            small.innerText = feast.name;
+        });
+
+        /* Add and enable tooltips. (Needs to be done here since this is
+        * an async function which runs after the rest are done.) */
+        document.querySelectorAll('.feast-link').forEach(elem => {
+            addTooltip(elem, elem.dataset['feastDate']);
+            new bootstrap.Tooltip(elem);
+        });
+    })();
 </script>
