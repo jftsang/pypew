@@ -26,9 +26,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
     <script>
-        function addTooltip(elem, text) {
+        function addTooltip(elem, text, placement='top') {
             elem.dataset['bsToggle'] = 'tooltip';
-            elem.dataset['bsPlacement'] = 'top';
+            elem.dataset['bsPlacement'] = placement;
             elem.title = text;
         }
     </script>

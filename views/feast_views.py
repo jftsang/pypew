@@ -39,11 +39,11 @@ def feast_upcoming_api():
             return dt.date.max
         return d
 
-    sorted_feasts = sorted(Feast.all(),
-                           key=lambda f: none2datemax(f.get_next_date(date)))
+    sorted_feasts = sorted(enumerate(Feast.all()),
+                           key=lambda nf: none2datemax(nf[1].get_next_date(date)))
     return jsonify([{
-        'name': f.name, 'next': english_date(f.get_next_date(date))
-    } for f in sorted_feasts])
+        'index': n, 'name': f.name, 'next': english_date(f.get_next_date(date))
+    } for n, f in sorted_feasts])
 
 
 def feast_date_api(name):
