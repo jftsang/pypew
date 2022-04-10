@@ -5,7 +5,7 @@ from threading import Thread
 from typing import Optional
 
 from dotenv import load_dotenv
-from flask import Flask, url_for
+from flask import Flask, url_for, redirect, request
 from jinja2 import StrictUndefined
 
 import filters
@@ -61,6 +61,14 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.add_url_rule('/texts', 'texts_view', views.texts_view, methods=['GET', 'POST'])
     app.add_url_rule('/texts/csv', 'texts_download_csv_view', views.texts_download_csv_view)
     app.add_url_rule('/texts/xlsx', 'texts_download_xlsx_view', views.texts_download_xlsx_view)
+    app.url_map.strict_slashes = False
+
+    @app.before_request
+    def clear_trailing_slashes():
+        """https://stackoverflow.com/questions/40365390/trailing-slash-in-flask-route#40365514"""
+        rp = request.path
+        if rp != '/' and rp.endswith('/'):
+            return redirect(rp[:-1])
 
     app.errorhandler(404)(views.not_found_handler)
     app.errorhandler(Exception)(views.internal_error_handler)
