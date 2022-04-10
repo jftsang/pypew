@@ -1,16 +1,18 @@
+import datetime as dt  # avoid namespace conflict over 'date'
 import os
 import typing
-import datetime as dt  # avoid namespace conflict over 'date'
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
 
 import jinja2
 import pandas as pd
-from attr import define, field
+from attr import field
 from dateutil.easter import easter
 from docx import Document
 from docxtpl import DocxTemplate
+
+from models_base import model, AllGetMixin, nullable_field
 
 if typing.TYPE_CHECKING:
     from forms import PewSheetForm
@@ -27,97 +29,63 @@ FEASTS_CSV = Path(os.path.dirname(__file__)) / 'data' / 'feasts.csv'
 PEW_SHEET_TEMPLATE = os.path.join('templates', 'pewSheetTemplate.docx')
 
 
-class NotFoundError(Exception):
-    pass
-
-
-class MultipleReturnedError(Exception):
-    pass
-
-
-def get(collection, **kwargs):
-    f = lambda x: all(getattr(x, k) == v for k, v in kwargs.items())
-    filtered = list(filter(f, collection))
-
-    n = len(filtered)
-    if n == 0:
-        raise NotFoundError(kwargs)
-    if n > 1:
-        raise MultipleReturnedError(kwargs, n)
-    return filtered[0]
-
-
-class AllGetMixin:
-    _df = None
-
-    @classmethod
-    def all(cls):
-        # attrs provides a __init__ that takes kwargs
-        # noinspection PyArgumentList
-        return [cls(**info) for _, info in cls._df.iterrows()]
-
-    @classmethod
-    def get(cls, **kwargs):
-        return get(cls.all(), **kwargs)
-
-
-@define
+@model
 class Feast(AllGetMixin):
-    name: str = field()
-
-    # Specified for the fixed holy days, None for the movable feasts.
-    # TODO - what about Remembrance Sunday and Advent Sunday? Not fixed
-    #  days but also not comoving with Easter. As a hack go with 11 Nov
-    #  and 30 Nov respectively but the exact dates are
-    month: Optional[int] = field()
-    day: Optional[int] = field()
-
-    # For the feasts synced with Easter, the number of days since Easter
-    coeaster: Optional[int] = field()
-    coadvent: Optional[int] = field()
-
-    introit: str = field()
-    collect: str = field()
-    epistle_ref: str = field()
-    epistle: str = field()
-    gat: str = field()
-    gradual: str = field()
-    alleluia: str = field()
-    tract: str = field()
-    gospel_ref: str = field()
-    gospel: str = field()
-    offertory: str = field()
-    communion: str = field()
-
     _df = pd.read_csv(FEASTS_CSV)
-    # Int64, not int, to allow null values
+    # Int64, not int, to allow null values (rather than casting them to 0)
     _df = _df.astype(
         {
             'month': 'Int64',
             'day': 'Int64',
             'coeaster': 'Int64',
             'coadvent': 'Int64'
-         }
+        }
     )
     assert list(_df.columns) == feasts_fields
+
+    name: str = field()
+
+    # Specified for the fixed holy days, None for the movable feasts.
+    # TODO - what about Remembrance Sunday and Advent Sunday? Not fixed
+    #  days but also not comoving with Easter. As a hack go with 11 Nov
+    #  and 30 Nov respectively but the exact dates are
+    month: Optional[int] = nullable_field()
+    day: Optional[int] = nullable_field()
+
+    # For the feasts synced with Easter, the number of days since Easter
+    coeaster: Optional[int] = nullable_field()
+    coadvent: Optional[int] = nullable_field()
+
+    introit: Optional[str] = nullable_field()
+    collect: Optional[str] = nullable_field()
+    epistle_ref: Optional[str] = nullable_field()
+    epistle: Optional[str] = nullable_field()
+    gat: Optional[str] = nullable_field()
+    gradual: Optional[str] = nullable_field()
+    alleluia: Optional[str] = nullable_field()
+    tract: Optional[str] = nullable_field()
+    gospel_ref: Optional[str] = nullable_field()
+    gospel: Optional[str] = nullable_field()
+    offertory: Optional[str] = nullable_field()
+    communion: Optional[str] = nullable_field()
 
     def get_date(self, year=None) -> Optional[dt.date]:
         if year is None:
             year = datetime.now().year
 
-        if self.month is not pd.NA and self.day is not pd.NA:
+        if self.month is not None and self.day is not None:
             # TODO Check this definition
             if self.name == 'Remembrance Sunday':
                 return closest_sunday_to(dt.date(year, self.month, self.day))
 
             return dt.date(year, self.month, self.day)
 
-        assert not (self.coeaster is not pd.NA and self.coadvent is not pd.NA)
+        assert not (self.coeaster is not None and self.coadvent is not None)
 
-        if self.coeaster is not pd.NA:
+        if self.coeaster is not None:
             return easter(year) + timedelta(days=self.coeaster)
 
-        if self.coadvent is not pd.NA:
+        if self.coadvent is not None:
             return advent(year) + timedelta(days=self.coadvent)
 
         return None
@@ -155,7 +123,7 @@ class Feast(AllGetMixin):
         document.save(path)
 
 
-@define
+@model
 class Music:
     hymns_df = get_neh_df()
 
@@ -190,7 +158,7 @@ class Music:
         return super().__str__()
 
 
-@define
+@model
 class Service:
     # Mandatory fields first, then fields with default values.
     title: str = field()

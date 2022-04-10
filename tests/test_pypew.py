@@ -7,7 +7,8 @@ from dateutil.utils import today
 from flask import url_for
 from parameterized import parameterized
 
-from models import Feast, Music, Service, get
+from models import Feast, Music, Service
+from models_base import get
 from utils import advent
 import views
 from pypew import create_app

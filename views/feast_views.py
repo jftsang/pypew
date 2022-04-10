@@ -6,14 +6,17 @@ from typing import Optional
 
 from docx2pdf import convert
 from flask import (flash, make_response, redirect, render_template, send_file,
-                   url_for, request, jsonify)
+                   url_for, request, jsonify, Response)
+from flask.json import dumps
 
 from filters import english_date
-from models import Feast, NotFoundError, get
+from models import Feast
+from models_base import NotFoundError, get, JSONEncoder
 from utils import logger, str2date
 
-__all__ = ['feast_index_view', 'feast_date_api', 'feast_upcoming_api',
-           'feast_detail_view', 'feast_docx_view', 'feast_pdf_view']
+__all__ = ['feast_index_view', 'feast_index_api', 'feast_date_api',
+           'feast_upcoming_api', 'feast_detail_view', 'feast_detail_api',
+           'feast_docx_view', 'feast_pdf_view']
 
 
 def feast_index_view():
@@ -21,6 +24,12 @@ def feast_index_view():
     return render_template(
         'feasts.html', feasts=feasts
     )
+
+
+def feast_index_api():
+    feasts = Feast.all()
+    return Response(dumps(feasts, cls=JSONEncoder),
+                    mimetype='application/json')
 
 
 def feast_upcoming_api():
@@ -55,7 +64,7 @@ def feast_date_api(name):
         return make_response(f"Feast {name} not found", 404)
 
 
-def feast_detail_view(name, **kwargs):
+def feast_detail_view(name):
     try:
         feasts = Feast.all()
         feast = get(feasts, name=name)
@@ -63,8 +72,19 @@ def feast_detail_view(name, **kwargs):
         flash(f'Feast {name} not found.')
         return make_response(feast_index_view(), 404)
 
-    return render_template('feastDetails.html', feast=feast, feasts=feasts, **kwargs)
+    return render_template('feastDetails.html', feast=feast, feasts=feasts)
 
+
+def feast_detail_api(name):
+    try:
+        feasts = Feast.all()
+        feast = get(feasts, name=name)
+    except NotFoundError:
+        flash(f'Feast {name} not found.')
+        return make_response(feast_index_view(), 404)
+
+    return Response(dumps(feast, cls=JSONEncoder),
+                    mimetype='application/json')
 
 def feast_docx_view(name):
     filename = f'{name}.docx'
