@@ -1,10 +1,8 @@
 """Boilerplate code for models. Actual business logic in models.py."""
 # import humps as humps
-import json
 
-import cattr
 import pandas as pd
-from attr import field, define
+from attr import field
 
 
 class NotFoundError(Exception):
@@ -21,28 +19,6 @@ def nullable_field(*args, **kwargs):
     """
     kwargs.pop('converter', None)
     return field(*args, **kwargs, converter=lambda x: None if pd.isna(x) else x)
-
-
-class JSONEncoder(json.JSONEncoder):
-    encoders = {}
-
-    @classmethod
-    def default(cls, obj):
-        if type(obj) in cls.encoders:
-            return cls.encoders[type(obj)](obj)
-        return json.JSONEncoder().default(obj)
-
-
-class JSONDecoder(json.JSONDecoder):
-    NotImplemented  # TODO
-
-
-def model(clazz):
-    clazz = define(clazz)
-    JSONEncoder.encoders[clazz] = lambda obj: cattr.Converter().unstructure(obj)
-    # JSONDecoder.decoders[clazz] = lambda jobj: cattr.Converter().structure(jobj, clazz)
-    # clazz.load = classmethod(lambda cls, d: _converter.load(d, cls))
-    return clazz
 
 
 def get(collection, **kwargs):

@@ -7,12 +7,12 @@ from typing import List, Optional
 
 import jinja2
 import pandas as pd
-from attr import field
+from attr import field, define
 from dateutil.easter import easter
 from docx import Document
 from docxtpl import DocxTemplate
 
-from models_base import model, AllGetMixin, nullable_field
+from models_base import AllGetMixin, nullable_field
 
 if typing.TYPE_CHECKING:
     from forms import PewSheetForm
@@ -29,7 +29,7 @@ FEASTS_CSV = Path(os.path.dirname(__file__)) / 'data' / 'feasts.csv'
 PEW_SHEET_TEMPLATE = os.path.join('templates', 'pewSheetTemplate.docx')
 
 
-@model
+@define
 class Feast(AllGetMixin):
     _df = pd.read_csv(FEASTS_CSV)
     # Int64, not int, to allow null values (rather than casting them to 0)
@@ -123,7 +123,7 @@ class Feast(AllGetMixin):
         document.save(path)
 
 
-@model
+@define
 class Music:
     hymns_df = get_neh_df()
 
@@ -158,7 +158,7 @@ class Music:
         return super().__str__()
 
 
-@model
+@define
 class Service:
     # Mandatory fields first, then fields with default values.
     title: str = field()

@@ -4,14 +4,14 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 import datetime as dt
 from typing import Optional
 
+import cattrs
 from docx2pdf import convert
 from flask import (flash, make_response, redirect, render_template, send_file,
-                   url_for, request, jsonify, Response)
-from flask.json import dumps
+                   url_for, request, jsonify)
 
 from filters import english_date
 from models import Feast
-from models_base import NotFoundError, get, JSONEncoder
+from models_base import NotFoundError, get
 from utils import logger, str2date
 
 __all__ = ['feast_index_view', 'feast_index_api', 'feast_date_api',
@@ -28,8 +28,7 @@ def feast_index_view():
 
 def feast_index_api():
     feasts = Feast.all()
-    return Response(dumps(feasts, cls=JSONEncoder),
-                    mimetype='application/json')
+    return jsonify(cattrs.unstructure(feasts))
 
 
 def feast_upcoming_api():
@@ -83,8 +82,8 @@ def feast_detail_api(name):
         flash(f'Feast {name} not found.')
         return make_response(feast_index_view(), 404)
 
-    return Response(dumps(feast, cls=JSONEncoder),
-                    mimetype='application/json')
+    return jsonify(cattrs.unstructure(feast))
+
 
 def feast_docx_view(name):
     filename = f'{name}.docx'
