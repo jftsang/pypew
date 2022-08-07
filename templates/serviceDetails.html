@@ -1,0 +1,88 @@
+<div class="container w-print-100">
+    <div class="row">
+        <div class="col">
+            <h1>{{ service.title }}</h1>
+        </div>
+        <div class="col d-print-none">
+            <p>
+                <a id="copyUrlBtn" class="btn btn-secondary mx-1">copy link</a>
+                <a id="printBtn" class="btn btn-light mx-1">print</a>
+                <a id="makeDocxBtn" class="btn btn-primary mx-1" href="{{ url_for('pew_sheet_docx_view') }}">.docx</a>
+{#                <a class="btn btn-danger mx-1" href="{{ url_for('feast_pdf_view', name=feast.name) }}">.pdf</a>#}
+            </p>
+        </div>
+    </div>
+
+    <p class="small"><em>{{ service.date | english_date }}<br/>
+    {{ service | service_subtitle }}</em></p>
+
+    {% if service.introit_hymn %}
+        <h2>Introit Hymn</h2>
+        <p class="pewbody">{{ service.introit_hymn }}</p>
+    {% endif %}
+
+    <h2>Introit Proper</h2>
+    <p class="pewbody">{{ service.introit_proper }}</p>
+
+    {% if len(service.collects) > 1 %}
+        <h2>Collects</h2>
+    {% elif len(service.collects) == 1 %}
+        <h2>Collect</h2>
+    {% endif %}
+    {% for collect in service.collects %}
+        <p>{{ collect }}</p>
+    {% endfor %}
+
+    <h2>Epistle</h2>
+    <p><i>{{ service.epistle_ref }}</i><br/>
+    {{ service.epistle }}</p>
+
+    <h2>{{ service.gat }}</h2>
+    {% for proper in service.gat_propers %}
+        <p>{{ proper }}</p>
+    {% endfor %}
+
+    <h2>Gospel</h2>
+    <p><i>{{ service.gospel_ref }}</i><br/>
+    {{ service.gospel }}</p>
+
+    <h2>Offertory Proper</h2>
+    <p class="pewbody">{{ service.offertory_proper }}</p>
+
+    {% if service.offertory_hymn %}
+        <h2>Offertory Hymn</h2>
+        <p class="pewbody">{{ service.offertory_hymn }}</p>
+    {% endif %}
+
+    <h2>Communion Proper</h2>
+    <p class="pewbody">{{ service.communion_proper }}</p>
+
+    {% if service.anthem %}
+        <h2>Anthem</h2>
+        <p class="pewbody">
+            <em>{{ service.anthem.title }}</em>. {{ service.anthem.composer }}<br/>
+            {{ service.anthem.lyrics }}
+        </p>
+    {% endif %}
+
+    {% if service.recessional_hymn %}
+        <h2>Recessional Hymn</h2>
+        <p class="pewbody">{{ service.recessional_hymn }}</p>
+    {% endif %}
+</div>
+
+<script>
+    const copyUrlBtn = document.getElementById('copyUrlBtn');
+    copyUrlBtn.onclick = () => {
+        navigator.clipboard.writeText(window.location);
+        notify({message: 'Link copied to clipboard.', color: 'success', timeout: 2000});
+    };
+
+    const printBtn = document.getElementById('printBtn');
+    printBtn.onclick = () => {
+        window.print();
+    };
+
+    const makeDocxBtn = document.getElementById('makeDocxBtn');
+    makeDocxBtn.href += window.location.search;
+</script>

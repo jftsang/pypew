@@ -1,0 +1,93 @@
+<div>
+    <a id="sortFeastsByCalendar" class="btn btn-sm btn-secondary"><small>cal</small></a>
+    <a id="sortFeastsByName" class="btn btn-sm btn-secondary"><small>A&ndash;Z</small></a>
+    <a id="sortFeastsByUpcoming" class="btn btn-sm btn-secondary"><small>soon</small></a>
+<ul id="feastList" class="list-unstyled">
+</ul>
+</div>
+<script>
+    {% if feast_name %}
+        const currentFeast = "{{ feast_name }}";
+    {% else %}
+        const currentFeast = null;
+    {% endif %}
+
+    function drawFeastsList(feastsArray) {
+        const feastListUl = document.getElementById('feastList');
+
+        feastListUl.replaceChildren();
+        feastsArray.forEach((feast) => {
+            const li = feastListUl.appendChild(document.createElement('li'));
+            const link = li.appendChild(document.createElement('a'));
+            const small = link.appendChild(document.createElement('small'));
+            small.innerText = feast.name;
+
+            link.dataset['feastName'] = feast.name;
+            link.dataset['feastDate'] = feast.next;
+            link.href = feastDetailUrl(feast.name);
+            link.classList.add('feast-link');
+            link.classList.add('text-decoration-none');
+            if (feast.name === currentFeast || currentFeast === null)
+                link.classList.add('link-info');
+            else
+                link.classList.add('link-secondary');
+
+            addTooltip(link, feast.next, 'right');
+            new bootstrap.Tooltip(link);
+        });
+    }
+
+    function feastDetailUrl(name) {
+        const feastUrlXXX = "{{ url_for('feast_detail_view', name='XXX') }}";
+        return feastUrlXXX.replace('XXX', name);
+    }
+    const feastsApiUrl = "{{ url_for('feast_upcoming_api') }}";
+
+    const calendarSortBtn = document.getElementById('sortFeastsByCalendar');
+    addTooltip(calendarSortBtn, 'Sort by calendar order (Advent–Trinity then specials)');
+    const nameSortBtn = document.getElementById('sortFeastsByName');
+    addTooltip(nameSortBtn, 'Sort alphabetically');
+    const upcomingSortBtn = document.getElementById('sortFeastsByUpcoming');
+    addTooltip(upcomingSortBtn, 'Show upcoming feasts');
+
+    (async () => {
+        const resp = await fetch(feastsApiUrl);
+        const feastsArray = await resp.json();
+
+        calendarSortBtn.onclick = () => {
+            drawFeastsList(feastsArray.slice().sort(
+                function (f, g) {return f.index - g.index}
+            ));
+            calendarSortBtn.classList.add('btn-light');
+            calendarSortBtn.classList.remove('btn-secondary');
+            nameSortBtn.classList.remove('btn-light');
+            nameSortBtn.classList.add('btn-secondary');
+            upcomingSortBtn.classList.remove('btn-light');
+            upcomingSortBtn.classList.add('btn-secondary');
+        };
+        nameSortBtn.onclick = () => {
+            drawFeastsList(feastsArray.slice().sort(
+                function (f, g) {
+                    return ('' + f.name).localeCompare(g.name);
+                }
+            ));
+            calendarSortBtn.classList.remove('btn-light');
+            calendarSortBtn.classList.add('btn-secondary');
+            nameSortBtn.classList.add('btn-light');
+            nameSortBtn.classList.remove('btn-secondary');
+            upcomingSortBtn.classList.remove('btn-light');
+            upcomingSortBtn.classList.add('btn-secondary');
+        };
+        upcomingSortBtn.onclick = () => {
+            drawFeastsList(feastsArray);  // default behaviour from the API
+            calendarSortBtn.classList.remove('btn-light');
+            calendarSortBtn.classList.add('btn-secondary');
+            nameSortBtn.classList.remove('btn-light');
+            nameSortBtn.classList.add('btn-secondary');
+            upcomingSortBtn.classList.add('btn-light');
+            upcomingSortBtn.classList.remove('btn-secondary');
+        };
+
+        upcomingSortBtn.click();  // default
+    })();
+</script>

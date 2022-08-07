@@ -24,10 +24,18 @@
           crossorigin="anonymous">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <script>
+        function addTooltip(elem, text, placement='top') {
+            elem.dataset['bsToggle'] = 'tooltip';
+            elem.dataset['bsPlacement'] = placement;
+            elem.title = text;
+        }
+    </script>
 </head>
 <body class="text-light">
 
-<header>
+<header class="d-print-none">
     {% include 'navbar.html' %}
 </header>
 
@@ -42,13 +50,22 @@
     {% endif %}
     </div>
 
-    <div class="container w-75">
-        {% block content %}
-        {% endblock %}
+    <div class="container w-75 w-print-100">
+        <div class="row">
+            <div class="col">
+                {% block content %}
+                {% endblock %}
+            </div>
+
+            <div class="col-2 d-print-none">
+                {% block sidebar %}
+                {% endblock %}
+            </div>
+        </div>
     </div>
 </main>
 
-<footer>
+<footer class="d-print-none">
     {% include 'footer.html' %}
 </footer>
 
@@ -56,6 +73,20 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
+
+<script>
+    /* Enable tooltips */
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+
+<!-- https://github.com/azzalfauzi/notify, https://azzalfauzi.github.io/notify/ -->
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='notify.css') }}">
+<script src="{{ url_for('static', filename='notify.js') }}"></script>
+
 
 </body>
 </html>

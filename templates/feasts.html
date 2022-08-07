@@ -2,12 +2,18 @@
 {% block title %}Feasts{% endblock %}
 {% block content %}
     <h1>Feasts</h1>
-    <ul class="list-unstyled">
-    {% for feast in feasts %}
-        <li>
-            <a href="{{ url_for('feast_detail_view', name=feast.name) }}"
-               class="link-info text-decoration-none">{{ feast.name }}</a>
-        </li>
-    {% endfor %}
-    </ul>
+
+    <p>On this page you can get information about each of the feasts.
+        Each feast has its own texts (readings, collect and propers).
+        These are combined with other information to
+        <a class="link link-info" href="{{ url_for('pew_sheet_create_view') }}">
+        create services</a>. It is also possible that a service
+        celebrate two feasts, in which case the texts from the two
+        feasts are combined with each other.
+    </p>
+{% endblock %}
+{% block sidebar %}
+    {% with feast_name = None %}
+        {% include 'feastList.html' %}
+    {% endwith %}
 {% endblock %}

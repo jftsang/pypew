@@ -3,20 +3,24 @@ body {
 }
 
 main {
-    padding-bottom: 2in;
+    padding-bottom: 4em;
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-family: "Book Antiqua", serif;
 }
 
+h2 {
+    font-size: larger;
+    font-weight: bold;
+}
+
 #navbar {
-    /*background-color: black;*/
-    /*noinspection CssUnresolvedCustomProperty*/
     background-image: var(--bs-gradient);
 }
 
 #footer {
+    height: 3em;
     background-color: hsla(38, 33%, 20%, 0.5);
 }
 
@@ -25,4 +29,20 @@ ul#flashes {
 
 li.flash {
     list-style: none;
+}
+
+@media print {
+    body {
+        font-family: serif;
+    }
+
+    p {
+        line-height: normal;
+        text-align: justify;
+    }
+
+    .w-print-100 {
+        width: 100% !important;
+        max-width: none;
+    }
 }
