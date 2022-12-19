@@ -46,3 +46,8 @@ li.flash {
         max-width: none;
     }
 }
+
+#feastListDiv {
+    max-height: 70vh;
+    overflow: auto !important;
+}
