@@ -60,9 +60,6 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
                      'pew_sheet_clear_history_endpoint',
                      views.pew_sheet_clear_history_endpoint,
                      methods=['DELETE'])
-    app.add_url_rule('/texts', 'texts_view', views.texts_view, methods=['GET', 'POST'])
-    app.add_url_rule('/texts/csv', 'texts_download_csv_view', views.texts_download_csv_view)
-    app.add_url_rule('/texts/xlsx', 'texts_download_xlsx_view', views.texts_download_xlsx_view)
     app.url_map.strict_slashes = False
 
     @app.before_request
