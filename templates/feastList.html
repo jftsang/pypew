@@ -26,7 +26,7 @@
 
             link.dataset['feastName'] = feast.name;
             link.dataset['feastDate'] = feast.next;
-            link.href = feastDetailUrl(feast.name);
+            link.href = feastDetailUrl(feast.slug);
             link.classList.add('feast-link');
             link.classList.add('text-decoration-none');
             if (feast.name === currentFeast || currentFeast === null)
@@ -39,9 +39,9 @@
         });
     }
 
-    function feastDetailUrl(name) {
-        const feastUrlXXX = "{{ url_for('feast_detail_view', name='XXX') }}";
-        return feastUrlXXX.replace('XXX', name);
+    function feastDetailUrl(slug) {
+        const feastUrlXXX = "{{ url_for('feast_detail_view', slug='XXX') }}";
+        return feastUrlXXX.replace('XXX', slug);
     }
     const feastsApiUrl = "{{ url_for('feast_upcoming_api') }}";
 

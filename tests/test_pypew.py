@@ -112,20 +112,20 @@ class TestViews(unittest.TestCase):
 
     def test_feast_detail_view(self):
         r = self.client.get(
-            url_for('feast_detail_view', name='Christmas Day')
+            url_for('feast_detail_view', slug='christmas-day')
         )
         self.assertEqual(r.status_code, 200)
 
     def test_feast_detail_view_handles_not_found(self):
         r = self.client.get(
-            url_for('feast_detail_view', name='Notmas Day')
+            url_for('feast_detail_view', slug='notmas-day')
         )
         self.assertEqual(r.status_code, 404)
 
     @patch('pypew.views.feast_views.Feast.create_docx')
     def test_feast_docx_view(self, m_create_docx):
         r = self.client.get(
-            url_for('feast_docx_view', name='Christmas Day')
+            url_for('feast_docx_view', slug='christmas-day')
         )
         m_create_docx.assert_called()
         self.assertEqual(r.status_code, 200)

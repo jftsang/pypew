@@ -50,7 +50,10 @@ def feast_upcoming_api():
     sorted_feasts = sorted(enumerate(Feast.all()),
                            key=lambda nf: none2datemax(nf[1].get_next_date(date)))
     return jsonify([{
-        'index': n, 'name': f.name, 'next': english_date(f.get_next_date(date))
+        'index': n,
+        'slug': f.slug,
+        'name': f.name,
+        'next': english_date(f.get_next_date(date))
     } for n, f in sorted_feasts])
 
 
@@ -63,12 +66,12 @@ def feast_date_api(name):
         return make_response(f"Feast {name} not found", 404)
 
 
-def feast_detail_view(name):
+def feast_detail_view(slug):
     try:
         feasts = Feast.all()
-        feast = get(feasts, name=name)
+        feast = get(feasts, slug=slug)
     except NotFoundError:
-        flash(f'Feast {name} not found.')
+        flash(f'Feast {slug} not found.', 'warning')
         return make_response(feast_index_view(), 404)
 
     return render_template('feastDetails.html', feast=feast, feasts=feasts)
@@ -79,20 +82,20 @@ def feast_detail_api(name):
         feasts = Feast.all()
         feast = get(feasts, name=name)
     except NotFoundError:
-        flash(f'Feast {name} not found.')
+        flash(f'Feast {name} not found.', 'warning')
         return make_response(feast_index_view(), 404)
 
     return jsonify(cattrs.unstructure(feast))
 
 
-def feast_docx_view(name):
-    filename = f'{name}.docx'
+def feast_docx_view(slug):
     try:
-        feast = Feast.get(name=name)
-    except Feast.NotFoundError:
-        flash(f'Feast {name} not found.')
+        feast = Feast.get(slug=slug)
+    except NotFoundError:
+        flash(f'Feast {slug} not found.', 'warning')
         return make_response(feast_index_view(), 404)
 
+    filename = f'{feast.name}.docx'
     with NamedTemporaryFile() as tf:
         feast.create_docx(path=tf.name)
         return send_file(
@@ -100,14 +103,14 @@ def feast_docx_view(name):
         )
 
 
-def feast_pdf_view(name):
-    filename = f'{name}.pdf'
+def feast_pdf_view(slug):
     try:
-        feast = Feast.get(name=name)
+        feast = Feast.get(slug=slug)
     except Feast.NotFoundError:
-        flash(f'Feast {name} not found.')
+        flash(f'Feast {slug} not found.', 'warning')
         return make_response(feast_index_view(), 404)
 
+    filename = f'{feast.name}.pdf'
     with TemporaryDirectory() as td:
         docx_path = os.path.join(td, 'tmp.docx')
         feast.create_docx(path=docx_path)
@@ -130,4 +133,4 @@ def feast_pdf_view(name):
                 'warning'
             )
             flash(str(exc), 'danger')
-            return redirect(url_for('feast_detail_view', name=name), 302)
+            return redirect(url_for('feast_detail_view', slug=slug), 302)

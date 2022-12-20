@@ -48,6 +48,7 @@ class Feast:
     def get(cls, **kwargs):
         return get(cls.all(), **kwargs)
 
+    slug: str = field()
     name: str = field()
 
     # Specified for the fixed holy days, None for the movable feasts.
@@ -73,10 +74,6 @@ class Feast:
     gospel: Optional[str] = field(default=None)
     offertory: Optional[str] = field(default=None)
     communion: Optional[str] = field(default=None)
-
-    @property
-    def slug(self) -> str:
-        return slugify(self.name)
 
     def get_date(self, year=None) -> Optional[dt.date]:
         if year is None:
@@ -299,4 +296,4 @@ class Service:
 def _feast_from_yaml(slug: str) -> Feast:
     with open((DATA_DIR / slug).with_suffix('.yaml')) as f:
         info = yaml.safe_load(f)
-        return Feast(**info)
+        return Feast(slug=slug, **info)
