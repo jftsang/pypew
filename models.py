@@ -2,17 +2,19 @@ import datetime as dt  # avoid namespace conflict over 'date'
 import os
 import typing
 from datetime import datetime, timedelta
+from functools import cache
 from pathlib import Path
 from typing import List, Optional
 
 import jinja2
-import pandas as pd
+import yaml
 from attr import field, define
 from dateutil.easter import easter
 from docx import Document
 from docxtpl import DocxTemplate
+from slugify import slugify
 
-from models_base import AllGetMixin, nullable_field
+from models_base import get
 
 if typing.TYPE_CHECKING:
     from forms import PewSheetForm
@@ -25,23 +27,26 @@ feasts_fields = ['name', 'month', 'day', 'coeaster', 'coadvent',
                  'gospel', 'offertory', 'communion']
 
 FEASTS_CSV = Path(os.path.dirname(__file__)) / 'data' / 'feasts.csv'
+DATA_DIR = Path(os.path.dirname(__file__)) / 'data' / 'feasts'
 
 PEW_SHEET_TEMPLATE = os.path.join('templates', 'pewSheetTemplate.docx')
 
 
 @define
-class Feast(AllGetMixin):
-    _df = pd.read_csv(FEASTS_CSV)
-    # Int64, not int, to allow null values (rather than casting them to 0)
-    _df = _df.astype(
-        {
-            'month': 'Int64',
-            'day': 'Int64',
-            'coeaster': 'Int64',
-            'coadvent': 'Int64'
-        }
-    )
-    assert list(_df.columns) == feasts_fields
+class Feast:
+    @classmethod
+    def from_yaml(cls, slug):
+        return _feast_from_yaml(slug)
+
+    @classmethod
+    def all(cls):
+        with open(DATA_DIR / '_list.txt') as f:
+            slugs = [x.strip() for x in f]
+            return [cls.from_yaml(slug) for slug in slugs]
+
+    @classmethod
+    def get(cls, **kwargs):
+        return get(cls.all(), **kwargs)
 
     name: str = field()
 
@@ -49,25 +54,29 @@ class Feast(AllGetMixin):
     # TODO - what about Remembrance Sunday and Advent Sunday? Not fixed
     #  days but also not comoving with Easter. As a hack go with 11 Nov
     #  and 30 Nov respectively but the exact dates are
-    month: Optional[int] = nullable_field()
-    day: Optional[int] = nullable_field()
+    month: Optional[int] = field(default=None)
+    day: Optional[int] = field(default=None)
 
     # For the feasts synced with Easter, the number of days since Easter
-    coeaster: Optional[int] = nullable_field()
-    coadvent: Optional[int] = nullable_field()
+    coeaster: Optional[int] = field(default=None)
+    coadvent: Optional[int] = field(default=None)
 
-    introit: Optional[str] = nullable_field()
-    collect: Optional[str] = nullable_field()
-    epistle_ref: Optional[str] = nullable_field()
-    epistle: Optional[str] = nullable_field()
-    gat: Optional[str] = nullable_field()
-    gradual: Optional[str] = nullable_field()
-    alleluia: Optional[str] = nullable_field()
-    tract: Optional[str] = nullable_field()
-    gospel_ref: Optional[str] = nullable_field()
-    gospel: Optional[str] = nullable_field()
-    offertory: Optional[str] = nullable_field()
-    communion: Optional[str] = nullable_field()
+    introit: Optional[str] = field(default=None)
+    collect: Optional[str] = field(default=None)
+    epistle_ref: Optional[str] = field(default=None)
+    epistle: Optional[str] = field(default=None)
+    gat: Optional[str] = field(default=None)
+    gradual: Optional[str] = field(default=None)
+    alleluia: Optional[str] = field(default=None)
+    tract: Optional[str] = field(default=None)
+    gospel_ref: Optional[str] = field(default=None)
+    gospel: Optional[str] = field(default=None)
+    offertory: Optional[str] = field(default=None)
+    communion: Optional[str] = field(default=None)
+
+    @property
+    def slug(self) -> str:
+        return slugify(self.name)
 
     def get_date(self, year=None) -> Optional[dt.date]:
         if year is None:
@@ -268,7 +277,8 @@ class Service:
             secondary_feast=secondary_feast,
             introit_hymn=Music.get_neh_hymn_by_ref(form.introit_hymn.data),
             offertory_hymn=Music.get_neh_hymn_by_ref(form.offertory_hymn.data),
-            recessional_hymn=Music.get_neh_hymn_by_ref(form.recessional_hymn.data),
+            recessional_hymn=Music.get_neh_hymn_by_ref(
+                form.recessional_hymn.data),
             anthem=anthem,
         )
 
@@ -283,3 +293,10 @@ class Service:
         jinja_env.filters.update(filters_context)
         doc.render({'service': self}, jinja_env)
         doc.save(path)
+
+
+@cache
+def _feast_from_yaml(slug: str) -> Feast:
+    with open((DATA_DIR / slug).with_suffix('.yaml')) as f:
+        info = yaml.safe_load(f)
+        return Feast(**info)

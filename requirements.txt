@@ -12,6 +12,8 @@ parameterized~=0.8.1
 python-dateutil~=2.8.2
 python-docx~=0.8.11
 python-dotenv~=0.19.2
+python-slugify~=7.0.0
+PyYAML~=6.0
 WTForms~=3.0.1
 setuptools~=50.3.2
 openpyxl==3.0.9
