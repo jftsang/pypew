@@ -50,14 +50,14 @@
     {% endif %}
     </div>
 
-    <div class="container w-75 w-print-100">
-        <div class="row">
-            <div class="col">
+    <div class="container w-print-100">
+        <div class="row justify-content-center">
+            <div id="mainContentDiv" class="col-md-8">
                 {% block content %}
                 {% endblock %}
             </div>
 
-            <div class="col-2 d-print-none">
+            <div id="sidebarDiv" class="col-md-2 d-print-none">
                 {% block sidebar %}
                 {% endblock %}
             </div>
