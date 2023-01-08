@@ -16,7 +16,7 @@ from utils import logger, str2date
 
 __all__ = ['feast_index_view', 'feast_index_api', 'feast_date_api',
            'feast_upcoming_api', 'feast_detail_view', 'feast_detail_api',
-           'feast_docx_view', 'feast_pdf_view']
+           'feast_docx_view']
 
 
 def feast_index_view():
@@ -101,36 +101,3 @@ def feast_docx_view(slug):
         return send_file(
             tf.name, as_attachment=True, attachment_filename=filename
         )
-
-
-def feast_pdf_view(slug):
-    try:
-        feast = Feast.get(slug=slug)
-    except Feast.NotFoundError:
-        flash(f'Feast {slug} not found.', 'warning')
-        return make_response(feast_index_view(), 404)
-
-    filename = f'{feast.name}.pdf'
-    with TemporaryDirectory() as td:
-        docx_path = os.path.join(td, 'tmp.docx')
-        feast.create_docx(path=docx_path)
-
-        pdf_path = os.path.join(td, 'tmp.pdf')
-        try:
-            # Note that convert() may fail silently:
-            # https://github.com/AlJohri/docx2pdf/issues/56
-            # https://github.com/AlJohri/docx2pdf/pull/57
-            convert(docx_path, pdf_path)
-            return send_file(
-                pdf_path, as_attachment=True, attachment_filename=filename
-            )
-        except Exception as exc:
-            logger.exception(exc)
-            flash(
-                'Conversion from DOCX to PDF was unsuccessful. '
-                'Try downloading the .docx version instead. '
-                'The server reported:',
-                'warning'
-            )
-            flash(str(exc), 'danger')
-            return redirect(url_for('feast_detail_view', slug=slug), 302)

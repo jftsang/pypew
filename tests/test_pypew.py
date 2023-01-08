@@ -138,18 +138,6 @@ class TestViews(unittest.TestCase):
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
 
-    @unittest.expectedFailure
-    @patch('pypew.views.convert')
-    @patch('pypew.views.Feast.create_docx')
-    def test_feast_pdf_view(self, m_create_docx, m_convert):
-        r = self.client.get(
-            url_for('feast_pdf_view', name='Christmas Day')
-        )
-        m_convert.assert_called()
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.headers['Content-Disposition'],
-                         'attachment; filename="Christmas Day.pdf"')
-
     @patch('pypew.views.pew_sheet_views.Service.create_docx')
     def test_pew_sheet_docx_view(self, m_create_docx):
         r = self.client.get(
