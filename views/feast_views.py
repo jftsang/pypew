@@ -1,18 +1,15 @@
-import os
-from tempfile import NamedTemporaryFile, TemporaryDirectory
-
 import datetime as dt
+from tempfile import NamedTemporaryFile
 from typing import Optional
 
 import cattrs
-from docx2pdf import convert
-from flask import (flash, make_response, redirect, render_template, send_file,
-                   url_for, request, jsonify)
+from flask import (flash, make_response, render_template, send_file,
+                   request, jsonify)
 
 from filters import english_date
 from models import Feast
 from models_base import NotFoundError, get
-from utils import logger, str2date
+from utils import str2date
 
 __all__ = ['feast_index_view', 'feast_index_api', 'feast_date_api',
            'feast_upcoming_api', 'feast_detail_view', 'feast_detail_api',
