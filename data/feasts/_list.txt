@@ -62,7 +62,7 @@ trinity-xxi
 trinity-xxii
 trinity-xxiii
 trinity-xxiv
-trinity-xv
+trinity-xxv
 st-andrew
 st-thomas-the-apostle
 candlemas
