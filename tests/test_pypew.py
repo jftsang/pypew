@@ -110,11 +110,15 @@ class TestViews(unittest.TestCase):
         r = self.client.get(url_for('feast_index_view'))
         self.assertEqual(r.status_code, 200)
 
-    def test_feast_detail_view(self):
-        r = self.client.get(
-            url_for('feast_detail_view', slug='christmas-day')
+    @parameterized.expand([
+        (feast.slug,) for feast in Feast.all()
+    ])
+    def test_can_load_all_feasts(self, slug):
+        endpoint = url_for('feast_detail_view', slug=slug)
+        r = self.client.get(endpoint)
+        self.assertEqual(
+            200, r.status_code, msg=f"Couldn't load {endpoint}"
         )
-        self.assertEqual(r.status_code, 200)
 
     def test_feast_detail_view_handles_not_found(self):
         r = self.client.get(
@@ -128,14 +132,14 @@ class TestViews(unittest.TestCase):
             url_for('feast_docx_view', slug='christmas-day')
         )
         m_create_docx.assert_called()
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(200, r.status_code)
         self.assertEqual(
+            'attachment; filename="Christmas Day.docx"',
             r.headers['Content-Disposition'],
-            'attachment; filename="Christmas Day.docx"'
         )
         self.assertEqual(
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             r.headers['Content-Type'],
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
 
     @patch('pypew.views.pew_sheet_views.Service.create_docx')
