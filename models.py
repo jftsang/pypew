@@ -12,7 +12,6 @@ from attr import field, define
 from dateutil.easter import easter
 from docx import Document
 from docxtpl import DocxTemplate
-from slugify import slugify
 
 from models_base import get
 
@@ -130,6 +129,20 @@ class Feast:
 
 
 @define
+class DateRule:
+    # Specified for the fixed holy days, None for the movable feasts.
+    # TODO - what about Remembrance Sunday and Advent Sunday? Not fixed
+    #  days but also not comoving with Easter. As a hack go with 11 Nov
+    #  and 30 Nov respectively but the exact dates are
+    month: Optional[int] = field(default=None)
+    day: Optional[int] = field(default=None)
+
+    # For the feasts synced with Easter, the number of days since Easter
+    coeaster: Optional[int] = field(default=None)
+    coadvent: Optional[int] = field(default=None)
+
+
+@define
 class Music:
     hymns_df = get_neh_df()
 
@@ -162,6 +175,13 @@ class Music:
         if self.category == 'Hymn':
             return f'{self.ref}, {self.title}'
         return super().__str__()
+
+
+@define
+class ServiceItem:
+    title: str = field(default='')
+    paragraphs: List[typing.Union[str, Music]] = field(factory=list)
+    subtitle: Optional[str] = field(default=None)
 
 
 @define
@@ -245,6 +265,40 @@ class Service:
     @property
     def gospel(self) -> str:
         return self.primary_feast.gospel
+
+    @property
+    def items(self) -> List[ServiceItem]:
+        items = []
+        if self.introit_hymn:
+            items.append(
+                ServiceItem('Introit Hymn', [self.introit_hymn])
+            )
+        items.append(ServiceItem('Introit Proper', [self.introit_proper]))
+        collects = ServiceItem()
+        collects.title = 'Collects' if len(self.collects) > 1 else 'Collect'
+        collects.paragraphs = self.collects
+        items.append(collects)
+
+        items.append(ServiceItem('Epistle', [self.epistle], self.epistle_ref))
+        items.append(ServiceItem(self.gat, self.gat_propers))
+        items.append(ServiceItem('Gospel', [self.gospel], self.gospel_ref))
+
+        items.append(ServiceItem('Offertory Proper', [self.offertory_proper]))
+        if self.offertory_hymn:
+            items.append(ServiceItem('Offertory Hymn', [self.offertory_hymn]))
+
+        items.append(ServiceItem('Communion Proper', [self.communion_proper]))
+
+        if self.anthem:
+            items.append(
+                ServiceItem('Anthem', [self.anthem.lyrics],
+                            f'{self.anthem.title}. {self.anthem.composer}'))
+
+        if self.recessional_hymn:
+            items.append(
+                ServiceItem('Recessional Hymn', [self.recessional_hymn]))
+
+        return items
 
     @classmethod
     def from_form(cls, form: 'PewSheetForm') -> 'Service':
