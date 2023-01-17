@@ -7,7 +7,8 @@
             <p>
                 <a id="copyUrlBtn" class="btn btn-secondary my-1">copy link</a>
                 <a id="printBtn" class="btn btn-light m-1">print</a>
-                <a id="makeDocxBtn" class="btn btn-primary my-1" href="{{ url_for('pew_sheet_docx_view') }}">.docx</a>
+                <a id="makeDocxBtn" class="btn btn-primary my-1"
+                   href="{{ url_for('pew_sheet_docx_view') }}">.docx</a>
             </p>
         </div>
     </div>
@@ -27,13 +28,17 @@
 </div>
 
 <script>
-    const copyUrlBtn = document.getElementById('copyUrlBtn');
-    copyUrlBtn.onclick = () => {
-        navigator.clipboard.writeText(window.location);
-        notify({message: 'Link copied to clipboard.', color: 'success', timeout: 2000});
-    };
+  const copyUrlBtn = document.getElementById('copyUrlBtn');
+  copyUrlBtn.onclick = () => {
+    navigator.clipboard.writeText(window.location);
+    notify({
+      message: 'Link copied to clipboard.',
+      color: 'success',
+      timeout: 2000
+    });
+  };
 
-    const printBtn = document.getElementById('printBtn');
+  const printBtn = document.getElementById('printBtn');
     printBtn.onclick = () => {
         window.print();
     };

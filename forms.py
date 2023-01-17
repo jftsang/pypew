@@ -1,6 +1,6 @@
 from flask import request
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, DateField
+from wtforms import StringField, SelectField, DateField, HiddenField
 from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea
 
@@ -11,7 +11,7 @@ hymns = [('', 'None')] + [(h.ref, h.title) for h in Music.neh_hymns()]
 
 class PewSheetForm(FlaskForm):
     feast_names = [feast.name for feast in Feast.all()]
-    title = StringField('Title', validators=[DataRequired()])
+    title = HiddenField('Title')
     date = DateField('Date', validators=[DataRequired()])
     celebrant = StringField('Celebrant')
     preacher = StringField('Preacher')

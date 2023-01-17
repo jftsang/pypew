@@ -22,6 +22,7 @@
     <ul class="list-unstyled">
         <li><small>(<a id="clearHistLink" href="#" class="link-warning text-decoration-none">clear history</a>)</small></li>
         {% for args, ps in previous_services %}
+            <!-- TODO don't do a server call for each one of these -->
             <li class="previous-service"><small>
                 <a href="{{ url_for('pew_sheet_create_view') }}?{{args}}"
                    class="{% if ps == service %}link-info{% else %}link-secondary{% endif %}
