@@ -16,13 +16,44 @@
     </div>
 
     <div class="row mb-3">
+        {{ form.primary_feast_name.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.primary_feast_name(class='form-select') }}
+            {% if form.primary_feast_name.errors %}
+                {% for error in form.primary_feast_name.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.secondary_feast_name.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.secondary_feast_name(class='form-select') }}
+            {% if form.secondary_feast_name.errors %}
+                {% for error in form.secondary_feast_name.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+
+    <div class="row mb-3">
         {{ form.date.label(class='col-sm-1 col-form-label') }}
         <div class="col">
             {{ form.date(class='form-date') }}
-            <a class="btn btn-secondary btn-sm px-1" id="prev-week-btn">-week</a>
+            <a class="btn btn-secondary btn-sm px-1"
+               id="prev-week-btn">-week</a>
             <a class="btn btn-secondary btn-sm px-1" id="today-btn">Today</a>
             <a class="btn btn-secondary btn-sm px-1" id="sunday-btn">Sunday</a>
-            <a class="btn btn-secondary btn-sm px-1" id="next-week-btn">+week</a>
+            <a class="btn btn-secondary btn-sm px-1"
+               id="next-week-btn">+week</a>
             {% if form.date.errors %}
                 {% for error in form.date.errors %}
                     <small class="font-small text-danger">
@@ -53,34 +84,6 @@
             {{ form.preacher(class='form-control') }}
             {% if form.preacher.errors %}
                 {% for error in form.preacher.errors %}
-                    <small class="font-small text-danger">
-                        {{ error }}
-                    </small>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="row mb-3">
-        {{ form.primary_feast_name.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
-            {{ form.primary_feast_name(class='form-select') }}
-            {% if form.primary_feast_name.errors %}
-                {% for error in form.primary_feast_name.errors %}
-                    <small class="font-small text-danger">
-                        {{ error }}
-                    </small>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="row mb-3">
-        {{ form.secondary_feast_name.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
-            {{ form.secondary_feast_name(class='form-select') }}
-            {% if form.secondary_feast_name.errors %}
-                {% for error in form.secondary_feast_name.errors %}
                     <small class="font-small text-danger">
                         {{ error }}
                     </small>
