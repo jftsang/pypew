@@ -6,10 +6,12 @@ const dateField = document.getElementById('date');
 
 const setTitle = () => {
   let txt;
+  const primaryFeastName = primaryFeastNameField.options[primaryFeastNameField.selectedIndex].innerText;
+  const secondaryFeastName = secondaryFeastNameField.options[secondaryFeastNameField.selectedIndex].innerText;
   if (secondaryFeastNameField.value)
-    txt = primaryFeastNameField.value + ' (' + secondaryFeastNameField.value + ')';
+    txt = primaryFeastName + ' (' + secondaryFeastName + ')';
   else
-    txt = primaryFeastNameField.value;
+    txt = primaryFeastName;
 
   titleH3.innerText = txt;
   titleField.value = txt;

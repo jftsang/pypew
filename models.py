@@ -302,9 +302,9 @@ class Service:
 
     @classmethod
     def from_form(cls, form: 'PewSheetForm') -> 'Service':
-        primary_feast = Feast.get(name=form.primary_feast_name.data)
+        primary_feast = Feast.get(slug=form.primary_feast_name.data)
         if form.secondary_feast_name.data:
-            secondary_feast = Feast.get(name=form.secondary_feast_name.data)
+            secondary_feast = Feast.get(slug=form.secondary_feast_name.data)
         else:
             secondary_feast = None
 

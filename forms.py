@@ -10,11 +10,13 @@ hymns = [('', 'None')] + [(h.ref, h.title) for h in Music.neh_hymns()]
 
 
 class PewSheetForm(FlaskForm):
-    feast_names = [feast.name for feast in Feast.all()]
     title = HiddenField('Title')
-    primary_feast_name = SelectField('Primary Feast', choices=feast_names)
+    feast_choices = [(feast.slug, feast.name) for
+                     feast in Feast.all()]
+    primary_feast_name = SelectField('Primary Feast',
+                                     choices=feast_choices)
     secondary_feast_name = SelectField('Secondary Feast',
-                                       choices=[''] + feast_names)
+                                       choices=[('', '')] + feast_choices)
     date = DateField('Date', validators=[DataRequired()])
     celebrant = StringField('Celebrant')
     preacher = StringField('Preacher')

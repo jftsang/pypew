@@ -74,12 +74,12 @@ def feast_detail_view(slug):
     return render_template('feastDetails.html', feast=feast, feasts=feasts)
 
 
-def feast_detail_api(name):
+def feast_detail_api(slug):
     try:
         feasts = Feast.all()
-        feast = get(feasts, name=name)
+        feast = get(feasts, slug=slug)
     except NotFoundError:
-        flash(f'Feast {name} not found.', 'warning')
+        flash(f'Feast {slug} not found.', 'warning')
         return make_response(feast_index_view(), 404)
 
     return jsonify(cattrs.unstructure(feast))

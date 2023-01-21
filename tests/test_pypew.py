@@ -121,6 +121,15 @@ class TestViews(unittest.TestCase):
     @parameterized.expand([
         (feast.slug,) for feast in Feast.all()
     ])
+    def test_feast_api(self, slug):
+        endpoint = url_for('feast_detail_api', slug=slug)
+        r = self.client.get(endpoint)
+        self.assertEqual(200, r.status_code, msg=f"Couldn't load {endpoint}")
+        self.assertTrue(r.is_json)
+
+    @parameterized.expand([
+        (feast.slug,) for feast in Feast.all()
+    ])
     def test_feast_date_api(self, slug):
         endpoint = url_for('feast_date_api', slug=slug)
         r = self.client.get(endpoint)
@@ -152,11 +161,13 @@ class TestViews(unittest.TestCase):
     def test_pew_sheet_docx_view(self, m_create_docx):
         r = self.client.get(
             url_for('pew_sheet_docx_view') + '?' + urlencode(
-                {'title': 'Feast of Foo', 'date': '2022-01-01', 'primary_feast_name': 'Advent I',
-                 'secondary_feast_name': '', 'introit_hymn': '', 'offertory_hymn': '', 'recessional_hymn': ''})
+                {'title': 'Feast of Foo', 'date': '2022-01-01',
+                 'primary_feast_name': 'advent-i',
+                 'secondary_feast_name': '', 'introit_hymn': '',
+                 'offertory_hymn': '', 'recessional_hymn': ''})
         )
-        m_create_docx.assert_called()
         self.assertEqual(r.status_code, 200)
+        m_create_docx.assert_called()
         self.assertEqual(
             r.headers['Content-Disposition'],
             'attachment; filename="Feast of Foo.docx"'
