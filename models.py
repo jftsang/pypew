@@ -44,6 +44,20 @@ class Feast:
             return [cls.from_yaml(slug) for slug in slugs]
 
     @classmethod
+    def upcoming(cls, date: Optional[dt.date] = None) -> List['Feast']:
+        if date is None:
+            date = dt.date.today()
+
+        def none2datemax(d: Optional[dt.date]) -> dt.date:
+            """Put unspecified dates at the end of the list."""
+            if d is None:
+                return dt.date.max
+            return d
+
+        return sorted(Feast.all(),
+                      key=lambda f: none2datemax(f.get_next_date(date)))
+
+    @classmethod
     def get(cls, **kwargs):
         return get(cls.all(), **kwargs)
 

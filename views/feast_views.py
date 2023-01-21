@@ -1,6 +1,5 @@
-import datetime as dt
+import datetime
 from tempfile import NamedTemporaryFile
-from typing import Optional
 
 import cattrs
 from flask import (flash, make_response, render_template, send_file,
@@ -33,19 +32,15 @@ def feast_upcoming_api():
     date, with the soonest first.
     """
     s = request.args.get('date')
-    try:
-        date = str2date(s)
-    except ValueError:
-        return make_response(f'Bad date {s}', 400)
+    if s is not None:
+        try:
+            date = str2date(s)
+        except ValueError:
+            return make_response(f'Bad date {s}', 400)
+    else:
+        date = datetime.date.today()
 
-    def none2datemax(d: Optional[dt.date]) -> dt.date:
-        """Put unspecified dates at the end of the list."""
-        if d is None:
-            return dt.date.max
-        return d
-
-    sorted_feasts = sorted(enumerate(Feast.all()),
-                           key=lambda nf: none2datemax(nf[1].get_next_date(date)))
+    sorted_feasts = enumerate(Feast.upcoming(date))
     return jsonify([{
         'index': n,
         'slug': f.slug,
