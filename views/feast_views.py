@@ -54,13 +54,13 @@ def feast_upcoming_api():
     } for n, f in sorted_feasts])
 
 
-def feast_date_api(name):
+def feast_date_api(slug):
     try:
         year = request.args.get('year')
-        feast = Feast.get(name=name)
+        feast = Feast.from_yaml(slug)
         return jsonify(feast.get_date(year=year))
     except NotFoundError:
-        return make_response(f"Feast {name} not found", 404)
+        return make_response(f"Feast {slug} not found", 404)
 
 
 def feast_detail_view(slug):

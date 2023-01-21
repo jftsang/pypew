@@ -7,11 +7,11 @@ from dateutil.utils import today
 from flask import url_for
 from parameterized import parameterized
 
+import views
 from models import Feast, Music, Service
 from models_base import get
-from utils import advent
-import views
 from pypew import create_app
+from utils import advent
 
 
 class TestDates(unittest.TestCase):
@@ -116,9 +116,15 @@ class TestViews(unittest.TestCase):
     def test_can_load_all_feasts(self, slug):
         endpoint = url_for('feast_detail_view', slug=slug)
         r = self.client.get(endpoint)
-        self.assertEqual(
-            200, r.status_code, msg=f"Couldn't load {endpoint}"
-        )
+        self.assertEqual(200, r.status_code, msg=f"Couldn't load {endpoint}")
+
+    @parameterized.expand([
+        (feast.slug,) for feast in Feast.all()
+    ])
+    def test_feast_date_api(self, slug):
+        endpoint = url_for('feast_date_api', slug=slug)
+        r = self.client.get(endpoint)
+        self.assertEqual(200, r.status_code, msg=f"Couldn't load {endpoint}")
 
     def test_feast_detail_view_handles_not_found(self):
         r = self.client.get(
