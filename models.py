@@ -88,7 +88,7 @@ class Feast:
     collect: Optional[str] = field(default=None)
     epistle_ref: Optional[str] = field(default=None)
     epistle: Optional[str] = field(default=None)
-    gat: Optional[str] = field(default=None)
+    gat: str = field(default='')
     gradual: Optional[str] = field(default=None)
     alleluia: Optional[str] = field(default=None)
     tract: Optional[str] = field(default=None)
