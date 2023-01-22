@@ -29,7 +29,7 @@ const updateDateFromPrimaryFeast = async () => {
     dateField.value = j;
 };
 
-await updateDateFromPrimaryFeast();
+updateDateFromPrimaryFeast().then();
 primaryFeastNameField.addEventListener('change', updateDateFromPrimaryFeast);
 
 const today = new Date()
@@ -94,3 +94,18 @@ addTooltip(prevWeekBtn, '7 days earlier');
 addTooltip(todayBtn, 'Set the date to today');
 addTooltip(sundayBtn, 'Set the date to this Sunday');
 addTooltip(nextWeekBtn, '7 days later');
+
+const hymnFields = Array.prototype.map.call(
+  ['introit_hymn', 'offertory_hymn', 'recessional_hymn'],
+  s => document.getElementById(s)
+);
+
+hymnFields.forEach(hymnField => {
+  const options = hymnField.options;
+  Array.prototype.forEach.call(options, opt => {
+    opt.dataset['number'] = opt.value;
+    opt.dataset['text'] = opt.text;
+  });
+
+  Array.prototype.sort.call(options,)
+});
