@@ -53,7 +53,8 @@ def feast_date_api(slug):
     try:
         year = request.args.get('year')
         feast = Feast.from_yaml(slug)
-        return jsonify(feast.get_date(year=year))
+        date = feast.get_date(year=year)
+        return jsonify(date.isoformat() if date else None)
     except NotFoundError:
         return make_response(f"Feast {slug} not found", 404)
 

@@ -18,8 +18,19 @@ const setTitle = () => {
 };
 
 setTitle();
-primaryFeastNameField.onchange = setTitle;
-secondaryFeastNameField.onchange = setTitle;
+primaryFeastNameField.addEventListener('change', setTitle);
+secondaryFeastNameField.addEventListener('change', setTitle);
+
+const updateDateFromPrimaryFeast = async () => {
+  const url = '/feast/api/' + primaryFeastNameField.value + '/date';
+  const r = await fetch(url);
+  const j = await r.json();
+  if (j !== null)
+    dateField.value = j;
+};
+
+await updateDateFromPrimaryFeast();
+primaryFeastNameField.addEventListener('change', updateDateFromPrimaryFeast);
 
 const today = new Date()
 const day = 1000 * 60 * 60 * 24;  // milliseconds in a day
@@ -28,8 +39,6 @@ const sunday = new Date(today.getTime() + (7 - today.getDay()) * day);
 function toISO(date) {
   return date.toISOString().split('T')[0];
 }
-
-dateField.value = toISO(today);
 
 const todayBtn = document.getElementById('today-btn');
 todayBtn.onclick = () => {

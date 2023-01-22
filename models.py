@@ -31,6 +31,13 @@ DATA_DIR = Path(os.path.dirname(__file__)) / 'data' / 'feasts'
 PEW_SHEET_TEMPLATE = os.path.join('templates', 'pewSheetTemplate.docx')
 
 
+def _none2datemax(d: Optional[dt.date]) -> dt.date:
+    """Put unspecified dates at the end of the list."""
+    if d is None:
+        return dt.date.max
+    return d
+
+
 @define
 class Feast:
     @classmethod
@@ -48,14 +55,16 @@ class Feast:
         if date is None:
             date = dt.date.today()
 
-        def none2datemax(d: Optional[dt.date]) -> dt.date:
-            """Put unspecified dates at the end of the list."""
-            if d is None:
-                return dt.date.max
-            return d
-
         return sorted(Feast.all(),
-                      key=lambda f: none2datemax(f.get_next_date(date)))
+                      key=lambda f: _none2datemax(f.get_next_date(date)))
+
+    @classmethod
+    def next(cls, date: Optional[dt.date] = None) -> 'Feast':
+        if date is None:
+            date = dt.date.today()
+
+        return min(Feast.all(),
+                   key=lambda f: _none2datemax(f.get_next_date(date)))
 
     @classmethod
     def get(cls, **kwargs):
