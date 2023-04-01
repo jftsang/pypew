@@ -6,7 +6,8 @@ from wtforms.widgets import TextArea
 
 from models import Feast, Music
 
-hymns = [('', 'None')] + [(h.ref, h.title) for h in Music.neh_hymns()]
+hymns = [('', 'None')] + [(h.ref, f'{h.ref} - {h.title}') for h in
+                          Music.neh_hymns()]
 
 
 class PewSheetForm(FlaskForm):
