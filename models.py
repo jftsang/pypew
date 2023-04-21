@@ -1,5 +1,6 @@
 import datetime as dt  # avoid namespace conflict over 'date'
 import os
+import re
 import typing
 from datetime import datetime, timedelta
 from functools import cache
@@ -177,15 +178,24 @@ class Music:
 
     @classmethod
     def neh_hymns(cls) -> List['Music']:
-        return [
+        records = get_neh_df().itertuples()
+
+        def nehref2num(nehref: str) -> typing.Tuple[int, str]:
+            m = re.match(r"NEH: (\d+)([a-z]?)", nehref)
+            num, suffix = m.groups()
+            return int(num), suffix
+
+        hymns = [
             Music(
                 title=record.firstLine,
                 category='Hymn',
                 composer=None,
                 lyrics=None,
                 ref=f'NEH: {record.number}'
-            ) for record in get_neh_df().itertuples()
+            ) for record in records
         ]
+        hymns.sort(key=lambda m: nehref2num(m.ref))
+        return hymns
 
     @classmethod
     def get_neh_hymn_by_ref(cls, ref: str) -> Optional['Music']:
