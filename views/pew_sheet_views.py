@@ -64,17 +64,25 @@ def pew_sheet_clear_history_endpoint():
 def pew_sheet_docx_view():
     form = PewSheetForm(request.args)
     if not form.validate_on_submit():
-        flash('Sorry, I could not create a service from that information. Please check the values that you provided.', 'danger')
+        flash(
+            'Sorry, I could not create a service from that information. '
+            'Please check the values that you provided.',
+            'danger')
         for k, es in form.errors.items():
             for e in es:
                 flash(f'{k}: {e}', 'danger')
-        return redirect(url_for('pew_sheet_create_view') + '?' + urlencode(request.args), 400)
+        return redirect(
+            url_for('pew_sheet_create_view') + '?' + urlencode(request.args),
+            400)
 
     service = Service.from_form(form)
+
+    datestamp = service.date.strftime("%Y-%m-%d")
+
     with NamedTemporaryFile() as tf:
         service.create_docx(tf.name)
         return send_file(
             tf.name,
             as_attachment=True,
-            attachment_filename=f'{service.title}.docx'
+            attachment_filename=f'{datestamp} {service.title}.docx'
         )

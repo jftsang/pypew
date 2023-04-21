@@ -170,7 +170,7 @@ class TestViews(unittest.TestCase):
         m_create_docx.assert_called()
         self.assertEqual(
             r.headers['Content-Disposition'],
-            'attachment; filename="Feast of Foo.docx"'
+            'attachment; filename="2022-01-01 Feast of Foo.docx"'
         )
         self.assertEqual(
             r.headers['Content-Type'],
