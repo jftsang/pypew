@@ -8,6 +8,7 @@ from flask import url_for
 from parameterized import parameterized
 
 import views
+from filters import english_date
 from models import Feast, Music, Service
 from models_base import get
 from pypew import create_app
@@ -36,6 +37,23 @@ class TestDates(unittest.TestCase):
     ])
     def test_get_date(self, name, year, expected_date):
         self.assertEqual(Feast.get(name=name).get_date(year), expected_date)
+
+    @parameterized.expand([
+        (date(2023, 9, 1), "Friday 1st September 2023"),
+        (date(2023, 9, 2), "Saturday 2nd September 2023"),
+        (date(2023, 9, 3), "Sunday 3rd September 2023"),
+        (date(2023, 9, 4), "Monday 4th September 2023"),
+        (date(2023, 9, 11), "Monday 11th September 2023"),
+        (date(2023, 9, 12), "Tuesday 12th September 2023"),
+        (date(2023, 9, 13), "Wednesday 13th September 2023"),
+        (date(2023, 9, 14), "Thursday 14th September 2023"),
+        (date(2023, 9, 21), "Thursday 21st September 2023"),
+        (date(2023, 9, 22), "Friday 22nd September 2023"),
+        (date(2023, 9, 23), "Saturday 23rd September 2023"),
+        (date(2023, 9, 24), "Sunday 24th September 2023"),
+    ])
+    def test_english_ordinals(self, supplied_date, expected_string):
+        self.assertEqual(english_date(supplied_date), expected_string)
 
 
 class TestModels(unittest.TestCase):

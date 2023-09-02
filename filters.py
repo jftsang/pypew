@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime
 from functools import wraps
 
@@ -13,11 +14,21 @@ def nullsafe(f):
 
 @nullsafe
 def english_date(date: datetime.date) -> str:
-    try:
-        return date.strftime('%A %-d %B %Y')
-    except ValueError:  # Windows
+    # https://stackoverflow.com/a/74227668
+    def format_date_with_ordinal(d, format_string):
+        if d.day not in (11, 12, 13):
+            ordinal = {'1': 'st', '2': 'nd', '3': 'rd'}.get(str(d.day)[-1:], 'th')
+        else:
+            ordinal = 'th'
+
+        return d.strftime(format_string).replace('{th}', ordinal)
+
+    # try:
+    if sys.platform.startswith('win'):
         # https://stackoverflow.com/questions/904928/python-strftime-date-without-leading-0
-        return date.strftime('%A %#d %B %Y')
+        return format_date_with_ordinal(date, '%A %#d{th} %B %Y')
+    else:
+        return format_date_with_ordinal(date, '%A %-d{th} %B %Y')
 
 
 def service_summary(service: Service) -> str:
