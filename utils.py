@@ -4,6 +4,8 @@ from datetime import timedelta, date
 from functools import lru_cache
 from typing import Optional
 
+from appdirs import AppDirs
+
 try:
     import pandas as pd
 except ImportError:
@@ -13,6 +15,9 @@ except ImportError:
 class NoPandasError(RuntimeError):
     pass
 
+
+cache_dir = AppDirs("pypew").user_cache_dir
+os.makedirs(cache_dir, exist_ok=True)
 
 logger = logging.getLogger("pypew")
 logger.setLevel(logging.INFO)

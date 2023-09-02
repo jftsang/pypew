@@ -1,5 +1,6 @@
 import unittest
 from datetime import date
+from pathlib import Path
 from unittest.mock import patch
 from urllib.parse import urlencode
 
@@ -13,6 +14,10 @@ from models import Feast, Music, Service
 from models_base import get
 from pypew import create_app
 from utils import advent
+
+
+def m_create_docx_impl(path):
+    Path(path).touch()
 
 
 class TestDates(unittest.TestCase):
@@ -159,7 +164,7 @@ class TestViews(unittest.TestCase):
         )
         self.assertEqual(r.status_code, 404)
 
-    @patch('pypew.views.feast_views.Feast.create_docx')
+    @patch('pypew.views.feast_views.Feast.create_docx', side_effect=m_create_docx_impl)
     def test_feast_docx_view(self, m_create_docx):
         r = self.client.get(
             url_for('feast_docx_view', slug='christmas-day')
@@ -175,7 +180,7 @@ class TestViews(unittest.TestCase):
             r.headers['Content-Type'],
         )
 
-    @patch('pypew.views.pew_sheet_views.Service.create_docx')
+    @patch('pypew.views.pew_sheet_views.Service.create_docx', side_effect=m_create_docx_impl)
     def test_pew_sheet_docx_view(self, m_create_docx):
         r = self.client.get(
             url_for('pew_sheet_docx_view') + '?' + urlencode(

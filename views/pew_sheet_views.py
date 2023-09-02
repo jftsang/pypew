@@ -1,5 +1,5 @@
 import os
-from tempfile import NamedTemporaryFile
+import uuid
 from urllib.parse import parse_qs, urlencode
 
 import dotenv
@@ -9,7 +9,7 @@ from werkzeug.datastructures import ImmutableMultiDict
 
 from forms import PewSheetForm
 from models import Service, Feast
-from utils import logger
+from utils import logger, cache_dir
 
 __all__ = ['pew_sheet_create_view', 'pew_sheet_clear_history_endpoint', 'pew_sheet_docx_view']
 
@@ -79,10 +79,9 @@ def pew_sheet_docx_view():
 
     datestamp = service.date.strftime("%Y-%m-%d")
 
-    with NamedTemporaryFile() as tf:
-        service.create_docx(tf.name)
-        return send_file(
-            tf.name,
-            as_attachment=True,
-            attachment_filename=f'{datestamp} {service.title}.docx'
-        )
+    filename = f'{datestamp} {service.title}.docx'
+    temp_docx = os.path.join(cache_dir, f"pew_sheet_{str(uuid.uuid4())}.docx")
+    service.create_docx(temp_docx)
+    return send_file(
+        temp_docx, as_attachment=True, attachment_filename=filename
+    )

@@ -1,5 +1,7 @@
 import datetime
-from tempfile import NamedTemporaryFile
+import os
+import uuid
+from tempfile import TemporaryDirectory
 
 import cattrs
 from flask import (flash, make_response, render_template, send_file,
@@ -8,7 +10,7 @@ from flask import (flash, make_response, render_template, send_file,
 from filters import english_date
 from models import Feast
 from models_base import NotFoundError, get
-from utils import str2date
+from utils import str2date, cache_dir
 
 __all__ = ['feast_index_view', 'feast_index_api', 'feast_date_api',
            'feast_upcoming_api', 'feast_detail_view', 'feast_detail_api',
@@ -89,8 +91,8 @@ def feast_docx_view(slug):
         return make_response(feast_index_view(), 404)
 
     filename = f'{feast.name}.docx'
-    with NamedTemporaryFile() as tf:
-        feast.create_docx(path=tf.name)
-        return send_file(
-            tf.name, as_attachment=True, attachment_filename=filename
-        )
+    temp_docx = os.path.join(cache_dir, f"feast_{str(uuid.uuid4())}.docx")
+    feast.create_docx(path=temp_docx)
+    return send_file(
+        temp_docx, as_attachment=True, attachment_filename=filename
+    )
