@@ -25,10 +25,7 @@ feasts_fields = ['name', 'month', 'day', 'coeaster', 'coadvent',
                  'introit', 'collect', 'epistle_ref', 'epistle',
                  'gat', 'gradual', 'alleluia', 'tract', 'gospel_ref',
                  'gospel', 'offertory', 'communion']
-
-FEASTS_CSV = Path(os.path.dirname(__file__)) / 'data' / 'feasts.csv'
 DATA_DIR = Path(os.path.dirname(__file__)) / 'data' / 'feasts'
-
 PEW_SHEET_TEMPLATE = os.path.join('templates', 'pewSheetTemplate.docx')
 
 
