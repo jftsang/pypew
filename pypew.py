@@ -21,7 +21,10 @@ class PyPew:
     def __init__(self):
         self.app: Optional[Flask] = None
         self.thread: Optional[Thread] = None
-        self.githash = git.Repo(search_parent_directories=True).head.object.hexsha
+        try:
+            self.githash = git.Repo(search_parent_directories=True).head.object.hexsha
+        except git.exc.InvalidGitRepositoryError:
+            self.githash = "unknown"
 
 
 def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
