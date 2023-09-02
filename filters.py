@@ -35,6 +35,10 @@ def service_summary(service: Service) -> str:
     return service.date.strftime('%Y-%m-%d') + ' ' + service_subtitle(service)
 
 
+def service_header(service: Service) -> str:
+    return service.service_type
+
+
 def service_subtitle(service: Service) -> str:
     # Feastday (Secondary), Fr XX YY (Preacher: AN Other)
     if service.secondary_feast:
@@ -57,7 +61,8 @@ def service_subtitle(service: Service) -> str:
 # These get registered by the Flask app, and also need to be passed into
 # docxtpl.
 filters_context = {
-   'english_date': english_date,
-   'service_summary': service_summary,
-   'service_subtitle': service_subtitle
+    'english_date': english_date,
+    'service_header': service_header,
+    'service_subtitle': service_subtitle,
+    'service_summary': service_summary,
 }

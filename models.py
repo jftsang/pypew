@@ -229,6 +229,7 @@ class Service:
     offertory_hymn: Optional[Music] = field(default=None)
     recessional_hymn: Optional[Music] = field(default=None)
     anthem: Optional[Music] = field(default=None)
+    service_type: str = field(default='Sung Mass')
 
     # One can't call methods in jinja2 templates, so one must provide
     # everything as member properties instead.
