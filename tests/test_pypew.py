@@ -12,7 +12,7 @@ import views
 from filters import english_date
 from models import Feast, Music, Service
 from models_base import get
-from pypew import create_app, PyPew
+from pypew import create_app
 from utils import advent
 
 
@@ -108,7 +108,7 @@ class TestModels(unittest.TestCase):
 
 class TestViews(unittest.TestCase):
     def setUp(self) -> None:
-        self.app = create_app(PyPew())
+        self.app = create_app()
         self.app.config['SERVER_NAME'] = 'localhost:5000'
         self.app.app_context().push()
         self.client = self.app.test_client()

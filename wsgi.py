@@ -1,6 +1,7 @@
-from pypew import create_app, PyPew
+from pypew import create_app
 
-app = create_app(PyPew())
+
+app = create_app()
 
 if __name__ == '__main__':
     app.run()
