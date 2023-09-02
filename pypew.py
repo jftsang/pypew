@@ -1,8 +1,9 @@
+import argparse
 import os
 import sys
 import webbrowser
 from threading import Thread
-from typing import Optional
+from typing import Optional, Sequence
 
 from dotenv import load_dotenv
 from flask import Flask, url_for, redirect, request
@@ -83,18 +84,29 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     return app
 
 
-def main(threaded: bool = False) -> None:
+def main(argv: Sequence[str] = None) -> None:
     """
     Start PyPew.
-    :param threaded: If true, run the Flask app in a separate thread,
-                     then open a webbrowser. Debug mode is not
-                     available in this case.
-    :return: None
     """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--debug", help="Run in debug mode", action="store_true"
+    )
+    parser.add_argument(
+        "--no-launch",
+        help="Don't launch web browser automatically",
+        action="store_true"
+    )
+    args = parser.parse_args(argv)
+
     pypew = PyPew()
     app = create_app(pypew)
 
-    if threaded:
+    if args.debug:
+        # noinspection FlaskDebugMode
+        app.run(debug=True, load_dotenv=True)
+
+    else:
         logger.info('Starting Flask app thread...')
         # TODO use werkzeug server instead
         pypew.thread = Thread(
@@ -103,14 +115,12 @@ def main(threaded: bool = False) -> None:
         pypew.thread.start()
         logger.info('Started Flask app. Close this terminal window to terminate PyPew.')
         logger.info('Opening web browser...')
-        with app.app_context():
-            webbrowser.open(url_for('index_view'))
-        pypew.thread.join()
+        if not args.no_launch:
+            with app.app_context():
+                webbrowser.open(url_for('index_view'))
 
-    else:
-        # noinspection FlaskDebugMode
-        app.run(debug=True, load_dotenv=True)
+        pypew.thread.join()
 
 
 if __name__ == '__main__':
-    main(threaded=True)
+    main()
