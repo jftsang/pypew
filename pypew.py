@@ -5,6 +5,7 @@ import webbrowser
 from threading import Thread
 from typing import Optional, Sequence
 
+import git
 from dotenv import load_dotenv
 from flask import Flask, url_for, redirect, request
 from jinja2 import StrictUndefined
@@ -20,6 +21,7 @@ class PyPew:
     def __init__(self):
         self.app: Optional[Flask] = None
         self.thread: Optional[Thread] = None
+        self.githash = git.Repo(search_parent_directories=True).head.object.hexsha
 
 
 def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
@@ -76,6 +78,8 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
         app.template_filter(filter_name)(filter_func)
 
     app.jinja_env.globals.update(len=len)
+
+    app.jinja_env.globals['pypew'] = pypew
 
     if pypew is not None:
         pypew.app = app
