@@ -19,7 +19,7 @@ from models_base import get
 if typing.TYPE_CHECKING:
     from forms import PewSheetForm
 
-from utils import get_neh_df, advent, closest_sunday_to
+from utils import get_neh_df, advent, closest_sunday_to, NoPandasError, logger
 
 feasts_fields = ['name', 'month', 'day', 'coeaster', 'coadvent',
                  'introit', 'collect', 'epistle_ref', 'epistle',
@@ -168,8 +168,6 @@ class DateRule:
 
 @define
 class Music:
-    hymns_df = get_neh_df()
-
     title: str = field()
     category: str = field()  # Anthem or Hymn or Plainsong
     composer: Optional[str] = field()
@@ -178,7 +176,11 @@ class Music:
 
     @classmethod
     def neh_hymns(cls) -> List['Music']:
-        records = get_neh_df().itertuples()
+        try:
+            records = get_neh_df().itertuples()
+        except NoPandasError as exc:
+            logger.warning(exc)
+            return []
 
         def nehref2num(nehref: str) -> typing.Tuple[int, str]:
             m = re.match(r"NEH: (\d+)([a-z]?)", nehref)
