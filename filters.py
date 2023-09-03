@@ -2,7 +2,9 @@ import sys
 from datetime import datetime
 from functools import wraps
 
-from models import Service
+from docxtpl import RichText
+
+from models import Service, ServiceItem
 
 
 def nullsafe(f):
@@ -10,6 +12,10 @@ def nullsafe(f):
     def ns(x):
         return f(x) if x is not None else ''
     return ns
+
+
+def as_richtext(item: ServiceItem) -> RichText:
+    return item.as_richtext()
 
 
 @nullsafe
@@ -61,6 +67,7 @@ def service_subtitle(service: Service) -> str:
 # These get registered by the Flask app, and also need to be passed into
 # docxtpl.
 filters_context = {
+    'as_richtext': as_richtext,
     'english_date': english_date,
     'service_header': service_header,
     'service_subtitle': service_subtitle,

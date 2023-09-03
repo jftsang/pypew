@@ -2,6 +2,7 @@ import datetime as dt  # avoid namespace conflict over 'date'
 import os
 import re
 import typing
+from abc import abstractmethod, ABC
 from datetime import datetime, timedelta
 from functools import cache
 from pathlib import Path
@@ -12,7 +13,7 @@ import yaml
 from attr import field, define
 from dateutil.easter import easter
 from docx import Document
-from docxtpl import DocxTemplate
+from docxtpl import DocxTemplate, RichText
 
 from models_base import get
 
@@ -163,6 +164,18 @@ class DateRule:
     coadvent: Optional[int] = field(default=None)
 
 
+class PewSheetItem(ABC):
+    @abstractmethod
+    def as_richtext(self) -> RichText:
+        raise NotImplementedError
+
+
+class CharacterStyles:
+    title = {'font': 'Merriweather', 'size': 20, 'bold': True}
+    subtitle = {'font': 'Raleway', 'size': 18, 'italic': True}
+    paragraph = {'font': 'Cambria', 'size': 20}
+
+
 @define
 class Music:
     title: str = field()
@@ -208,12 +221,87 @@ class Music:
             return f'{self.ref}, {self.title}'
         return super().__str__()
 
+    def as_richtext(self) -> RichText:
+        if self.category != 'Hymn':
+            return RichText(super().__str__())
+
+        rt = RichText()
+        rt.add(self.ref + ', ', **CharacterStyles.paragraph)
+        rt.add(self.title, **CharacterStyles.paragraph, italic=True)
+        return rt
+
 
 @define
-class ServiceItem:
+class ServiceItem(PewSheetItem):
     title: str = field(default='')
-    paragraphs: List[typing.Union[str, Music]] = field(factory=list)
+    paragraphs: List[typing.Any] = field(factory=list)
     subtitle: Optional[str] = field(default=None)
+
+    def as_richtext(self) -> RichText:
+
+        rt = RichText()
+        rt.add(self.title, **CharacterStyles.title)
+        if self.subtitle is not None:
+            rt.add('\a')
+            rt.add(self.subtitle, **CharacterStyles.subtitle)
+
+        for paragraph in self.paragraphs:
+            rt.add('\a')
+            rt.add(paragraph, **CharacterStyles.paragraph)
+
+        return rt
+
+
+@define
+class CollectItem(PewSheetItem):
+    collects: List[str] = field(factory=list)
+
+    @property
+    def title(self):
+        return 'Collect' if len(self.collects) == 1 else 'Collects'
+
+    @property
+    def subtitle(self):
+        return None
+
+    @property
+    def paragraphs(self):
+        return self.collects
+
+    def as_richtext(self) -> RichText:
+        rt = RichText()
+        rt.add(self.title, **CharacterStyles.title)
+        for collect in self.collects:
+            if collect.endswith('Amen.'):
+                rt.add('\a' + collect[:-5], **CharacterStyles.paragraph)
+                rt.add(collect[-5:], **CharacterStyles.paragraph, bold=True)
+            else:
+                rt.add('\a' + collect, **CharacterStyles.paragraph)
+
+        return rt
+
+
+
+
+@define
+class MusicItem(PewSheetItem):
+    title: str = field()
+    music: Music = field()
+
+    @property
+    def subtitle(self):
+        return None
+
+    @property
+    def paragraphs(self):
+        return [str(self.music)]
+
+    def as_richtext(self) -> RichText:
+        rt = RichText()
+        rt.add(self.title, font='Merriweather', size=20, bold=True)
+        rt.add('\a')
+        rt.add(self.music.as_richtext())
+        return rt
 
 
 @define
@@ -300,16 +388,15 @@ class Service:
         return self.primary_feast.gospel
 
     @property
-    def items(self) -> List[ServiceItem]:
+    def items(self) -> List[PewSheetItem]:
         items = []
         if self.introit_hymn:
             items.append(
-                ServiceItem('Introit Hymn', [self.introit_hymn])
+                MusicItem('Introit Hymn', self.introit_hymn)
             )
         items.append(ServiceItem('Introit Proper', [self.introit_proper]))
-        collects = ServiceItem()
-        collects.title = 'Collects' if len(self.collects) > 1 else 'Collect'
-        collects.paragraphs = self.collects
+
+        collects = CollectItem(self.collects)
         items.append(collects)
 
         items.append(ServiceItem('Epistle', [self.epistle], self.epistle_ref))
@@ -318,7 +405,7 @@ class Service:
 
         items.append(ServiceItem('Offertory Proper', [self.offertory_proper]))
         if self.offertory_hymn:
-            items.append(ServiceItem('Offertory Hymn', [self.offertory_hymn]))
+            items.append(MusicItem('Offertory Hymn', self.offertory_hymn))
 
         items.append(ServiceItem('Communion Proper', [self.communion_proper]))
 
@@ -329,7 +416,7 @@ class Service:
 
         if self.recessional_hymn:
             items.append(
-                ServiceItem('Recessional Hymn', [self.recessional_hymn]))
+                MusicItem('Recessional Hymn', self.recessional_hymn))
 
         return items
 
