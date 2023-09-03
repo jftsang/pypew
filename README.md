@@ -93,3 +93,5 @@ Distributions of the PyPew include extracts from the Book of Common
 Prayer. Extracts from The Book of Common Prayer, the rights of which are
 vested in the Crown, are reproduced by permission of the Crown's
 patentee, Cambridge University Press.
+
+Information about hymns is courtesy of [Hymnary.org](https://hymnary.org).
