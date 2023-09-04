@@ -3,9 +3,16 @@
 {% block content %}
     <h1>Welcome to PyPew</h1>
 
-    <p>PyPew is a pew sheet generator.</p>
+    <p>PyPew is an interactive ecclesiastical calendar, and also a pew
+        sheet generator.</p>
 
-    <p>Please turn your attention to the <a class="link link-info" href="{{ url_for('feast_index_view') }}">
-        list of feasts</a>, or <a class="link-info" href="{{ url_for('pew_sheet_create_view') }}">
-        create a service</a>.</p>
+    <p>You can go to the <a class="link link-info"
+                            href="{{ url_for('feast_index_view') }}">
+        list of feasts</a> to find out the readings for each feast.</p>
+
+    <p>Or you can <a
+            class="link-info"
+            href="{{ url_for('pew_sheet_create_view') }}">
+        create a service</a> by choosing the music or other components
+        that you desire.</p>
 {% endblock %}
