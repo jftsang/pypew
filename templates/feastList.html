@@ -41,9 +41,8 @@
 
     function feastDetailUrl(slug) {
         const feastUrlXXX = "{{ url_for('feast_detail_view', slug='XXX') }}";
-        return feastUrlXXX.replace('XXX', slug);
+      return feastUrlXXX.replace('XXX', slug);
     }
-    const feastsApiUrl = "{{ url_for('feast_upcoming_api') }}";
 
     const calendarSortBtn = document.getElementById('sortFeastsByCalendar');
     addTooltip(calendarSortBtn, 'Sort by calendar order (Advent–Trinity then specials)');
@@ -52,44 +51,49 @@
     const upcomingSortBtn = document.getElementById('sortFeastsByUpcoming');
     addTooltip(upcomingSortBtn, 'Show upcoming feasts');
 
+    const sortBtns = [calendarSortBtn, nameSortBtn, upcomingSortBtn];
+    var currentSortBtn = null;
+
+    function redrawSortBtns() {
+      sortBtns.forEach((btn) => {
+        if (btn === currentSortBtn) {
+          btn.classList.add('btn-light')
+          btn.classList.remove('btn-secondary')
+        } else {
+          btn.classList.remove('btn-light')
+          btn.classList.add('btn-secondary')
+        }
+      });
+    }
+
     (async () => {
-        const resp = await fetch(feastsApiUrl);
-        const feastsArray = await resp.json();
+      calendarSortBtn.onclick = async () => {
+        const feastsApiUrl = "{{ url_for('feast_index_api') }}";
+        const feastsArray = await (await fetch(feastsApiUrl)).json();
+        currentSortBtn = calendarSortBtn;
+        drawFeastsList(feastsArray);
+        redrawSortBtns();
+      };
 
-        calendarSortBtn.onclick = () => {
-            drawFeastsList(feastsArray.slice().sort(
-                function (f, g) {return f.index - g.index}
-            ));
-            calendarSortBtn.classList.add('btn-light');
-            calendarSortBtn.classList.remove('btn-secondary');
-            nameSortBtn.classList.remove('btn-light');
-            nameSortBtn.classList.add('btn-secondary');
-            upcomingSortBtn.classList.remove('btn-light');
-            upcomingSortBtn.classList.add('btn-secondary');
-        };
-        nameSortBtn.onclick = () => {
-            drawFeastsList(feastsArray.slice().sort(
-                function (f, g) {
-                    return ('' + f.name).localeCompare(g.name);
-                }
-            ));
-            calendarSortBtn.classList.remove('btn-light');
-            calendarSortBtn.classList.add('btn-secondary');
-            nameSortBtn.classList.add('btn-light');
-            nameSortBtn.classList.remove('btn-secondary');
-            upcomingSortBtn.classList.remove('btn-light');
-            upcomingSortBtn.classList.add('btn-secondary');
-        };
-        upcomingSortBtn.onclick = () => {
-            drawFeastsList(feastsArray);  // default behaviour from the API
-            calendarSortBtn.classList.remove('btn-light');
-            calendarSortBtn.classList.add('btn-secondary');
-            nameSortBtn.classList.remove('btn-light');
-            nameSortBtn.classList.add('btn-secondary');
-            upcomingSortBtn.classList.add('btn-light');
-            upcomingSortBtn.classList.remove('btn-secondary');
-        };
+      nameSortBtn.onclick = async () => {
+        const feastsApiUrl = "{{ url_for('feast_index_api') }}";
+        const feastsArray = (await (await fetch(feastsApiUrl)).json()).slice().sort(
+          function (f, g) {
+            return ('' + f.name).localeCompare(g.name);
+          }
+        );
+        currentSortBtn = nameSortBtn;
+        drawFeastsList(feastsArray);
+        redrawSortBtns();
+      };
+      upcomingSortBtn.onclick = async () => {
+        const feastsApiUrl = "{{ url_for('feast_upcoming_api') }}";
+        const feastsArray = await (await fetch(feastsApiUrl)).json();
+        currentSortBtn = upcomingSortBtn;
+        drawFeastsList(feastsArray);  // default behaviour from the API
+        redrawSortBtns();
+      };
 
-        upcomingSortBtn.click();  // default
+      upcomingSortBtn.click();  // default
     })();
 </script>
