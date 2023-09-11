@@ -16,11 +16,11 @@
     </div>
 
     <div class="row mb-3">
-        {{ form.primary_feast_name.label(class='col-sm-2 col-form-label') }}
+        {{ form.primary_feast.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
-            {{ form.primary_feast_name(class='form-select') }}
-            {% if form.primary_feast_name.errors %}
-                {% for error in form.primary_feast_name.errors %}
+            {{ form.primary_feast(class='form-select') }}
+            {% if form.primary_feast.errors %}
+                {% for error in form.primary_feast.errors %}
                     <small class="font-small text-danger">
                         {{ error }}
                     </small>
@@ -30,11 +30,11 @@
     </div>
 
     <div class="row mb-3">
-        {{ form.secondary_feast_name.label(class='col-sm-2 col-form-label') }}
+        {{ form.secondary_feasts.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
-            {{ form.secondary_feast_name(class='form-select') }}
-            {% if form.secondary_feast_name.errors %}
-                {% for error in form.secondary_feast_name.errors %}
+            {{ form.secondary_feasts(class='form-select') }}
+            {% if form.secondary_feasts.errors %}
+                {% for error in form.secondary_feasts.errors %}
                     <small class="font-small text-danger">
                         {{ error }}
                     </small>

@@ -312,8 +312,8 @@ class Service:
     title: str = field()
     date: dt.date = field()
     primary_feast: Feast = field()
-    secondary_feast: Optional[Feast] = field(default=None)
     time: dt.time = field(default=dt.time(11, 0))
+    secondary_feasts: [Feast] = field(factory=list)
     celebrant: str = field(default='')
     preacher: str = field(default='')
     introit_hymn: Optional[Music] = field(default=None)
@@ -330,8 +330,9 @@ class Service:
         out = []
         if self.primary_feast.collect:
             out.append(self.primary_feast.collect)
-        if self.secondary_feast and self.secondary_feast.collect:
-            out.append(self.secondary_feast.collect)
+        for sf in self.secondary_feasts:
+            if sf.collect:
+                out.append(sf.collect)
 
         # Collects for Advent I and Ash Wednesday are repeated
         # throughout Advent and Lent respectively.
@@ -429,11 +430,12 @@ class Service:
 
     @classmethod
     def from_form(cls, form: 'PewSheetForm') -> 'Service':
-        primary_feast = Feast.get(slug=form.primary_feast_name.data)
-        if form.secondary_feast_name.data:
-            secondary_feast = Feast.get(slug=form.secondary_feast_name.data)
+        primary_feast = Feast.get(slug=form.primary_feast.data)
+        if form.secondary_feasts.data:
+            secondary_feasts = [Feast.get(slug=slug) for slug in
+                                form.secondary_feasts.data]
         else:
-            secondary_feast = None
+            secondary_feasts = None
 
         if form.anthem_title.data or form.anthem_composer.data or form.anthem_lyrics.data:
             anthem = Music(
@@ -453,7 +455,7 @@ class Service:
             celebrant=form.celebrant.data,
             preacher=form.preacher.data,
             primary_feast=primary_feast,
-            secondary_feast=secondary_feast,
+            secondary_feasts=secondary_feasts,
             introit_hymn=Music.get_neh_hymn_by_ref(form.introit_hymn.data),
             offertory_hymn=Music.get_neh_hymn_by_ref(form.offertory_hymn.data),
             recessional_hymn=Music.get_neh_hymn_by_ref(

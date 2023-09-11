@@ -22,7 +22,8 @@ def as_richtext(item: ServiceItem) -> RichText:
 def service_supertitle(service: Service) -> str:
     s = english_date(service.date)
     if service.time:
-        s += f", " + service.time.strftime("%-I:%M%p").lower()
+        fmt = "%I:%M%p"
+        s += ", " + service.time.strftime(fmt).lower()
     return s
 
 
@@ -58,8 +59,9 @@ def service_header(service: Service) -> str:
 
 def service_subtitle(service: Service) -> str:
     # Feastday (Secondary), Fr XX YY (Preacher: AN Other)
-    if service.secondary_feast:
-        s = service.primary_feast.name + ' (' + service.secondary_feast.name + '),'
+    if service.secondary_feasts:
+        parens = ", ".join(sf.name for sf in service.secondary_feasts)
+        s = service.primary_feast.name + ' (' + parens + '),'
     else:
         s = service.primary_feast.name + ','
 
