@@ -4,12 +4,8 @@ from datetime import timedelta, date
 from functools import lru_cache
 from typing import Optional
 
+import pandas as pd
 from appdirs import AppDirs
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None  # No CSV manipulations available
 
 
 class NoPandasError(RuntimeError):

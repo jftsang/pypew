@@ -17,7 +17,7 @@ load_dotenv()
 
 
 class PyPew:
-    def __init__(self):
+    def __init__(self) -> None:
         self.app: Optional[Flask] = None
         self.thread: Optional[Thread] = None
 
@@ -84,7 +84,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     return app
 
 
-def main(argv: Sequence[str] = None) -> None:
+def main(argv: Sequence[str] | None = None) -> None:
     """
     Start PyPew.
     """

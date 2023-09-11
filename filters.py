@@ -1,5 +1,5 @@
+import datetime as dt
 import sys
-from datetime import datetime
 from functools import wraps
 
 from docxtpl import RichText
@@ -19,7 +19,7 @@ def as_richtext(item: ServiceItem) -> RichText:
 
 
 @nullsafe
-def english_date(date: datetime.date) -> str:
+def english_date(date: dt.date) -> str:
     # https://stackoverflow.com/a/74227668
     def format_date_with_ordinal(d, format_string):
         if d.day not in (11, 12, 13):

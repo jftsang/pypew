@@ -1,9 +1,8 @@
-import datetime as dt  # avoid namespace conflict over 'date'
+import datetime as dt
 import os
 import re
 import typing
 from abc import abstractmethod, ABC
-from datetime import datetime, timedelta
 from functools import cache
 from pathlib import Path
 from typing import List, Optional
@@ -98,7 +97,7 @@ class Feast:
 
     def get_date(self, year=None) -> Optional[dt.date]:
         if year is None:
-            year = datetime.now().year
+            year = dt.datetime.now().year
 
         if self.month is not None and self.day is not None:
             # TODO Check this definition
@@ -110,10 +109,10 @@ class Feast:
         assert not (self.coeaster is not None and self.coadvent is not None)
 
         if self.coeaster is not None:
-            return easter(year) + timedelta(days=self.coeaster)
+            return easter(year) + dt.timedelta(days=self.coeaster)
 
         if self.coadvent is not None:
-            return advent(year) + timedelta(days=self.coadvent)
+            return advent(year) + dt.timedelta(days=self.coadvent)
 
         return None
 
@@ -194,6 +193,7 @@ class Music:
 
         def nehref2num(nehref: str) -> typing.Tuple[int, str]:
             m = re.match(r"NEH: (\d+)([a-z]?)", nehref)
+            assert m is not None
             num, suffix = m.groups()
             return int(num), suffix
 
@@ -206,7 +206,7 @@ class Music:
                 ref=f'NEH: {record.number}'
             ) for record in records
         ]
-        hymns.sort(key=lambda m: nehref2num(m.ref))
+        hymns.sort(key=lambda m: nehref2num(m.ref or ""))
         return hymns
 
     @classmethod
@@ -224,6 +224,8 @@ class Music:
     def as_richtext(self) -> RichText:
         if self.category != 'Hymn':
             return RichText(super().__str__())
+
+        assert self.ref is not None
 
         rt = RichText()
         rt.add(self.ref + ', ', **CharacterStyles.paragraph)
@@ -308,7 +310,7 @@ class MusicItem(PewSheetItem):
 class Service:
     # Mandatory fields first, then fields with default values.
     title: str = field()
-    date: datetime.date = field()
+    date: dt.date = field()
     primary_feast: Feast = field()
     secondary_feast: Optional[Feast] = field(default=None)
     celebrant: str = field(default='')
@@ -345,51 +347,55 @@ class Service:
 
     # TODO primary or secondary?
     @property
-    def introit_proper(self) -> str:
+    def introit_proper(self) -> str | None:
         return self.primary_feast.introit
 
     @property
     def gat(self) -> str:
+        assert self.primary_feast.gat is not None
         return self.primary_feast.gat
 
     @property
     def gat_propers(self) -> List[str]:
         propers = []
         if 'Gradual' in self.primary_feast.gat:
+            assert self.primary_feast.gradual is not None
             propers.append(self.primary_feast.gradual)
         if 'Alleluia' in self.primary_feast.gat:
+            assert self.primary_feast.alleluia is not None
             propers.append(self.primary_feast.alleluia)
         if 'Tract' in self.primary_feast.gat:
+            assert self.primary_feast.tract is not None
             propers.append(self.primary_feast.tract)
         return propers
 
     @property
-    def offertory_proper(self) -> str:
+    def offertory_proper(self) -> str | None:
         return self.primary_feast.offertory
 
     @property
-    def communion_proper(self) -> str:
+    def communion_proper(self) -> str | None:
         return self.primary_feast.communion
 
     @property
-    def epistle_ref(self) -> str:
+    def epistle_ref(self) -> str | None:
         return self.primary_feast.epistle_ref
 
     @property
-    def epistle(self) -> str:
+    def epistle(self) -> str | None:
         return self.primary_feast.epistle
 
     @property
-    def gospel_ref(self) -> str:
+    def gospel_ref(self) -> str | None:
         return self.primary_feast.gospel_ref
 
     @property
-    def gospel(self) -> str:
+    def gospel(self) -> str | None:
         return self.primary_feast.gospel
 
     @property
     def items(self) -> List[PewSheetItem]:
-        items = []
+        items: List[PewSheetItem] = []
         if self.introit_hymn:
             items.append(
                 MusicItem('Introit Hymn', self.introit_hymn)
