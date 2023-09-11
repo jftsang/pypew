@@ -85,8 +85,31 @@ class TestModels(unittest.TestCase):
     def test_collects_with_secondary_feast(self):
         primary = get(Feast.all(), name='Septuagesima')
         secondary = get(Feast.all(), name='Christmas Day')
-        service = Service(title='', date=today(), primary_feast=primary, secondary_feast=secondary)
-        self.assertListEqual(service.collects, [primary.collect, secondary.collect])
+        service = Service(
+            title='',
+            date=today(),
+            primary_feast=primary,
+            secondary_feasts=[secondary]
+        )
+        self.assertListEqual(
+            service.collects,
+            [primary.collect, secondary.collect]
+        )
+
+    def test_collects_with_two_secondary_feasts(self):
+        primary = get(Feast.all(), name='Septuagesima')
+        secondary1 = get(Feast.all(), name='Christmas Day')
+        secondary2 = get(Feast.all(), name='St. Stephen')
+        service = Service(
+            title='',
+            date=today(),
+            primary_feast=primary,
+            secondary_feasts=[secondary1, secondary2]
+        )
+        self.assertListEqual(
+            service.collects,
+            [primary.collect, secondary1.collect, secondary2.collect]
+        )
 
     def test_collect_on_advent1(self):
         advent1 = get(Feast.all(), name='Advent I')
@@ -188,11 +211,11 @@ class TestViews(unittest.TestCase):
                     'title': 'Feast of Foo',
                     'date': '2022-01-01',
                     'time': '11:00',
-                    'primary_feast_name': 'advent-i',
-                    'secondary_feast_name': '',
+                    'primary_feast': 'advent-i',
+                    'secondary_feasts': 'trinity-iii',
                     'introit_hymn': '',
                     'offertory_hymn': '',
-                    'recessional_hymn': ''
+                    'recessional_hymn': '',
                 }
             )
         )

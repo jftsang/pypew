@@ -1,10 +1,8 @@
 from flask import request
 from flask_wtf import FlaskForm
+from wtforms import DateField, HiddenField, SelectField, SelectMultipleField, \
+    StringField
 from wtforms import (
-    DateField,
-    HiddenField,
-    SelectField,
-    StringField,
     TimeField,
 )
 from wtforms.validators import DataRequired
@@ -20,13 +18,13 @@ class PewSheetForm(FlaskForm):
     title = HiddenField('Title')
     feasts = Feast.upcoming()
     feast_choices = [(feast.slug, feast.name) for feast in feasts]
-    primary_feast_name = SelectField(
+    primary_feast = SelectField(
         'Primary Feast',
-        choices=feast_choices
+        choices=feast_choices,
     )
-    secondary_feast_name = SelectField(
-        'Secondary Feast',
-        choices=[('', '')] + feast_choices
+    secondary_feasts = SelectMultipleField(
+        'Secondary Feasts',
+        choices=[('', '')] + feast_choices,
     )
     date = DateField('Date', validators=[DataRequired()])
     time = TimeField('Time', validators=[DataRequired()])

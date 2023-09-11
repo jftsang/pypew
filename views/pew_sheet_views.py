@@ -8,8 +8,8 @@ from flask import (flash, make_response, redirect, render_template, request,
 from werkzeug.datastructures import ImmutableMultiDict
 
 from forms import PewSheetForm
-from models import Service, Feast
-from utils import logger, cache_dir
+from models import Feast, Service
+from utils import cache_dir, logger
 
 __all__ = ['pew_sheet_create_view', 'pew_sheet_clear_history_endpoint', 'pew_sheet_docx_view']
 
@@ -19,8 +19,8 @@ COOKIE_NAME = os.environ.get('COOKIE_NAME', 'previousPewSheets')
 
 def pew_sheet_create_view():
     form = PewSheetForm(request.args)
-    if not form.primary_feast_name.data:
-        form.primary_feast_name.data = Feast.next().slug
+    if not form.primary_feast.data:
+        form.primary_feast.data = Feast.next().slug
     service = None
 
     if form.validate_on_submit():
