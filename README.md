@@ -30,13 +30,16 @@ without needing Python to be setup.
 
 ### Windows
 
-  1. Run `build.bat` to create a folder in `dist/pypew`, containing the
+  1. Set up a Python environment with the required packages: `pip install -r requirements.txt`
+
+  2. `pip install pyinstaller`
+
+  3. Run `build.bat` to create a folder in `dist/pypew`, containing the
      executable `pypew.exe` as well as all the necessary files and DLLs.
      (This is rather large as it includes an entire Python distribution
-     as well as packages like Pandas; it comes to around 100MB in
-     total.)
+     as well as packages like Pandas.)
 
-  2. If desired, use [Advanced Installer](https://advancedinstaller.com/)
+  4. If desired, use [Advanced Installer](https://advancedinstaller.com/)
      to create an .msi that will install PyPew into the 'Program Files'
      directory, together with shortcuts in the Start Menu.
 
