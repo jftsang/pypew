@@ -2,14 +2,14 @@ import datetime as dt
 import os
 import re
 import typing
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from functools import cache
 from pathlib import Path
 from typing import List, Optional
 
 import jinja2
 import yaml
-from attr import field, define
+from attr import define, field
 from dateutil.easter import easter
 from docx import Document
 from docxtpl import DocxTemplate, RichText
@@ -313,6 +313,7 @@ class Service:
     date: dt.date = field()
     primary_feast: Feast = field()
     secondary_feast: Optional[Feast] = field(default=None)
+    time: dt.time = field(default=dt.time(11, 0))
     celebrant: str = field(default='')
     preacher: str = field(default='')
     introit_hymn: Optional[Music] = field(default=None)
@@ -448,6 +449,7 @@ class Service:
         return Service(
             title=form.title.data,
             date=form.date.data,
+            time=form.time.data,
             celebrant=form.celebrant.data,
             preacher=form.preacher.data,
             primary_feast=primary_feast,

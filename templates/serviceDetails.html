@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <p class="small"><em>{{ service.date | english_date }}<br/>
+    <p class="small"><em>{{ service | service_supertitle }}<br/>
         {{ service | service_subtitle }}</em></p>
 
     {% for item in service.items %}
