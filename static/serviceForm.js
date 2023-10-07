@@ -3,6 +3,7 @@ const titleField = document.getElementById('title');
 const primaryFeastNameField = document.getElementById('primary_feast_name');
 const secondaryFeastNameField = document.getElementById('secondary_feast_name');
 const dateField = document.getElementById('date');
+const timeField = document.getElementById('time');
 
 const setTitle = () => {
   let txt;
@@ -17,10 +18,6 @@ const setTitle = () => {
   titleField.value = txt;
 };
 
-setTitle();
-primaryFeastNameField.addEventListener('change', setTitle);
-secondaryFeastNameField.addEventListener('change', setTitle);
-
 const updateDateFromPrimaryFeast = async () => {
   const url = '/feast/api/' + primaryFeastNameField.value + '/date';
   const r = await fetch(url);
@@ -29,7 +26,6 @@ const updateDateFromPrimaryFeast = async () => {
     dateField.value = j;
 };
 
-updateDateFromPrimaryFeast().then();
 primaryFeastNameField.addEventListener('change', updateDateFromPrimaryFeast);
 
 const today = new Date()
@@ -100,12 +96,23 @@ const hymnFields = Array.prototype.map.call(
   s => document.getElementById(s)
 );
 
-hymnFields.forEach(hymnField => {
-  const options = hymnField.options;
-  Array.prototype.forEach.call(options, opt => {
-    opt.dataset['number'] = opt.value;
-    opt.dataset['text'] = opt.text;
-  });
+(() => {
+  setTitle();
+  primaryFeastNameField.addEventListener('change', setTitle);
+  secondaryFeastNameField.addEventListener('change', setTitle);
 
-  Array.prototype.sort.call(options,)
-});
+  updateDateFromPrimaryFeast().then();
+
+  if (timeField.value === '')
+    timeField.value = "11:00";
+
+  hymnFields.forEach(hymnField => {
+    const options = hymnField.options;
+    Array.prototype.forEach.call(options, opt => {
+      opt.dataset['number'] = opt.value;
+      opt.dataset['text'] = opt.text;
+    });
+
+    Array.prototype.sort.call(options,)
+  });
+})();
