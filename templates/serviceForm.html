@@ -65,6 +65,20 @@
     </div>
 
     <div class="row mb-3">
+        {{ form.time.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.time(class='form-control') }}
+            {% if form.time.errors %}
+                {% for error in form.time.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
         {{ form.celebrant.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
             {{ form.celebrant(class='form-control') }}

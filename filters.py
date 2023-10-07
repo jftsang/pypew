@@ -18,6 +18,13 @@ def as_richtext(item: ServiceItem) -> RichText:
     return item.as_richtext()
 
 
+def service_supertitle(service: Service) -> str:
+    s = english_date(service.date)
+    if service.time:
+        s += f", " + service.time.strftime("%-I:%M%p").lower()
+    return s
+
+
 @nullsafe
 def english_date(date: dt.date) -> str:
     # https://stackoverflow.com/a/74227668
@@ -71,5 +78,6 @@ filters_context = {
     'english_date': english_date,
     'service_header': service_header,
     'service_subtitle': service_subtitle,
+    'service_supertitle': service_supertitle,
     'service_summary': service_summary,
 }

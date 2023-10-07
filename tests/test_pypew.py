@@ -184,10 +184,17 @@ class TestViews(unittest.TestCase):
     def test_pew_sheet_docx_view(self, m_create_docx):
         r = self.client.get(
             url_for('pew_sheet_docx_view') + '?' + urlencode(
-                {'title': 'Feast of Foo', 'date': '2022-01-01',
-                 'primary_feast_name': 'advent-i',
-                 'secondary_feast_name': '', 'introit_hymn': '',
-                 'offertory_hymn': '', 'recessional_hymn': ''})
+                {
+                    'title': 'Feast of Foo',
+                    'date': '2022-01-01',
+                    'time': '11:00',
+                    'primary_feast_name': 'advent-i',
+                    'secondary_feast_name': '',
+                    'introit_hymn': '',
+                    'offertory_hymn': '',
+                    'recessional_hymn': ''
+                }
+            )
         )
         self.assertEqual(r.status_code, 200)
         m_create_docx.assert_called()
