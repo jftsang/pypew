@@ -457,7 +457,8 @@ class Service:
             introit_hymn=Music.get_neh_hymn_by_ref(form.introit_hymn.data),
             offertory_hymn=Music.get_neh_hymn_by_ref(form.offertory_hymn.data),
             recessional_hymn=Music.get_neh_hymn_by_ref(
-                form.recessional_hymn.data),
+                form.recessional_hymn.data
+            ),
             anthem=anthem,
         )
 
