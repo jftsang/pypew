@@ -11,6 +11,7 @@ def nullsafe(f):
     @wraps(f)
     def ns(x):
         return f(x) if x is not None else ''
+
     return ns
 
 
@@ -30,7 +31,10 @@ def english_date(date: dt.date) -> str:
     # https://stackoverflow.com/a/74227668
     def format_date_with_ordinal(d, format_string):
         if d.day not in (11, 12, 13):
-            ordinal = {'1': 'st', '2': 'nd', '3': 'rd'}.get(str(d.day)[-1:], 'th')
+            ordinal = {'1': 'st', '2': 'nd', '3': 'rd'}.get(
+                str(d.day)[-1:],
+                'th'
+            )
         else:
             ordinal = 'th'
 
@@ -55,9 +59,9 @@ def service_header(service: Service) -> str:
 def service_subtitle(service: Service) -> str:
     # Feastday (Secondary), Fr XX YY (Preacher: AN Other)
     if service.secondary_feast:
-        s = service.primary_feast.name + ' (' + service.secondary_feast.name + '), '
+        s = service.primary_feast.name + ' (' + service.secondary_feast.name + '),'
     else:
-        s = service.primary_feast.name + ', '
+        s = service.primary_feast.name + ','
 
     c, p = service.celebrant, service.preacher
     if c:
