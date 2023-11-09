@@ -59,9 +59,9 @@ def service_header(service: Service) -> str:
 def service_subtitle(service: Service) -> str:
     # Feastday (Secondary), Fr XX YY (Preacher: AN Other)
     if service.secondary_feast:
-        s = service.primary_feast.name + ' (' + service.secondary_feast.name + '), '
+        s = service.primary_feast.name + ' (' + service.secondary_feast.name + '),'
     else:
-        s = service.primary_feast.name + ', '
+        s = service.primary_feast.name + ','
 
     c, p = service.celebrant, service.preacher
     if c:
