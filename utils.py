@@ -2,6 +2,7 @@ import logging
 import os
 from datetime import timedelta, date
 from functools import lru_cache
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
@@ -31,9 +32,13 @@ def str2date(s: Optional[str]) -> date:
 @lru_cache()
 def get_neh_df():
     if pd is None:
-        raise NoPandasError('Pandas not available, can\'t load hymn information')
+        raise NoPandasError(
+            'Pandas not available, can\'t load hymn information'
+        )
 
-    df = pd.read_csv(os.path.join('data', 'neh.csv'))
+    df = pd.read_csv(
+        Path(__file__).parent / 'data/neh.csv'
+    )
 
     assert 'number' in df.columns
     assert 'firstLine' in df.columns

@@ -1,16 +1,16 @@
 const titleH3 = document.getElementById('titleH3');
 const titleField = document.getElementById('title');
-const primaryFeastNameField = document.getElementById('primary_feast_name');
-const secondaryFeastNameField = document.getElementById('secondary_feast_name');
+const primaryFeastField = document.getElementById('primary_feast');
+const secondaryFeastsField = document.getElementById('secondary_feasts');
 const dateField = document.getElementById('date');
 const timeField = document.getElementById('time');
 
 const setTitle = () => {
   let txt;
-  const primaryFeastName = primaryFeastNameField.options[primaryFeastNameField.selectedIndex].innerText;
-  const secondaryFeastName = secondaryFeastNameField.options[secondaryFeastNameField.selectedIndex].innerText;
-  if (secondaryFeastNameField.value)
-    txt = primaryFeastName + ' (' + secondaryFeastName + ')';
+  const primaryFeastName = primaryFeastField.selectedOptions[0].innerText;
+  const secondaryFeastsNames = Array.from(secondaryFeastsField.selectedOptions).map(e => e.innerText)
+  if (secondaryFeastsNames.length !== 0)
+    txt = primaryFeastName + ' (' + secondaryFeastsNames.join(", ") + ')';
   else
     txt = primaryFeastName;
 
@@ -18,15 +18,20 @@ const setTitle = () => {
   titleField.value = txt;
 };
 
+setTitle();
+primaryFeastField.addEventListener('change', setTitle);
+secondaryFeastsField.addEventListener('change', setTitle);
+
 const updateDateFromPrimaryFeast = async () => {
-  const url = '/feast/api/' + primaryFeastNameField.value + '/date';
+  const url = '/feast/api/' + primaryFeastField.value + '/date';
   const r = await fetch(url);
   const j = await r.json();
   if (j !== null)
     dateField.value = j;
 };
 
-primaryFeastNameField.addEventListener('change', updateDateFromPrimaryFeast);
+updateDateFromPrimaryFeast().then();
+primaryFeastField.addEventListener('change', updateDateFromPrimaryFeast);
 
 const today = new Date()
 const day = 1000 * 60 * 60 * 24;  // milliseconds in a day
