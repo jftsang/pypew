@@ -103,8 +103,8 @@ const hymnFields = Array.prototype.map.call(
 
 (() => {
   setTitle();
-  primaryFeastNameField.addEventListener('change', setTitle);
-  secondaryFeastNameField.addEventListener('change', setTitle);
+  primaryFeastField.addEventListener('change', setTitle);
+  secondaryFeastsField.addEventListener('change', setTitle);
 
   updateDateFromPrimaryFeast().then();
 
