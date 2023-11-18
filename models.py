@@ -432,8 +432,9 @@ class Service:
     def from_form(cls, form: 'PewSheetForm') -> 'Service':
         primary_feast = Feast.get(slug=form.primary_feast.data)
         if form.secondary_feasts.data:
-            secondary_feasts = [Feast.get(slug=slug) for slug in
-                                form.secondary_feasts.data]
+            secondary_feasts = [Feast.get(slug=slug)
+                                for slug in form.secondary_feasts.data
+                                if slug]
         else:
             secondary_feasts = None
 
