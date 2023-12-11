@@ -436,7 +436,7 @@ class Service:
                                 for slug in form.secondary_feasts.data
                                 if slug]
         else:
-            secondary_feasts = None
+            secondary_feasts = []
 
         if form.anthem_title.data or form.anthem_composer.data or form.anthem_lyrics.data:
             anthem = Music(
