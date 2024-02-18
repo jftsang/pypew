@@ -61,6 +61,13 @@ class TestDates(unittest.TestCase):
         self.assertEqual(english_date(supplied_date), expected_string)
 
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+
+@unittest.skipIf(pd is None, "Pandas not available")
 class TestModels(unittest.TestCase):
     def test_neh_lookup(self):
         music = Music.get_neh_hymn_by_ref('NEH: 1a')
