@@ -83,5 +83,5 @@ def pew_sheet_docx_view():
     temp_docx = os.path.join(cache_dir, f"pew_sheet_{str(uuid.uuid4())}.docx")
     service.create_docx(temp_docx)
     return send_file(
-        temp_docx, as_attachment=True, attachment_filename=filename
+        temp_docx, as_attachment=True, download_name=filename
     )

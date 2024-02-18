@@ -5,7 +5,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-import pandas as pd
 from appdirs import AppDirs
 
 
@@ -31,7 +30,9 @@ def str2date(s: Optional[str]) -> date:
 
 @lru_cache()
 def get_neh_df():
-    if pd is None:
+    try:
+        import pandas as pd
+    except ImportError:
         raise NoPandasError(
             'Pandas not available, can\'t load hymn information'
         )

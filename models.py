@@ -3,7 +3,7 @@ import os
 import re
 import typing
 from abc import ABC, abstractmethod
-from functools import cache
+from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
 
@@ -349,7 +349,7 @@ class Service:
 
     # TODO primary or secondary?
     @property
-    def introit_proper(self) -> str | None:
+    def introit_proper(self) -> Optional[str]:
         return self.primary_feast.introit
 
     @property
@@ -372,27 +372,27 @@ class Service:
         return propers
 
     @property
-    def offertory_proper(self) -> str | None:
+    def offertory_proper(self) -> Optional[str]:
         return self.primary_feast.offertory
 
     @property
-    def communion_proper(self) -> str | None:
+    def communion_proper(self) -> Optional[str]:
         return self.primary_feast.communion
 
     @property
-    def epistle_ref(self) -> str | None:
+    def epistle_ref(self) -> Optional[str]:
         return self.primary_feast.epistle_ref
 
     @property
-    def epistle(self) -> str | None:
+    def epistle(self) -> Optional[str]:
         return self.primary_feast.epistle
 
     @property
-    def gospel_ref(self) -> str | None:
+    def gospel_ref(self) -> Optional[str]:
         return self.primary_feast.gospel_ref
 
     @property
-    def gospel(self) -> str | None:
+    def gospel(self) -> Optional[str]:
         return self.primary_feast.gospel
 
     @property
@@ -478,7 +478,7 @@ class Service:
         doc.save(path)
 
 
-@cache
+@lru_cache()
 def _feast_from_yaml(slug: str) -> Feast:
     with open((DATA_DIR / slug).with_suffix('.yaml')) as f:
         info = yaml.safe_load(f)

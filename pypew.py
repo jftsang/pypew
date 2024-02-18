@@ -84,7 +84,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     return app
 
 
-def main(argv: Sequence[str] | None = None) -> None:
+def main(argv: Optional[Sequence[str]] = None) -> None:
     """
     Start PyPew.
     """

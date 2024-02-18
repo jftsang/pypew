@@ -94,5 +94,5 @@ def feast_docx_view(slug):
     temp_docx = os.path.join(cache_dir, f"feast_{str(uuid.uuid4())}.docx")
     feast.create_docx(path=temp_docx)
     return send_file(
-        temp_docx, as_attachment=True, attachment_filename=filename
+        temp_docx, as_attachment=True, download_name=filename
     )
