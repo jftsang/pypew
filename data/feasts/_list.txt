@@ -34,7 +34,7 @@ easter-iii
 easter-iv
 easter-v
 ascension-day
-sunday-after-ascesnsion
+sunday-after-ascension
 whitsunday
 trinity-sunday
 corpus-christi
