@@ -90,3 +90,15 @@ st-clement
 holy-cross-day
 requiem-mass
 harvest-thanksgiving
+st-etheldreda
+st-mary-magdalene
+st-bernard
+st-augustine-of-hippo
+st-jerome
+st-augustine-of-canterbury
+anniversary-of-kings-accession
+st-francis
+st-edward-confessor
+the-blessed-virgin-mary
+st-leo
+st-athanasius
