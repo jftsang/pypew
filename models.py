@@ -182,6 +182,7 @@ class Music:
     composer: Optional[str] = field()
     lyrics: Optional[str] = field()
     ref: Optional[str] = field()
+    translation: Optional[str] = field()
 
     @classmethod
     def neh_hymns(cls) -> List['Music']:
@@ -203,7 +204,8 @@ class Music:
                 category='Hymn',
                 composer=None,
                 lyrics=None,
-                ref=f'NEH: {record.number}'
+                ref=f'NEH: {record.number}',
+                translation=f'Words/translation available at NEH: {record.number}, {record.firstLine}'
             ) for record in records
         ]
         hymns.sort(key=lambda m: nehref2num(m.ref or ""))
@@ -419,7 +421,7 @@ class Service:
 
         if self.anthem:
             items.append(
-                ServiceItem('Anthem', [self.anthem.lyrics],
+                ServiceItem('Anthem', [self.anthem.lyrics, self.anthem.translation],
                             f'{self.anthem.title}. {self.anthem.composer}'))
 
         if self.recessional_hymn:
@@ -444,10 +446,13 @@ class Service:
                 composer=form.anthem_composer.data,
                 lyrics=form.anthem_lyrics.data,
                 category='Anthem',
-                ref=None
+                ref=None,
+                translation=form.anthem_translation.data
             )
         else:
             anthem = None
+
+        print(form.anthem_translation.data)
 
         return Service(
             title=form.title.data,

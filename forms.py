@@ -13,6 +13,9 @@ from models import Feast, Music
 hymns = [('', 'None')] + [(h.ref, f'{h.ref} - {h.title}') for h in
                           Music.neh_hymns()]
 
+translations = [('', 'None')] + [(h.translation, f'{h.translation}') for h in
+                          Music.neh_hymns()]
+
 
 class PewSheetForm(FlaskForm):
     title = HiddenField('Title')
@@ -38,6 +41,7 @@ class PewSheetForm(FlaskForm):
     anthem_title = StringField('Anthem')
     anthem_composer = StringField('Anthem composer')
     anthem_lyrics = StringField('Anthem lyrics', widget=TextArea())
+    anthem_translation = SelectField('Anthem Translation', choices=translations)
 
     class Meta:
         csrf = False
