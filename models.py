@@ -440,7 +440,7 @@ class Service:
         else:
             secondary_feasts = []
 
-        if form.anthem_title.data or form.anthem_composer.data or form.anthem_lyrics.data:
+        if form.anthem_title.data or form.anthem_composer.data or form.anthem_lyrics.data or form.anthem_translation.data:
             anthem = Music(
                 title=form.anthem_title.data,
                 composer=form.anthem_composer.data,
@@ -451,8 +451,6 @@ class Service:
             )
         else:
             anthem = None
-
-        print(form.anthem_translation.data)
 
         return Service(
             title=form.title.data,

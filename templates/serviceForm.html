@@ -138,7 +138,7 @@
     <div class="row mb-3">
         {{ form.anthem_translation.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
-            {{ form.anthem_translation(class='form-control') }}
+            {{ form.anthem_translation(class='form-select') }}
             {% if form.anthem_translation.errors %}
                 {% for error in form.anthem_translation.errors %}
                     <small class="font-small text-danger">
