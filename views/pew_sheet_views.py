@@ -11,11 +11,14 @@ from forms import PewSheetForm
 from models import Feast, Service
 from utils import cache_dir, logger
 
-__all__ = ['pew_sheet_create_view', 'pew_sheet_clear_history_endpoint', 'pew_sheet_docx_view']
+__all__ = ['pew_sheet_create_view', 'pew_sheet_clear_history_endpoint', 'pew_sheet_docx_view', 'create_feast']
 
 dotenv.load_dotenv()
 COOKIE_NAME = os.environ.get('COOKIE_NAME', 'previousPewSheets')
 
+def create_feast():
+    print('you are about to create a feast')
+    return make_response('', 204)
 
 def pew_sheet_create_view():
     form = PewSheetForm(request.args)

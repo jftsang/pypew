@@ -1,3 +1,16 @@
+<dialog id="feast-dialog">
+    <form method="get" action="{{ url_for('create_feast') }}">
+      <p>
+        <label for="feast-name">Feast Name:</label>
+        <input type="text" id="feast-name">
+      </p>
+      <div>
+        <button id="cancel" type="reset">Cancel</button>
+        <input id="create-feast" type="submit" value="Create Feast">
+      </div>
+    </form>
+</dialog>
+
 <form action="{{ url_for('pew_sheet_create_view') }}"
       class="px-5">
     <div class="row mb-3">
@@ -41,8 +54,10 @@
                 {% endfor %}
             {% endif %}
         </div>
+        <div class="col-sm-3">
+            <button id="add-feast-dialog" type="button">Add Feast</button>
+        </div>
     </div>
-
 
     <div class="row mb-3">
         {{ form.date.label(class='col-sm-1 col-form-label') }}
