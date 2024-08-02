@@ -34,12 +34,17 @@
 </head>
 <body class="text-light">
 
+<div class="container-fluid mx-0 px-0">
+
 <header class="d-print-none">
-    {% include 'navbar.html' %}
+    <div class="row">
+        {% include 'navbar.html' %}
+    </div>
 </header>
 
 <main>
-    <div class="container p-2" id="flashes-div">
+    <div class="container">
+    <div class="row p-2" id="flashes-div">
     {% if get_flashed_messages() %}
         <ul id="flashes">
         {% for category, msg in get_flashed_messages(with_categories=True) %}
@@ -49,7 +54,7 @@
     {% endif %}
     </div>
 
-    <div class="container w-print-100">
+    <div class="w-print-100">
         <div class="row justify-content-center">
             <div id="mainContentDiv" class="col-md-8">
                 {% block content %}
@@ -62,11 +67,15 @@
             </div>
         </div>
     </div>
+    </div>
 </main>
 
 <footer class="d-print-none">
-    {% include 'footer.html' %}
+    <div class="row align-items-end">
+        {% include 'footer.html' %}
+    </div>
 </footer>
+</div>
 
 <!-- Bootstrap JS with Popper -->
 <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"
