@@ -17,7 +17,7 @@ from docxtpl import DocxTemplate, RichText
 from models_base import get
 
 if typing.TYPE_CHECKING:
-    from forms import PewSheetForm
+    from forms import PewSheetForm, AnthemForm
 
 from utils import get_neh_df, advent, closest_sunday_to, NoPandasError, logger
 
@@ -440,14 +440,15 @@ class Service:
         else:
             secondary_feasts = []
 
-        if form.anthem_title.data or form.anthem_composer.data or form.anthem_lyrics.data or form.anthem_translation.data:
+        if form.anthem_group.data:
+            ag = form.anthem_group
             anthem = Music(
-                title=form.anthem_title.data,
-                composer=form.anthem_composer.data,
-                lyrics=form.anthem_lyrics.data,
+                title=ag.title.data,
+                composer=ag.composer.data,
+                lyrics=ag.lyrics.data,
                 category='Anthem',
                 ref=None,
-                translation=form.anthem_translation.data
+                translation=ag.translation.data
             )
         else:
             anthem = None

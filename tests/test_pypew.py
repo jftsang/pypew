@@ -224,7 +224,7 @@ class TestViews(unittest.TestCase):
                     'introit_hymn': '',
                     'offertory_hymn': '',
                     'recessional_hymn': '',
-                    'anthem_translation': ''
+                    'anthem_group-translation': ''
                 }
             )
         )
