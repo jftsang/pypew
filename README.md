@@ -7,9 +7,8 @@ hymns to be sung, as well as other details such as the name of the
 priest, and all this information is assembled into a web page or .docx
 file for editing or printing.
 
-There is a demonstration deployment at
-[https://pypew.herokuapp.com](https://pypew.herokuapp.com) but it is
-also possible to run PyPew as a desktop app.
+There is a demonstration deployment at <https://jmft2.user.srcf.net/pypew/>
+but it is also possible to run PyPew as a desktop app.
 
 
 ## Running as a Flask app
