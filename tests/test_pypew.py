@@ -77,7 +77,8 @@ class TestModels(unittest.TestCase):
                   category='Hymn',
                   composer=None,
                   lyrics=None,
-                  ref='NEH: 1a')
+                  ref='NEH: 1a',
+                  translation = 'Words/translation available at NEH: 1a, Creator of the stars of night')
         )
 
     def test_neh_lookup_unsuccessful(self):
@@ -223,6 +224,7 @@ class TestViews(unittest.TestCase):
                     'introit_hymn': '',
                     'offertory_hymn': '',
                     'recessional_hymn': '',
+                    'anthem_group-translation': ''
                 }
             )
         )
