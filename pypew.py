@@ -54,6 +54,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
     app.add_url_rule('/feast/api/<slug>', 'feast_detail_api', views.feast_detail_api)
     app.add_url_rule('/feast/api/<slug>/date', 'feast_date_api', views.feast_date_api)
     app.add_url_rule('/feast/<slug>/docx', 'feast_docx_view', views.feast_docx_view)
+    app.add_url_rule('/pewSheet/feastCreation', 'create_feast', views.create_feast, methods=['GET'])
     app.add_url_rule('/pewSheet', 'pew_sheet_create_view', views.pew_sheet_create_view, methods=['GET'])
     app.add_url_rule('/pewSheet/docx', 'pew_sheet_docx_view', views.pew_sheet_docx_view, methods=['GET'])
     app.add_url_rule('/pewSheet/clearHistory',
@@ -123,4 +124,5 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
 
 if __name__ == '__main__':
+    print('some test');
     main()

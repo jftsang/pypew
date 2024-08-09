@@ -10,6 +10,7 @@ from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea
 
 from models import Feast, Music
+from utils import logger
 
 hymns = [('', 'None')] + [(h.ref, f'{h.ref} - {h.title}') for h in
                           Music.neh_hymns()]

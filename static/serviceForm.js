@@ -63,6 +63,29 @@ nextWeekBtn.onclick = () => {
   dateField.value = toISO(new Date(nextWeek));
 };
 
+const dialog = document.getElementById("feast-dialog");
+const addFeastBtn = document.getElementById('add-feast-dialog');
+addFeastBtn.onclick = () => {
+  dialog.showModal();
+};
+
+const cancelButton = document.getElementById("cancel");
+cancelButton.onclick = () => {
+  dialog.close("feastCreationCancelled");
+};
+
+const createFeastBtn = document.getElementById("create-feast");
+createFeastBtn.onclick = () => {
+  const feastName = document.getElementById("feast-name");
+  dialog.close(feastName.value);
+};
+
+dialog.addEventListener('close', function(e){
+  e.preventDefault();
+  console.log(dialog.returnValue);
+});
+
+
 /**
  * Cause a class to be applied to the specified fields when the
  * specified element is mouseovered. Note that this overwrites
