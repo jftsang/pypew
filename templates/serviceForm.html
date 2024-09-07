@@ -122,11 +122,11 @@
     </div>
 
     <div class="row mb-3">
-        {{ form.anthem_title.label(class='col-sm-2 col-form-label') }}
+        {{ form.anthem_group.title.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
-            {{ form.anthem_title(class='form-control') }}
-            {% if form.anthem_title.errors %}
-                {% for error in form.anthem_title.errors %}
+            {{ form.anthem_group.title(class='form-control') }}
+            {% if form.anthem_group.title.errors %}
+                {% for error in form.anthem_group.title.errors %}
                     <small class="font-small text-danger">
                         {{ error }}
                     </small>
@@ -136,11 +136,11 @@
     </div>
 
     <div class="row mb-3">
-        {{ form.anthem_composer.label(class='col-sm-2 col-form-label') }}
+        {{ form.anthem_group.translation.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
-            {{ form.anthem_composer(class='form-control') }}
-            {% if form.anthem_composer.errors %}
-                {% for error in form.anthem_composer.errors %}
+            {{ form.anthem_group.translation(class='form-select') }}
+            {% if form.anthem_group.translation.errors %}
+                {% for error in form.anthem_group.translation.errors %}
                     <small class="font-small text-danger">
                         {{ error }}
                     </small>
@@ -150,11 +150,25 @@
     </div>
 
     <div class="row mb-3">
-        {{ form.anthem_lyrics.label(class='col-sm-2 col-form-label') }}
+        {{ form.anthem_group.composer.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
-            {{ form.anthem_lyrics(class='form-control') }}
-            {% if form.anthem_lyrics.errors %}
-                {% for error in form.anthem_lyrics.errors %}
+            {{ form.anthem_group.composer(class='form-control') }}
+            {% if form.anthem_group.composer.errors %}
+                {% for error in form.anthem_group.composer.errors %}
+                    <small class="font-small text-danger">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        {{ form.anthem_group.lyrics.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-5">
+            {{ form.anthem_group.lyrics(class='form-control') }}
+            {% if form.anthem_group.lyrics.errors %}
+                {% for error in form.anthem_group.lyrics.errors %}
                     <small class="font-small text-danger">
                         {{ error }}
                     </small>
