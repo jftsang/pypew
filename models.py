@@ -17,7 +17,7 @@ from docxtpl import DocxTemplate, RichText
 from models_base import get
 
 if typing.TYPE_CHECKING:
-    from forms import PewSheetForm, AnthemForm
+    from forms import PewSheetForm, AnthemForm, FeastForm
 
 from utils import get_neh_df, advent, closest_sunday_to, NoPandasError, logger
 
@@ -41,6 +41,17 @@ class Feast:
     @classmethod
     def from_yaml(cls, slug):
         return _feast_from_yaml(slug)
+    
+    @classmethod
+    def to_yaml(cls, feastForm: 'FeastForm'):
+        with open((DATA_DIR / feastForm.name.data).with_suffix('.yaml'), "w") as f:
+            f.write('name: ' + feastForm.name.data + '\n')
+            #TODO: check validity of day and month, 
+            # i.e. generate Date instance with Date(str) and check if it exists
+            f.write('month: ' + feastForm.month.data + '\n')
+            f.write('day: ' + feastForm.day.data + '\n')
+            f.write('collect: ' + feastForm.collect.data + '\n')
+
 
     @classmethod
     def all(cls):

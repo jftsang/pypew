@@ -7,7 +7,7 @@ from flask import (flash, make_response, redirect, render_template, request,
                    send_file, session, url_for)
 from werkzeug.datastructures import ImmutableMultiDict
 
-from forms import PewSheetForm
+from forms import PewSheetForm, FeastForm
 from models import Feast, Service
 from utils import cache_dir, logger
 
@@ -17,10 +17,13 @@ dotenv.load_dotenv()
 COOKIE_NAME = os.environ.get('COOKIE_NAME', 'previousPewSheets')
 
 def create_feast():
-    print('you are about to create a feast')
+    print('Into feast creation...')
+    feastForm = FeastForm(request.args)
+    Feast.to_yaml(feastForm)
     return make_response('', 204)
 
 def pew_sheet_create_view():
+    feastForm = FeastForm(request.args)
     form = PewSheetForm(request.args)
     if not form.primary_feast.data:
         form.primary_feast.data = Feast.next().slug
@@ -52,10 +55,9 @@ def pew_sheet_create_view():
             pass
 
     previous_services.sort(key=lambda args_service: args_service[1].date)
-
     return render_template(
         'pewSheet.html', form=form, service=service,
-        previous_services=previous_services
+        previous_services=previous_services, feastForm=feastForm
     )
 
 

@@ -71,13 +71,13 @@ addFeastBtn.onclick = () => {
 
 const cancelButton = document.getElementById("cancel");
 cancelButton.onclick = () => {
-  dialog.close("feastCreationCancelled");
+  dialog.close("Feast creation cancelled");
 };
 
 const createFeastBtn = document.getElementById("create-feast");
 createFeastBtn.onclick = () => {
   const feastName = document.getElementById("feast-name");
-  dialog.close(feastName.value);
+  dialog.close("Feast created successfully");
 };
 
 dialog.addEventListener('close', function(e){
