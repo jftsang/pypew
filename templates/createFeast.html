@@ -1,0 +1,52 @@
+<div class="row mb-3">
+    {{ feastForm.name.label(class='col-sm-2 col-form-label') }}
+    <div class="col-sm-5">
+        {{ feastForm.name(class='form-control') }}
+        {% if feastForm.name.errors %}
+            {% for error in feastForm.name.errors %}
+                <small class="font-small text-danger">
+                    {{ error }}
+                </small>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<div class="row mb-3">
+    {{ feastForm.day.label(class='col-sm-1 col-form-label') }}
+    <div class="col">
+        {{ feastForm.day(class='form-control') }}
+        {% if feastForm.day.errors %}
+            {% for error in feastForm.day.errors %}
+                <small class="font-small text-danger">
+                    {{ error }}
+                </small>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<div class="row mb-3">
+    {{ feastForm.month.label(class='col-sm-1 col-form-label') }}
+    <div class="col">
+        {{ feastForm.month(class='form-control') }}
+        {% if feastForm.month.errors %}
+            {% for error in feastForm.month.errors %}
+                <small class="font-small text-danger">
+                    {{ error }}
+                </small>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<div class="row mb-3">
+    {{ feastForm.collect.label(class='col-sm-2 col-form-label') }}
+    <div class="col-sm-5">
+        {{ feastForm.collect(class='form-control') }}
+        {% if feastForm.collect.errors %}
+            {% for error in feastForm.collect.errors %}
+                <small class="font-small text-danger">
+                    {{ error }}
+                </small>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
