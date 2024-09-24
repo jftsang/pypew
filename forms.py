@@ -18,13 +18,17 @@ hymns = [('', 'None')] + [(h.ref, f'{h.ref} - {h.title}') for h in
 translations = [('', 'None')] + [(h.translation, f'{h.translation}') for h in
                           Music.neh_hymns()]
 
-class FeastForm(Form):
+class FeastForm(FlaskForm):
     # Required fields
     name = StringField('Name', validators=[DataRequired()])
     month = StringField('Month', validators=[DataRequired()])
     day = StringField('Day', validators=[DataRequired()])
     collect = StringField('Collect', widget=TextArea(), validators=[DataRequired()])
     # Optional fields
+    introit = StringField('Introit', widget=TextArea())
+    offertory = StringField('Offertory', widget=TextArea())
+    tract = StringField('Tract', widget=TextArea())
+    gradual = StringField('Gradual', widget=TextArea())
 
 class AnthemForm(Form):
     title = StringField('Anthem')

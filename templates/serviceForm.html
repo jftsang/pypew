@@ -1,11 +1,5 @@
 <dialog id="feast-dialog">
-    <form method="get" action="{{ url_for('create_feast') }}">
-        {% include "createFeast.html" %}
-      <div>
-        <button id="cancel" type="reset">Cancel</button>
-        <input id="create-feast" type="submit" value="Create Feast">
-      </div>
-    </form>
+    {% include "createFeast.html" %}
 </dialog>
 <form action="{{ url_for('pew_sheet_create_view') }}"
       class="px-5">

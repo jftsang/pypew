@@ -51,6 +51,10 @@ class Feast:
             f.write('month: ' + feastForm.month.data + '\n')
             f.write('day: ' + feastForm.day.data + '\n')
             f.write('collect: ' + feastForm.collect.data + '\n')
+            f.write('introit: ' + feastForm.introit.data + '\n')
+            f.write('gradual: ' + feastForm.gradual.data + '\n')
+            f.write('tract: ' + feastForm.tract.data + '\n')
+            f.write('offertory: ' + feastForm.offertory.data + '\n')
 
 
     @classmethod
