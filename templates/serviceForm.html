@@ -35,7 +35,7 @@
     <div class="row mb-3">
         {{ form.secondary_feasts.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
-            {{ form.secondary_feasts(class='form-select') }}
+            {{ form.secondary_feasts(class='form-select', formnovalidate=True) }}
             {% if form.secondary_feasts.errors %}
                 {% for error in form.secondary_feasts.errors %}
                     <small class="font-small text-danger">
@@ -188,3 +188,53 @@
 </form>
 
 <script src="{{ url_for('static', filename='serviceForm.js') }}"></script>
+<script>
+
+    // Note: logic needs to be able to access python API and hence was placed here
+
+    const dialog = document.getElementById("feast-dialog");
+    const addFeastBtn = document.getElementById('add-feast-dialog');
+    addFeastBtn.onclick = () => {
+        dialog.showModal();
+    };
+
+    const cancelButton = document.getElementById("cancel");
+    cancelButton.onclick = () => {
+        var feastName = document.getElementById("feast-name");
+        dialog.close("Feast creation cancelled");
+    };
+
+    function updateFeasts(){
+        // refresh feasts
+        console.log('retrieved data from database');
+        const feastsApiUrl = "{{ url_for('feast_upcoming_api') }}";
+        const feastsArray = fetch(feastsApiUrl).then(response => response.json())
+        .then(function(response) {
+            console.log("Nr. of feasts: " + response.length);
+            console.log(JSON.stringify(response));
+            // clear choice options
+            var secondaryFeastsField = document.getElementById('secondary_feasts');
+            secondaryFeastsField.replaceChildren();
+            // recreate choice options
+            response.forEach(element => {
+                var opt = document.createElement('option');
+                opt.text = element.name;
+                opt.value = element.slug;
+                secondaryFeastsField.add(opt);
+            });
+        });
+    }
+    // TODO: update feasts also for newly opened pew sheet form
+
+    const createFeastBtn = document.getElementById("create-feast");
+    createFeastBtn.onclick = () => {
+        dialog.close("Feast creation request submitted!");
+        // wait some time for database update
+        const myTimeout = setTimeout(updateFeasts, 2000);
+    };
+
+    dialog.addEventListener('close', function (e) {
+        e.preventDefault();
+        console.log(dialog.returnValue);
+    });  
+</script>

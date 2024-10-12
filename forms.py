@@ -41,12 +41,12 @@ class PewSheetForm(FlaskForm):
     feasts = Feast.upcoming()
     feast_choices = [(feast.slug, feast.name) for feast in feasts]
     primary_feast = SelectField(
-        'Primary Feast',
+        'Primary Feast',  #choices=[]
         choices=feast_choices,
     )
     secondary_feasts = SelectMultipleField(
         'Secondary Feasts',
-        choices=[('', '')] + feast_choices,
+        choices=[('', '')] + feast_choices, validate_choice=False
     )
     date = DateField('Date', validators=[DataRequired()])
     time = TimeField('Time', validators=[DataRequired()])

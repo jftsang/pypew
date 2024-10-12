@@ -19,7 +19,7 @@ from models_base import get
 if typing.TYPE_CHECKING:
     from forms import PewSheetForm, AnthemForm, FeastForm
 
-from utils import get_neh_df, advent, closest_sunday_to, NoPandasError, logger
+from utils import get_neh_df, advent, closest_sunday_to, NoPandasError, logger, formatFeastName
 
 feasts_fields = ['name', 'month', 'day', 'coeaster', 'coadvent',
                  'introit', 'collect', 'epistle_ref', 'epistle',
@@ -44,7 +44,8 @@ class Feast:
     
     @classmethod
     def to_yaml(cls, feastForm: 'FeastForm'):
-        with open((DATA_DIR / feastForm.name.data).with_suffix('.yaml'), "w") as f:
+        name = formatFeastName(feastForm.name.data)
+        with open((DATA_DIR / name).with_suffix('.yaml'), "w") as f:
             f.write('name: ' + feastForm.name.data + '\n')
             #TODO: check validity of day and month, 
             # i.e. generate Date instance with Date(str) and check if it exists
@@ -55,6 +56,9 @@ class Feast:
             f.write('gradual: ' + feastForm.gradual.data + '\n')
             f.write('tract: ' + feastForm.tract.data + '\n')
             f.write('offertory: ' + feastForm.offertory.data + '\n')
+        with open(DATA_DIR / '_list.txt', "a") as f:
+            f.write('\n' + name)
+
 
 
     @classmethod
