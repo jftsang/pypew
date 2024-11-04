@@ -29,6 +29,7 @@ class FeastForm(FlaskForm):
     offertory = StringField('Offertory', widget=TextArea())
     tract = StringField('Tract', widget=TextArea())
     gradual = StringField('Gradual', widget=TextArea())
+    alleluia = StringField('Alleluia', widget=TextArea())
 
 class AnthemForm(Form):
     title = StringField('Anthem')

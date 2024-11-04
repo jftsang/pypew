@@ -191,6 +191,43 @@
 <script>
 
     // Note: logic needs to be able to access python API and hence was placed here
+    var feastsArray = [];
+    var feastName = document.getElementById("feast-name");
+    var feastDay = document.getElementById("feast-day");
+    var feastMonth = document.getElementById("feast-month");
+    feastName.addEventListener('change', checkForNameDuplicates);
+    //TODO: check date duplicates
+
+    function checkForNameDuplicates() {
+        var input = feastName.value;
+        var words = input.split(' ');
+        var similarityCt = 0, similarFeast = '';
+        feastsArray.every(function (el) {
+            if (similarityCt > 1) {
+                return false;
+            }
+            similarityCt = 0;
+            words.every(function (word) {
+                if (similarityCt > 1) {
+                    return false;
+                }
+                if (el.name.includes(word)) {
+                    if (word != 'and') {
+                        similarityCt++;
+                    }
+                    if(similarityCt == 2){
+                        similarFeast = el.name;
+                    }
+                }
+                return true;
+            });
+            return true;
+        });
+
+        if (similarityCt > 1) {
+            alert("You're inputting " + input + ", but " + similarFeast + " already exists; are you accidentally creating a duplicate?");
+        }
+    }
 
     const dialog = document.getElementById("feast-dialog");
     const addFeastBtn = document.getElementById('add-feast-dialog');
@@ -200,7 +237,6 @@
 
     const cancelButton = document.getElementById("cancel");
     cancelButton.onclick = () => {
-        var feastName = document.getElementById("feast-name");
         dialog.close("Feast creation cancelled");
     };
 
@@ -208,10 +244,8 @@
         // refresh feasts
         console.log('retrieved data from database');
         const feastsApiUrl = "{{ url_for('feast_upcoming_api') }}";
-        const feastsArray = fetch(feastsApiUrl).then(response => response.json())
+        fetch(feastsApiUrl).then(response => response.json())
         .then(function(response) {
-            console.log("Nr. of feasts: " + response.length);
-            console.log(JSON.stringify(response));
             // clear choice options
             var secondaryFeastsField = document.getElementById('secondary_feasts');
             secondaryFeastsField.replaceChildren();
@@ -222,19 +256,28 @@
                 opt.value = element.slug;
                 secondaryFeastsField.add(opt);
             });
+            feastsArray = response;
         });
     }
-    // TODO: update feasts also for newly opened pew sheet form
 
     const createFeastBtn = document.getElementById("create-feast");
     createFeastBtn.onclick = () => {
-        dialog.close("Feast creation request submitted!");
-        // wait some time for database update
-        const myTimeout = setTimeout(updateFeasts, 2000);
+        try {
+            dialog.close("Feast creation request submitted!");
+            // wait some time for database update
+            const myTimeout = setTimeout(updateFeasts, 2000);
+        } catch (error) {
+            dialog.close("Feast creation aborted due to errors!");
+        }
     };
 
     dialog.addEventListener('close', function (e) {
         e.preventDefault();
         console.log(dialog.returnValue);
     });  
+
+    // load secondary feast options on init
+    (() => {
+        updateFeasts();
+    })();
 </script>

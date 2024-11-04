@@ -38,6 +38,21 @@ def _none2datemax(d: Optional[dt.date]) -> dt.date:
 
 @define
 class Feast:
+    optionalFields = ['introit', 'gat', 'gradual', 'alleluia', 'tract', 'offertory']
+
+    def infer_gat(gradual, alleluia):
+        gat = None
+        if gradual:
+            gat = 'Gradual'
+        if alleluia:
+            if gat is not None:
+                gat = gat + ' and Alleuia'
+            else:
+                gat = 'Alleuia'
+        if gat is not None:
+            gat = gat + ' Proper'
+        return gat
+
     @classmethod
     def from_yaml(cls, slug):
         return _feast_from_yaml(slug)
@@ -45,6 +60,7 @@ class Feast:
     @classmethod
     def to_yaml(cls, feastForm: 'FeastForm'):
         name = formatFeastName(feastForm.name.data)
+        gat = cls.infer_gat(feastForm.gradual.data, feastForm.alleluia.data)
         with open((DATA_DIR / name).with_suffix('.yaml'), "w") as f:
             f.write('name: ' + feastForm.name.data + '\n')
             #TODO: check validity of day and month, 
@@ -52,10 +68,14 @@ class Feast:
             f.write('month: ' + feastForm.month.data + '\n')
             f.write('day: ' + feastForm.day.data + '\n')
             f.write('collect: ' + feastForm.collect.data + '\n')
-            f.write('introit: ' + feastForm.introit.data + '\n')
-            f.write('gradual: ' + feastForm.gradual.data + '\n')
-            f.write('tract: ' + feastForm.tract.data + '\n')
-            f.write('offertory: ' + feastForm.offertory.data + '\n')
+            for field in cls.optionalFields:
+                if field != 'gat':
+                    if feastForm[field].data:
+                        f.write(field + ': ' + feastForm[field].data + '\n')
+                else:
+                    if gat is not None:
+                        f.write('gat: ' + gat + '\n')
+
         with open(DATA_DIR / '_list.txt', "a") as f:
             f.write('\n' + name)
 

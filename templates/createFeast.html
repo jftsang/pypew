@@ -1,5 +1,5 @@
 <form method="get" id="createFeastForm" action="{{ url_for('create_feast') }}">
-    {{ form.hidden_tag() }}
+    {{ feastForm.csrf_token }}
     {% for field in feastFormFields %}
         <div class="row">
             <div class="col-sm-3">

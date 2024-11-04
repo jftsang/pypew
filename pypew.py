@@ -13,6 +13,8 @@ import filters
 import views
 from utils import logger
 
+from flask_wtf.csrf import CSRFProtect
+
 load_dotenv()
 
 
@@ -102,6 +104,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
     pypew = PyPew()
     app = create_app(pypew)
+    csrf = CSRFProtect(app)
 
     if args.debug:
         # noinspection FlaskDebugMode

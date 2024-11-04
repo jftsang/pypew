@@ -18,23 +18,12 @@ COOKIE_NAME = os.environ.get('COOKIE_NAME', 'previousPewSheets')
 
 def create_feast():
     feastForm = FeastForm(request.args)
-    # not working
-    # if not feastForm.validate_on_submit():
-    #     print('Form not validated successfully')
-    #     flash(
-    #         'Sorry, I could not create a service from that information. '
-    #         'Please check the values that you provided.',
-    #         'danger')
-    #     for k, es in feastForm.errors.items():
-    #         for e in es:
-    #             flash(f'{k}: {e}', 'danger')
-    #     return make_response('', 400)
     print('Into feast creation...')
     Feast.to_yaml(feastForm)
     return make_response('', 204)
 
 def pew_sheet_create_view():
-    feastFormFields = ["name", "month", "day", "collect", "introit", "offertory", "tract", "gradual"]
+    feastFormFields = ["name", "month", "day", "collect", "introit", "offertory", "tract", "gradual", "alleluia"]
     feastForm = FeastForm(request.args)
     form = PewSheetForm(request.args)
     if not form.primary_feast.data:
