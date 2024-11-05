@@ -192,11 +192,51 @@
 
     // Note: logic needs to be able to access python API and hence was placed here
     var feastsArray = [];
+    var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]; 
+    // source: https://www.freecodecamp.org/news/format-dates-with-ordinal-number-suffixes-javascript/
+    const nthNumber = (number) => {
+        if (number > 3 && number < 21) return "th";
+        switch (number % 10) {
+            case 1:
+            return "st";
+            case 2:
+            return "nd";
+            case 3:
+            return "rd";
+            default:
+            return "th";
+        }
+    };
     var feastName = document.getElementById("feast-name");
     var feastDay = document.getElementById("feast-day");
     var feastMonth = document.getElementById("feast-month");
     feastName.addEventListener('change', checkForNameDuplicates);
-    //TODO: check date duplicates
+    feastDay.addEventListener('change', checkForDateDuplicates);
+    feastMonth.addEventListener('change', checkForDateDuplicates);
+    
+    function checkForDateDuplicates() {
+        var day = feastDay.value? parseInt(feastDay.value) : 0;
+        var month = feastMonth.value? parseInt(feastMonth.value): 0;
+        if(day == 0 || month == 0){
+            return;
+        }
+        console.log(nthNumber(day) + ', ' + monthNames[month-1]);
+        var similarityDetected = false;
+        feastsArray.every(function (el) {
+            // compare date of feast to input month and day
+            var dateComponents = el.next.split(' ');
+            if(dateComponents.length == 4 && (day + nthNumber(day) == dateComponents[1]) && monthNames[month-1] == dateComponents[2]){
+                similarityDetected = true;
+                return false;
+            }
+            
+            return true;
+        });
+
+        if (similarityDetected) {
+            alert("You're creating a feast for " + day + "." + month + "., but there already exists a feast on this date; are you accidentally creating a duplicate?");
+        }
+    }
 
     function checkForNameDuplicates() {
         var input = feastName.value;
