@@ -20,8 +20,11 @@ h2 {
 }
 
 #footer {
-    height: 3em;
     background-color: hsla(38, 33%, 20%, 0.5);
+}
+
+#bottomBar,div.nav-item {
+    text-align: center;
 }
 
 ul#flashes {
