@@ -1,0 +1,24 @@
+<form method="get" id="createFeastForm" action="{{ url_for('create_feast') }}">
+    {{ feastForm.csrf_token }}
+    {% for field in feastFormFields %}
+        <div class="row">
+            <div class="col-sm-3">
+                {{ feastForm[field].label(class='col-form-label') }}
+            </div>
+            <div class="col-sm-9">
+                {{ feastForm[field](class='form-control', id='feast-' + field) }}
+                {% if feastForm[field].errors %}
+                    {% for error in feastForm[field].errors %}
+                        <small class="font-small text-danger">
+                            {{ error }}
+                        </small>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    <div>
+        <button id="cancel" type="reset">Cancel</button>
+        <input id="create-feast" type="submit" value="Create Feast">
+    </div>
+</form>

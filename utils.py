@@ -75,3 +75,7 @@ def advent(year: int) -> date:
         return christmas - timedelta(days=christmas_dow + 7*3)
     else:
         return christmas - timedelta(7 * 4)
+
+def formatFeastName(name: str) -> str:
+    nameComponents = name.split()
+    return ('-').join(nameComponents)
