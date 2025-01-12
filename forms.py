@@ -42,7 +42,7 @@ class PewSheetForm(FlaskForm):
     feasts = Feast.upcoming()
     feast_choices = [(feast.slug, feast.name) for feast in feasts]
     primary_feast = SelectField(
-        'Primary Feast',  #choices=[]
+        'Primary Feast',
         choices=feast_choices,
     )
     secondary_feasts = SelectMultipleField(
