@@ -63,7 +63,6 @@ nextWeekBtn.onclick = () => {
   dateField.value = toISO(new Date(nextWeek));
 };
 
-
 /**
  * Cause a class to be applied to the specified fields when the
  * specified element is mouseovered. Note that this overwrites
