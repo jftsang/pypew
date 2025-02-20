@@ -17,7 +17,7 @@ epiphany-iv
 epiphany-v
 epiphany-vi
 septuagesima
-sexuagesima
+sexagesima
 quinquagesima
 ash-wednesday
 lent-i
