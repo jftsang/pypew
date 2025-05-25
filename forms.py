@@ -1,10 +1,13 @@
 from flask import request
 from flask_wtf import FlaskForm, Form
-from wtforms import DateField, HiddenField, SelectField, SelectMultipleField, \
-    StringField
 from wtforms import (
+    DateField,
+    FormField,
+    HiddenField,
+    SelectField,
+    SelectMultipleField,
+    StringField,
     TimeField,
-    FormField
 )
 from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea
