@@ -137,3 +137,5 @@ dmypy.json
 # Data
 *.xlsx
 *.csv
+!data/feasts.csv
+!data/neh.csv
