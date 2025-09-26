@@ -22,4 +22,4 @@ fields = "name,month,day,coeaster,coadvent,introit,collect,epistle_ref,epistle,g
 )
 df = df[fields]
 
-df.to_csv(feastdir / "feasts.csv", index=False)
+df.to_csv(feastdir.parent / "feasts.csv", index=False)
