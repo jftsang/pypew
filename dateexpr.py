@@ -3,6 +3,7 @@ import re
 from datetime import date
 
 import dateutil
+import dateutil.parser
 from dateutil.easter import easter
 
 aliases = {
