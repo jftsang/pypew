@@ -22,3 +22,7 @@ def internal_error_handler(error):
 
 def not_found_handler(error):
     return make_response(render_template('404.html', error=error), 404)
+
+
+def dateexpr_view():
+    return render_template('dateexpr.html')

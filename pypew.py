@@ -6,7 +6,7 @@ from threading import Thread
 from typing import Optional, Sequence
 
 from dotenv import load_dotenv
-from flask import Flask, url_for, redirect, request
+from flask import Flask, redirect, request, url_for
 from jinja2 import StrictUndefined
 
 import filters
@@ -47,6 +47,7 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
         '/', 'index_view', views.index_view, methods=['GET', 'POST']
     )
     app.add_url_rule('/acknowledgements', 'acknowledgements_view', views.acknowledgements_view)
+    app.add_url_rule('/dateexpr', 'dateexpr_view', views.dateexpr_view)
     app.add_url_rule('/feasts', 'feast_index_view', views.feast_index_view)
     app.add_url_rule('/feasts/api', 'feast_index_api', views.feast_index_api)
     app.add_url_rule('/feasts/api/upcoming', 'feast_upcoming_api', views.feast_upcoming_api)
