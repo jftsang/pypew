@@ -28,9 +28,11 @@ def not_found_handler(error):
 def dateexpr_view():
     dexpr = request.args.get('dexpr') or ""
     try:
-        date = dateexpr.parse(dexpr) if dexpr else ""
+        date = dateexpr.parse(dexpr) if dexpr else None
+        error = None
     except Exception as e:
-        date = f"I couldn't parse this date expression, sorry: {e}"
+        date = None
+        error = repr(e)
 
     examples = [
         "4th Sunday before Christmas",
@@ -46,5 +48,6 @@ def dateexpr_view():
         'dateexpr.html',
         dexpr=dexpr or "",
         date=date,
+        error=error,
         examples=examples
     )

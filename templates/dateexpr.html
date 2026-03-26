@@ -3,7 +3,13 @@
 {% block content %}
   <h1>dateexpr test page</h1>
 
-  <strong>{{ dexpr }}</strong> is <strong>{{ date | english_date }}</strong>.
+  {% if date %}
+    <strong>{{ dexpr }}</strong> is <strong>{{ date | english_date }}</strong>.
+  {% endif %}
+
+  {% if error %}
+    <span style="color: red"><strong>{{ error }}</strong></span>
+  {% endif %}
 
 
   <form action="{{ url_for('dateexpr_view') }}" method="get">
