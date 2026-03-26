@@ -32,4 +32,18 @@
     }
   </style>
 
+  <h2>Language spec</h2>
+
+  <pre>
+  &lt;date-expr&gt; ::= &lt;simple-expr&gt; | &lt;compound-expr&gt;
+  &lt;compound-expr&gt; ::= &lt;clause&gt; &lt;date-expr&gt;
+  &lt;clause&gt; ::= &lt;nearest-clause&gt; | &lt;relative-clause&gt;
+  &lt;nearest-clause&gt; ::= &lt;day-of-week&gt; "nearest"
+  &lt;relative-clause&gt; ::= &lt;relative-what&gt; &lt;relative-how&gt;
+  &lt;relative-how&gt; ::= "before" | "after"
+  &lt;relative-what&gt; ::= &lt;number&gt; &lt;unit&gt;
+  &lt;unit&gt; ::= &lt;day-of-week&gt; | "days" | "weeks"
+  </pre>
+
+
 {% endblock %}
