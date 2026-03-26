@@ -47,7 +47,12 @@ def create_app(pypew: Optional[PyPew] = None, **kwargs) -> Flask:
         '/', 'index_view', views.index_view, methods=['GET', 'POST']
     )
     app.add_url_rule('/acknowledgements', 'acknowledgements_view', views.acknowledgements_view)
-    app.add_url_rule('/dateexpr', 'dateexpr_view', views.dateexpr_view)
+    app.add_url_rule(
+        '/dateexpr',
+        'dateexpr_view',
+        views.dateexpr_view,
+        methods=['GET', 'POST']
+    )
     app.add_url_rule('/feasts', 'feast_index_view', views.feast_index_view)
     app.add_url_rule('/feasts/api', 'feast_index_api', views.feast_index_api)
     app.add_url_rule('/feasts/api/upcoming', 'feast_upcoming_api', views.feast_upcoming_api)
@@ -105,7 +110,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
     if args.debug:
         # noinspection FlaskDebugMode
-        app.run(debug=True, load_dotenv=True)
+        app.run(host='0.0.0.0', debug=True, load_dotenv=True)
 
     else:
         logger.info('Starting Flask app thread...')

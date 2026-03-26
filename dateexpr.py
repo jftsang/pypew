@@ -9,6 +9,8 @@ from dateutil.easter import easter
 aliases = {
     "Christmas": "25 December",
     "Christmas Day": "Christmas",
+    "Boxing Day": "1 day after Christmas",
+    "Epiphany": "13 days after Christmas",
     "Advent Sunday": "4th Sunday before Christmas",
     "Good Friday": "Friday before Easter",
     "Easter Sunday": "Easter",
@@ -48,8 +50,6 @@ def parse_compound(expr: str, year=None) -> date:
     op = m.group("op")
     base = m.group("base")
     basedate = parse_compound(base, year)
-
-    print(modifier, op, base, sep=" | ")
 
     if op in {"after", "before"}:
         m = re.match(r"(?:(?P<num>\d+)\w* )?(?P<unit>\w+)", modifier)

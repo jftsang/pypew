@@ -1,7 +1,8 @@
 from traceback import format_exc
 
-from flask import (make_response, render_template)
+from flask import (make_response, render_template, request)
 
+import dateexpr
 from utils import logger
 from .feast_views import *
 from .pew_sheet_views import *
@@ -25,4 +26,25 @@ def not_found_handler(error):
 
 
 def dateexpr_view():
-    return render_template('dateexpr.html')
+    dexpr = request.args.get('dexpr') or ""
+    try:
+        date = dateexpr.parse(dexpr) if dexpr else ""
+    except Exception as e:
+        date = f"I couldn't parse this date expression, sorry: {e}"
+
+    examples = [
+        "4th Sunday before Christmas",
+        "Epiphany",
+        "1st Sunday after 13 days after Christmas",
+        "Easter",
+        "Easter Monday",
+        "17 weeks after Easter",
+        "11 November",
+        "Remembrance Sunday",
+    ]
+    return render_template(
+        'dateexpr.html',
+        dexpr=dexpr or "",
+        date=date,
+        examples=examples
+    )

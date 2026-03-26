@@ -3,5 +3,27 @@
 {% block content %}
   <h1>dateexpr test page</h1>
 
+  <strong>{{ dexpr }}</strong> is <strong>{{ date | english_date }}</strong>.
+
+
+  <form action="{{ url_for('dateexpr_view') }}" method="get">
+    <datalist id="examples">
+      {% for example in examples %}
+        <option value="{{ example }}">{{ example }}</option>
+      {% endfor %}
+    </datalist>
+    <label for="dexpr">Date expression: </label>
+    <input id="dexpr" name="dexpr"
+           list="examples"
+           placeholder="4th Sunday before Christmas"
+           value="{{ dexpr }}">
+    <input type="submit">
+  </form>
+
+  <style>
+    input#dexpr {
+      width: 100%;
+    }
+  </style>
 
 {% endblock %}
