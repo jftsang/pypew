@@ -1,3 +1,6 @@
+<dialog id="feast-dialog">
+    {% include "createFeast.html" %}
+</dialog>
 <form action="{{ url_for('pew_sheet_create_view') }}"
       class="px-5">
     <div class="row mb-3">
@@ -32,7 +35,7 @@
     <div class="row mb-3">
         {{ form.secondary_feasts.label(class='col-sm-2 col-form-label') }}
         <div class="col-sm-5">
-            {{ form.secondary_feasts(class='form-select') }}
+            {{ form.secondary_feasts(class='form-select', formnovalidate=True) }}
             {% if form.secondary_feasts.errors %}
                 {% for error in form.secondary_feasts.errors %}
                     <small class="font-small text-danger">
@@ -41,8 +44,10 @@
                 {% endfor %}
             {% endif %}
         </div>
+        <div class="col-sm-3">
+            <button id="add-feast-dialog" type="button">Add Feast</button>
+        </div>
     </div>
-
 
     <div class="row mb-3">
         {{ form.date.label(class='col-sm-1 col-form-label') }}
@@ -183,3 +188,136 @@
 </form>
 
 <script src="{{ url_for('static', filename='serviceForm.js') }}"></script>
+<script>
+
+    // Note: logic needs to be able to access python API and hence was placed here
+    var feastsArray = [];
+    var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]; 
+    // source: https://www.freecodecamp.org/news/format-dates-with-ordinal-number-suffixes-javascript/
+    const nthNumber = (number) => {
+        if (number > 3 && number < 21) return "th";
+        switch (number % 10) {
+            case 1:
+            return "st";
+            case 2:
+            return "nd";
+            case 3:
+            return "rd";
+            default:
+            return "th";
+        }
+    };
+    var feastName = document.getElementById("feast-name");
+    var feastDay = document.getElementById("feast-day");
+    var feastMonth = document.getElementById("feast-month");
+    feastName.addEventListener('change', checkForNameDuplicates);
+    feastDay.addEventListener('change', checkForDateDuplicates);
+    feastMonth.addEventListener('change', checkForDateDuplicates);
+    
+    function checkForDateDuplicates() {
+        var day = feastDay.value? parseInt(feastDay.value) : 0;
+        var month = feastMonth.value? parseInt(feastMonth.value): 0;
+        if(day == 0 || month == 0){
+            return;
+        }
+        console.log(nthNumber(day) + ', ' + monthNames[month-1]);
+        var similarityDetected = false;
+        feastsArray.every(function (el) {
+            // compare date of feast to input month and day
+            var dateComponents = el.next.split(' ');
+            if(dateComponents.length == 4 && (day + nthNumber(day) == dateComponents[1]) && monthNames[month-1] == dateComponents[2]){
+                similarityDetected = true;
+                return false;
+            }
+            
+            return true;
+        });
+
+        if (similarityDetected) {
+            alert("You're creating a feast for " + day + "." + month + "., but there already exists a feast on this date; are you accidentally creating a duplicate?");
+        }
+    }
+
+    function checkForNameDuplicates() {
+        var input = feastName.value;
+        var words = input.split(' ');
+        var similarityCt = 0, similarFeast = '';
+        feastsArray.every(function (el) {
+            if (similarityCt > 1) {
+                return false;
+            }
+            similarityCt = 0;
+            words.every(function (word) {
+                if (similarityCt > 1) {
+                    return false;
+                }
+                if (el.name.includes(word)) {
+                    if (word != 'and') {
+                        similarityCt++;
+                    }
+                    if(similarityCt == 2){
+                        similarFeast = el.name;
+                    }
+                }
+                return true;
+            });
+            return true;
+        });
+
+        if (similarityCt > 1) {
+            alert("You're inputting " + input + ", but " + similarFeast + " already exists; are you accidentally creating a duplicate?");
+        }
+    }
+
+    const dialog = document.getElementById("feast-dialog");
+    const addFeastBtn = document.getElementById('add-feast-dialog');
+    addFeastBtn.onclick = () => {
+        dialog.showModal();
+    };
+
+    const cancelButton = document.getElementById("cancel");
+    cancelButton.onclick = () => {
+        dialog.close("Feast creation cancelled");
+    };
+
+    function updateFeasts(){
+        // refresh feasts
+        console.log('retrieved data from database');
+        const feastsApiUrl = "{{ url_for('feast_upcoming_api') }}";
+        fetch(feastsApiUrl).then(response => response.json())
+        .then(function(response) {
+            // clear choice options
+            var secondaryFeastsField = document.getElementById('secondary_feasts');
+            secondaryFeastsField.replaceChildren();
+            // recreate choice options
+            response.forEach(element => {
+                var opt = document.createElement('option');
+                opt.text = element.name;
+                opt.value = element.slug;
+                secondaryFeastsField.add(opt);
+            });
+            feastsArray = response;
+        });
+    }
+
+    const createFeastBtn = document.getElementById("create-feast");
+    createFeastBtn.onclick = () => {
+        try {
+            dialog.close("Feast creation request submitted!");
+            // wait some time for database update
+            const myTimeout = setTimeout(updateFeasts, 2000);
+        } catch (error) {
+            dialog.close("Feast creation aborted due to errors!");
+        }
+    };
+
+    dialog.addEventListener('close', function (e) {
+        e.preventDefault();
+        console.log(dialog.returnValue);
+    });  
+
+    // load secondary feast options on init
+    (() => {
+        updateFeasts();
+    })();
+</script>

@@ -10,12 +10,26 @@ from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea
 
 from models import Feast, Music
+from utils import logger
 
 hymns = [('', 'None')] + [(h.ref, f'{h.ref} - {h.title}') for h in
                           Music.neh_hymns()]
 
 translations = [('', 'None')] + [(h.translation, f'{h.translation}') for h in
                           Music.neh_hymns()]
+
+class FeastForm(FlaskForm):
+    # Required fields
+    name = StringField('Name', validators=[DataRequired()])
+    month = StringField('Month', validators=[DataRequired()])
+    day = StringField('Day', validators=[DataRequired()])
+    collect = StringField('Collect', widget=TextArea(), validators=[DataRequired()])
+    # Optional fields
+    introit = StringField('Introit', widget=TextArea())
+    offertory = StringField('Offertory', widget=TextArea())
+    tract = StringField('Tract', widget=TextArea())
+    gradual = StringField('Gradual', widget=TextArea())
+    alleluia = StringField('Alleluia', widget=TextArea())
 
 class AnthemForm(Form):
     title = StringField('Anthem')
@@ -33,7 +47,7 @@ class PewSheetForm(FlaskForm):
     )
     secondary_feasts = SelectMultipleField(
         'Secondary Feasts',
-        choices=[('', '')] + feast_choices,
+        choices=[('', '')] + feast_choices, validate_choice=False
     )
     date = DateField('Date', validators=[DataRequired()])
     time = TimeField('Time', validators=[DataRequired()])
