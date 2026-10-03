@@ -3,41 +3,31 @@ import re
 import typing
 from abc import ABC, abstractmethod
 from functools import lru_cache
-from typing import Optional
+from typing import Literal
 
 import jinja2
 import yaml
-from attr import define, field
 from dateutil.easter import easter
 from docx import Document
 from docxtpl import DocxTemplate, RichText
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-from .models_base import get
+from .models_base import NotFoundError, get
 from .paths import FEASTS_DIR, PEW_SHEET_TEMPLATE
 from .utils import NoPandasError, advent, closest_sunday_to, get_neh_df, logger
 
 if typing.TYPE_CHECKING:
     from .forms import PewSheetForm
 
-feasts_fields = [
-    "name",
-    "month",
-    "day",
-    "coeaster",
-    "coadvent",
-    "introit",
-    "collect",
-    "epistle_ref",
-    "epistle",
-    "gat",
-    "gradual",
-    "alleluia",
-    "tract",
-    "gospel_ref",
-    "gospel",
-    "offertory",
-    "communion",
-]
+
+class PypewModel(BaseModel):
+    """Base class for the app's models.
+
+    ``extra="forbid"`` rejects unknown fields, so a mistyped key in a feast
+    YAML file is reported instead of silently dropped.
+    """
+
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
 
 def _none2datemax(d: dt.date | None) -> dt.date:
@@ -47,14 +37,40 @@ def _none2datemax(d: dt.date | None) -> dt.date:
     return d
 
 
-@define
-class Feast:
+class Feast(PypewModel):
+    slug: str
+    name: str
+
+    # Specified for the fixed holy days, None for the movable feasts.
+    # TODO - what about Remembrance Sunday and Advent Sunday? Not fixed
+    #  days but also not comoving with Easter. As a hack go with 11 Nov
+    #  and 30 Nov respectively but the exact dates are
+    month: int | None = None
+    day: int | None = None
+
+    # For the feasts synced with Easter, the number of days since Easter
+    coeaster: int | None = None
+    coadvent: int | None = None
+
+    introit: str | None = None
+    collect: str | None = None
+    epistle_ref: str | None = None
+    epistle: str | None = None
+    gat: str = ""
+    gradual: str | None = None
+    alleluia: str | None = None
+    tract: str | None = None
+    gospel_ref: str | None = None
+    gospel: str | None = None
+    offertory: str | None = None
+    communion: str | None = None
+
     @classmethod
-    def from_yaml(cls, slug):
+    def from_yaml(cls, slug: str) -> "Feast":
         return _feast_from_yaml(slug)
 
     @classmethod
-    def all(cls):
+    def all(cls) -> list["Feast"]:
         with open(FEASTS_DIR / "_list.txt") as f:
             slugs = [x.strip() for x in f]
             return [cls.from_yaml(slug) for slug in slugs]
@@ -76,37 +92,10 @@ class Feast:
         return min(Feast.all(), key=lambda f: _none2datemax(f.get_next_date(date)))
 
     @classmethod
-    def get(cls, **kwargs):
+    def get(cls, **kwargs) -> "Feast":
         return get(cls.all(), **kwargs)
 
-    slug: str = field()
-    name: str = field()
-
-    # Specified for the fixed holy days, None for the movable feasts.
-    # TODO - what about Remembrance Sunday and Advent Sunday? Not fixed
-    #  days but also not comoving with Easter. As a hack go with 11 Nov
-    #  and 30 Nov respectively but the exact dates are
-    month: int | None = field(default=None)
-    day: int | None = field(default=None)
-
-    # For the feasts synced with Easter, the number of days since Easter
-    coeaster: int | None = field(default=None)
-    coadvent: int | None = field(default=None)
-
-    introit: str | None = field(default=None)
-    collect: str | None = field(default=None)
-    epistle_ref: str | None = field(default=None)
-    epistle: str | None = field(default=None)
-    gat: str = field(default="")
-    gradual: str | None = field(default=None)
-    alleluia: str | None = field(default=None)
-    tract: str | None = field(default=None)
-    gospel_ref: str | None = field(default=None)
-    gospel: str | None = field(default=None)
-    offertory: str | None = field(default=None)
-    communion: str | None = field(default=None)
-
-    def get_date(self, year=None) -> dt.date | None:
+    def get_date(self, year: int | None = None) -> dt.date | None:
         if year is None:
             # FIXME(DTZ005): local wall-clock year, timezone irrelevant
             year = dt.datetime.now().year
@@ -129,7 +118,7 @@ class Feast:
         return None
 
     @property
-    def date(self):
+    def date(self) -> dt.date | None:
         """The date of the feast in the present year."""
         return self.get_date()
 
@@ -150,33 +139,27 @@ class Feast:
         return next_occurrence
 
     @property
-    def next_date(self):
+    def next_date(self) -> dt.date | None:
         """The next occurrence of the feast, which may be in the next
         calendar year.
         """
         return self.get_next_date()
 
-    def create_docx(self, path):
+    def create_docx(self, path) -> None:
         document = Document()
         document.add_heading(self.name, 0)
         document.save(path)
 
 
-@define
-class DateRule:
-    # Specified for the fixed holy days, None for the movable feasts.
-    # TODO - what about Remembrance Sunday and Advent Sunday? Not fixed
-    #  days but also not comoving with Easter. As a hack go with 11 Nov
-    #  and 30 Nov respectively but the exact dates are
-    month: int | None = field(default=None)
-    day: int | None = field(default=None)
+class PewSheetItem(PypewModel, ABC):
+    """A block of a pew sheet: a heading, an optional subtitle and some
+    paragraphs.
 
-    # For the feasts synced with Easter, the number of days since Easter
-    coeaster: int | None = field(default=None)
-    coadvent: int | None = field(default=None)
+    Subclasses expose ``title``, ``subtitle`` and ``paragraphs``, either as
+    fields or as computed properties, so that jinja templates and the
+    docx renderer can treat every block the same way.
+    """
 
-
-class PewSheetItem(ABC):
     @abstractmethod
     def as_richtext(self) -> RichText:
         raise NotImplementedError
@@ -189,14 +172,13 @@ class CharacterStyles:
     paragraph = {"font": "Cambria", "size": 20}
 
 
-@define
-class Music:
-    title: str = field()
-    category: str = field()  # Anthem or Hymn or Plainsong
-    composer: str | None = field()
-    lyrics: str | None = field()
-    ref: str | None = field()
-    translation: str | None = field()
+class Music(PypewModel):
+    title: str
+    category: Literal["Anthem", "Hymn", "Plainsong"]
+    composer: str | None = None
+    lyrics: str | None = None
+    ref: str | None = None
+    translation: str | None = None
 
     @classmethod
     def neh_hymns(cls) -> list["Music"]:
@@ -228,20 +210,22 @@ class Music:
         return hymns
 
     @classmethod
-    def get_neh_hymn_by_ref(cls, ref: str) -> Optional["Music"]:
+    def get_neh_hymn_by_ref(cls, ref: str) -> "Music | None":
         try:
             return next(filter(lambda h: h.ref == ref, cls.neh_hymns()))
         except StopIteration:
             return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.category == "Hymn":
             return f"{self.ref}, {self.title}"
-        return super().__str__()
+        if self.composer:
+            return f"{self.title} ({self.composer})"
+        return self.title
 
     def as_richtext(self) -> RichText:
         if self.category != "Hymn":
-            return RichText(super().__str__())
+            return RichText(str(self))
 
         assert self.ref is not None
 
@@ -251,11 +235,10 @@ class Music:
         return rt
 
 
-@define
 class ServiceItem(PewSheetItem):
-    title: str = field(default="")
-    paragraphs: list[typing.Any] = field(factory=list)
-    subtitle: str | None = field(default=None)
+    title: str = ""
+    paragraphs: list[typing.Any] = Field(default_factory=list)
+    subtitle: str | None = None
 
     def as_richtext(self) -> RichText:
 
@@ -272,20 +255,22 @@ class ServiceItem(PewSheetItem):
         return rt
 
 
-@define
 class CollectItem(PewSheetItem):
-    collects: list[str] = field(factory=list)
+    collects: list[str] = Field(default_factory=list)
 
+    @computed_field  # type: ignore[prop-decorator]
     @property
-    def title(self):
+    def title(self) -> str:
         return "Collect" if len(self.collects) == 1 else "Collects"
 
+    @computed_field  # type: ignore[prop-decorator]
     @property
-    def subtitle(self):
+    def subtitle(self) -> str | None:
         return None
 
+    @computed_field  # type: ignore[prop-decorator]
     @property
-    def paragraphs(self):
+    def paragraphs(self) -> list[str]:
         return self.collects
 
     def as_richtext(self) -> RichText:
@@ -301,17 +286,18 @@ class CollectItem(PewSheetItem):
         return rt
 
 
-@define
 class MusicItem(PewSheetItem):
-    title: str = field()
-    music: Music = field()
+    title: str
+    music: Music
 
+    @computed_field  # type: ignore[prop-decorator]
     @property
-    def subtitle(self):
+    def subtitle(self) -> str | None:
         return None
 
+    @computed_field  # type: ignore[prop-decorator]
     @property
-    def paragraphs(self):
+    def paragraphs(self) -> list[str]:
         return [str(self.music)]
 
     def as_richtext(self) -> RichText:
@@ -322,21 +308,20 @@ class MusicItem(PewSheetItem):
         return rt
 
 
-@define
-class Service:
+class Service(PypewModel):
     # Mandatory fields first, then fields with default values.
-    title: str = field()
-    date: dt.date = field()
-    primary_feast: Feast = field()
-    time: dt.time = field(default=dt.time(11, 0))
-    secondary_feasts: [Feast] = field(factory=list)
-    celebrant: str = field(default="")
-    preacher: str = field(default="")
-    introit_hymn: Music | None = field(default=None)
-    offertory_hymn: Music | None = field(default=None)
-    recessional_hymn: Music | None = field(default=None)
-    anthem: Music | None = field(default=None)
-    service_type: str = field(default="Sung Mass")
+    title: str
+    date: dt.date
+    primary_feast: Feast
+    time: dt.time = dt.time(11, 0)
+    secondary_feasts: list[Feast] = Field(default_factory=list)
+    celebrant: str = ""
+    preacher: str = ""
+    introit_hymn: Music | None = None
+    offertory_hymn: Music | None = None
+    recessional_hymn: Music | None = None
+    anthem: Music | None = None
+    service_type: str = "Sung Mass"
 
     # One can't call methods in jinja2 templates, so one must provide
     # everything as member properties instead.
@@ -415,33 +400,51 @@ class Service:
     def items(self) -> list[PewSheetItem]:
         items: list[PewSheetItem] = []
         if self.introit_hymn:
-            items.append(MusicItem("Introit Hymn", self.introit_hymn))
-        items.append(ServiceItem("Introit Proper", [self.introit_proper]))
+            items.append(MusicItem(title="Introit Hymn", music=self.introit_hymn))
+        items.append(
+            ServiceItem(title="Introit Proper", paragraphs=[self.introit_proper])
+        )
 
-        collects = CollectItem(self.collects)
+        collects = CollectItem(collects=self.collects)
         items.append(collects)
 
-        items.append(ServiceItem("Epistle", [self.epistle], self.epistle_ref))
-        items.append(ServiceItem(self.gat, self.gat_propers))
-        items.append(ServiceItem("Gospel", [self.gospel], self.gospel_ref))
+        items.append(
+            ServiceItem(
+                title="Epistle",
+                paragraphs=[self.epistle],
+                subtitle=self.epistle_ref,
+            )
+        )
+        items.append(ServiceItem(title=self.gat, paragraphs=self.gat_propers))
+        items.append(
+            ServiceItem(
+                title="Gospel", paragraphs=[self.gospel], subtitle=self.gospel_ref
+            )
+        )
 
-        items.append(ServiceItem("Offertory Proper", [self.offertory_proper]))
+        items.append(
+            ServiceItem(title="Offertory Proper", paragraphs=[self.offertory_proper])
+        )
         if self.offertory_hymn:
-            items.append(MusicItem("Offertory Hymn", self.offertory_hymn))
+            items.append(MusicItem(title="Offertory Hymn", music=self.offertory_hymn))
 
-        items.append(ServiceItem("Communion Proper", [self.communion_proper]))
+        items.append(
+            ServiceItem(title="Communion Proper", paragraphs=[self.communion_proper])
+        )
 
         if self.anthem:
             items.append(
                 ServiceItem(
-                    "Anthem",
-                    [self.anthem.lyrics, self.anthem.translation],
-                    f"{self.anthem.title}. {self.anthem.composer}",
+                    title="Anthem",
+                    paragraphs=[self.anthem.lyrics, self.anthem.translation],
+                    subtitle=f"{self.anthem.title}. {self.anthem.composer}",
                 )
             )
 
         if self.recessional_hymn:
-            items.append(MusicItem("Recessional Hymn", self.recessional_hymn))
+            items.append(
+                MusicItem(title="Recessional Hymn", music=self.recessional_hymn)
+            )
 
         return items
 
@@ -455,8 +458,11 @@ class Service:
         else:
             secondary_feasts = []
 
-        if form.anthem_group.data:
-            ag = form.anthem_group
+        ag = form.anthem_group
+        # The browser submits every form field, so an anthem group reports
+        # data even when the user left it blank; the title is what decides
+        # whether there is an anthem at all.
+        if ag.title.data:
             anthem = Music(
                 title=ag.title.data,
                 composer=ag.composer.data,
@@ -469,11 +475,11 @@ class Service:
             anthem = None
 
         return Service(
-            title=form.title.data,
+            title=form.title.data or "",
             date=form.date.data,
             time=form.time.data,
-            celebrant=form.celebrant.data,
-            preacher=form.preacher.data,
+            celebrant=form.celebrant.data or "",
+            preacher=form.preacher.data or "",
             primary_feast=primary_feast,
             secondary_feasts=secondary_feasts,
             introit_hymn=Music.get_neh_hymn_by_ref(form.introit_hymn.data),
@@ -482,7 +488,7 @@ class Service:
             anthem=anthem,
         )
 
-    def create_docx(self, path):
+    def create_docx(self, path) -> None:
         doc = DocxTemplate(PEW_SHEET_TEMPLATE)
         jinja_env = jinja2.Environment(autoescape=True)
         jinja_env.globals["len"] = len
@@ -497,6 +503,9 @@ class Service:
 
 @lru_cache
 def _feast_from_yaml(slug: str) -> Feast:
-    with open((FEASTS_DIR / slug).with_suffix(".yaml")) as f:
+    path = (FEASTS_DIR / slug).with_suffix(".yaml")
+    if not path.is_file():
+        raise NotFoundError({"slug": slug})
+    with open(path) as f:
         info = yaml.safe_load(f)
-        return Feast(slug=slug, **info)
+        return Feast.model_validate({"slug": slug, **info})

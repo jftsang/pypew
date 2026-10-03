@@ -19,16 +19,6 @@ logger = logging.getLogger("pypew")
 logger.setLevel(logging.INFO)
 
 
-def str2date(s: str | None) -> date:
-    """Parse the date string if one is given. If None or empty, return
-    today.
-    """
-    if not s:
-        # FIXME(DTZ011): naive local date is correct here
-        return date.today()
-    return date.fromisoformat(s)
-
-
 @lru_cache
 def get_neh_df():
     try:

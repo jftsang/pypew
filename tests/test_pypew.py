@@ -186,6 +186,77 @@ class TestViews(unittest.TestCase):
         r = self.client.get(endpoint)
         self.assertEqual(200, r.status_code, msg=f"Couldn't load {endpoint}")
 
+    def test_feast_index_api(self):
+        r = self.client.get(url_for("feast_index_api"))
+        self.assertEqual(200, r.status_code)
+        self.assertTrue(r.is_json)
+
+        feasts = r.get_json()
+        self.assertEqual(len(feasts), len(Feast.all()))
+        self.assertEqual(
+            set(feasts[0]),
+            set(Feast.model_fields),
+            msg="every field should be serialized",
+        )
+        self.assertEqual(feasts[0]["slug"], Feast.all()[0].slug)
+
+    def test_feast_detail_api_serializes_every_field(self):
+        r = self.client.get(url_for("feast_detail_api", slug="christmas-day"))
+        self.assertEqual(200, r.status_code)
+        self.assertTrue(r.is_json)
+
+        feast = r.get_json()
+        self.assertEqual(set(feast), set(Feast.model_fields))
+        self.assertEqual(feast["name"], "Christmas Day")
+
+    @parameterized.expand(
+        [
+            ("2022", "2022-11-27"),
+            ("2024", "2024-12-01"),
+        ]
+    )
+    def test_feast_date_api_with_year(self, year, expected_date):
+        r = self.client.get(
+            url_for("feast_date_api", slug="advent-i") + f"?year={year}"
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(r.get_json(), expected_date)
+
+    def test_feast_date_api_with_bad_year(self):
+        r = self.client.get(
+            url_for("feast_date_api", slug="advent-i") + "?year=not-a-year"
+        )
+        self.assertEqual(400, r.status_code)
+
+    def test_feast_date_api_handles_not_found(self):
+        r = self.client.get(url_for("feast_date_api", slug="notmas-day"))
+        self.assertEqual(404, r.status_code)
+
+    def test_feast_upcoming_api(self):
+        r = self.client.get(url_for("feast_upcoming_api") + "?date=2022-01-01")
+        self.assertEqual(200, r.status_code)
+        self.assertTrue(r.is_json)
+
+        upcoming = r.get_json()
+        self.assertEqual(len(upcoming), len(Feast.all()))
+        self.assertEqual(
+            [f["index"] for f in upcoming],
+            list(range(len(upcoming))),
+            msg="the soonest feast comes first",
+        )
+        self.assertEqual(upcoming[0]["slug"], "the-naming-circumcision-of-christ")
+        self.assertEqual(upcoming[0]["name"], "The Naming & Circumcision of Christ")
+        self.assertEqual(upcoming[0]["next"], "Saturday 1st January 2022")
+
+    def test_feast_upcoming_api_defaults_to_today(self):
+        r = self.client.get(url_for("feast_upcoming_api"))
+        self.assertEqual(200, r.status_code)
+        self.assertTrue(r.get_json())
+
+    def test_feast_upcoming_api_with_bad_date(self):
+        r = self.client.get(url_for("feast_upcoming_api") + "?date=not-a-date")
+        self.assertEqual(400, r.status_code)
+
     def test_feast_detail_view_handles_not_found(self):
         r = self.client.get(url_for("feast_detail_view", slug="notmas-day"))
         self.assertEqual(r.status_code, 404)
