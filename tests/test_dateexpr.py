@@ -78,6 +78,13 @@ class TestDateExpr(TestCase):
             == parse("Sunday nearest 11 November", 2026)
             == date(2026, 11, 8)
         )
+        # Whit Sunday is Pentecost, and Trinity Sunday the Sunday after it,
+        # so the two aliases must stay a week apart.
+        assert parse("Whit Sunday", 2026) == date(2026, 5, 24)
+        assert parse("Trinity Sunday", 2026) == date(2026, 5, 31)
+        assert parse("Trinity Sunday", 2026) - parse(
+            "Whit Sunday", 2026
+        ) == dt.timedelta(days=7)
 
 
 if __name__ == "__main__":

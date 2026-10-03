@@ -7,17 +7,21 @@ from typing import Literal
 
 import jinja2
 import yaml
-from dateutil.easter import easter
 from docx import Document
 from docxtpl import DocxTemplate, RichText
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
+from .dateexpr import parse
 from .models_base import NotFoundError, get
 from .paths import FEASTS_DIR, PEW_SHEET_TEMPLATE
-from .utils import NoPandasError, advent, closest_sunday_to, get_neh_df, logger
+from .utils import NoPandasError, get_neh_df, logger
 
 if typing.TYPE_CHECKING:
     from .forms import PewSheetForm
+
+# Any one year will do for validating a date expression, so pin one to keep
+# the verdict from depending on when the feast files happen to be loaded.
+VALIDATION_YEAR = 2024
 
 
 class PypewModel(BaseModel):
@@ -41,16 +45,10 @@ class Feast(PypewModel):
     slug: str
     name: str
 
-    # Specified for the fixed holy days, None for the movable feasts.
-    # TODO - what about Remembrance Sunday and Advent Sunday? Not fixed
-    #  days but also not comoving with Easter. As a hack go with 11 Nov
-    #  and 30 Nov respectively but the exact dates are
-    month: int | None = None
-    day: int | None = None
-
-    # For the feasts synced with Easter, the number of days since Easter
-    coeaster: int | None = None
-    coadvent: int | None = None
+    # Date expression giving the date of the feast, e.g. "Easter",
+    # "8 weeks after Easter" or "25 December". None for feasts that are not
+    # tied to a date of their own.
+    dateexpr: str | None = None
 
     introit: str | None = None
     collect: str | None = None
@@ -95,27 +93,31 @@ class Feast(PypewModel):
     def get(cls, **kwargs) -> "Feast":
         return get(cls.all(), **kwargs)
 
+    @field_validator("dateexpr")
+    @classmethod
+    def _valid_dateexpr(cls, v: str | None) -> str | None:
+        """Reject an unparseable expression when the feast is loaded.
+
+        Otherwise a typo in a feast file stays hidden until someone opens
+        that feast, where the error names no feast at all.
+        """
+        if v is None:
+            return None
+        try:
+            parse(v, VALIDATION_YEAR)
+        except Exception as exc:  # FIXME(BLE001): dateexpr raises several types
+            raise ValueError(f"invalid date expression {v!r}: {exc}") from exc
+        return v
+
     def get_date(self, year: int | None = None) -> dt.date | None:
+        if self.dateexpr is None:
+            return None
+
         if year is None:
             # FIXME(DTZ005): local wall-clock year, timezone irrelevant
             year = dt.datetime.now().year
 
-        if self.month is not None and self.day is not None:
-            # TODO Check this definition
-            if self.name == "Remembrance Sunday":
-                return closest_sunday_to(dt.date(year, self.month, self.day))
-
-            return dt.date(year, self.month, self.day)
-
-        assert not (self.coeaster is not None and self.coadvent is not None)
-
-        if self.coeaster is not None:
-            return easter(year) + dt.timedelta(days=self.coeaster)
-
-        if self.coadvent is not None:
-            return advent(year) + dt.timedelta(days=self.coadvent)
-
-        return None
+        return parse(self.dateexpr, year)
 
     @property
     def date(self) -> dt.date | None:

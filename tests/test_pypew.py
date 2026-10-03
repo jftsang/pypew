@@ -1,3 +1,4 @@
+import json
 import unittest
 from datetime import date
 from pathlib import Path
@@ -7,13 +8,24 @@ from urllib.parse import urlencode
 from dateutil.utils import today
 from flask import url_for
 from parameterized import parameterized
+from pydantic import ValidationError
 
 from pypew import views
 from pypew.app import create_app
 from pypew.filters import english_date
 from pypew.models import Feast, Music, Service
 from pypew.models_base import get
-from pypew.utils import advent
+
+# The date each feast falls on, as an ISO string or null, keyed by slug and
+# then year. This pins the date expressions in the feast files, so changing
+# one on purpose means regenerating this file -- and that regeneration shows
+# up in the diff as the dates that moved. Regenerate with:
+#
+#   uv run python -c 'import json; from pypew.models import Feast; \
+#     g = {f.slug: {str(y): (d.isoformat() if (d := f.get_date(y)) else None) \
+#       for y in range(2022, 2033)} for f in Feast.all()}; \
+#     open("tests/feast_dates.json", "w").write(json.dumps(g, indent=2) + "\n")'
+GOLDEN_DATES = json.loads((Path(__file__).parent / "feast_dates.json").read_text())
 
 
 def m_create_docx_impl(path):
@@ -23,29 +35,61 @@ def m_create_docx_impl(path):
 class TestDates(unittest.TestCase):
     @parameterized.expand(
         [
-            # Christmas Day in 2021 was a Saturday
-            (2021, date(2021, 11, 28)),
-            # Sunday (special case!)
-            (2022, date(2022, 11, 27)),
-            # Monday
-            (2023, date(2023, 12, 3)),
-        ]
-    )
-    def test_advent(self, year, expected_date):
-        self.assertEqual(advent(year), expected_date)
-
-    @parameterized.expand(
-        [
-            ("Advent I", 2022, date(2022, 11, 27)),  # coadvent
-            ("Christmas Day", 2022, date(2022, 12, 25)),  # fixed
-            ("Easter Day", 2022, date(2022, 4, 17)),  # coeaster
-            ("Trinity Sunday", 2022, date(2022, 6, 12)),  # coeaster
-            ("Remembrance Sunday", 2022, date(2022, 11, 13)),  # closest Sunday
-            ("Remembrance Sunday", 2024, date(2024, 11, 10)),  # closest Sunday
+            ("Advent I", 2022, date(2022, 11, 27)),  # Advent Sunday
+            ("Christmas Day", 2022, date(2022, 12, 25)),  # fixed date
+            ("Easter Day", 2022, date(2022, 4, 17)),  # Easter
+            ("Trinity Sunday", 2022, date(2022, 6, 12)),  # a week after Whit Sunday
+            ("Remembrance Sunday", 2022, date(2022, 11, 13)),  # nearest Sunday
+            ("Remembrance Sunday", 2024, date(2024, 11, 10)),  # nearest Sunday
         ]
     )
     def test_get_date(self, name, year, expected_date):
         self.assertEqual(Feast.get(name=name).get_date(year), expected_date)
+
+    def test_golden_dates(self):
+        """Every feast falls where the golden file says it does.
+
+        The feasts with no date of their own are recorded as null rather than
+        omitted, so one cannot quietly acquire a date expression either.
+        """
+        for slug, years in GOLDEN_DATES.items():
+            feast = Feast.from_yaml(slug)
+            for year, expected in years.items():
+                with self.subTest(slug=slug, year=year):
+                    actual = feast.get_date(int(year))
+                    assert (
+                        actual is None and expected is None
+                    ) or actual == date.fromisoformat(expected)
+
+    def test_golden_dates_cover_every_feast(self):
+        """A new feast file fails here until the golden file is regenerated."""
+        self.assertEqual(set(GOLDEN_DATES), {f.slug for f in Feast.all()})
+
+    @parameterized.expand(
+        [
+            ("Easter",),
+            ("8 weeks after Easter",),
+            ("Remembrance Sunday",),
+            ("25 December",),
+            (None,),
+        ]
+    )
+    def test_valid_dateexpr_is_accepted(self, dateexpr):
+        Feast(slug="x", name="X", dateexpr=dateexpr)
+
+    @parameterized.expand(
+        [
+            ("banana",),
+            ("8 fortnights after Easter",),
+            ("Someday",),
+            ("25 December and also Easter",),
+        ]
+    )
+    def test_invalid_dateexpr_is_rejected(self, dateexpr):
+        """A typo in a feast file is reported when the file loads."""
+        with self.assertRaises(ValidationError) as cm:
+            Feast(slug="x", name="X", dateexpr=dateexpr)
+        self.assertIn(repr(dateexpr), str(cm.exception))
 
     @parameterized.expand(
         [

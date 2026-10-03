@@ -15,6 +15,8 @@ aliases = {
     "Good Friday": "Friday before Easter",
     "Easter Sunday": "Easter",
     "Easter Monday": "day after Easter",
+    "Whit Sunday": "7 weeks after Easter",
+    "Trinity Sunday": "8 weeks after Easter",
     "Remembrance Day": "11 November",
     "Remembrance Sunday": "Sunday nearest Remembrance Day",
 }
@@ -60,7 +62,6 @@ def parse_compound(expr: str, year=None) -> date:
 
     if op in {"after", "before"}:
         m = re.match(r"(?:(?P<num>\d+)\w* )?(?P<unit>\w+)", modifier)
-        # breakpoint()
         if not m:
             raise ValueError
         num = int(m.group("num") or 1)
@@ -78,8 +79,6 @@ def parse_compound(expr: str, year=None) -> date:
 
     else:
         raise ValueError
-
-    return basedate
 
 
 def apply_relative_clause(base: date, op: str, num: int, unit: str) -> date:
