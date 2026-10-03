@@ -8,8 +8,9 @@ from slugify import slugify  # python-slugify, not slugify
 
 from models import FEASTS_CSV
 
-feastdir = Path(FEASTS_CSV).parent / 'feasts'
-df = pd.read_csv(FEASTS_CSV).to_dict(orient='records')
+feastdir = Path(FEASTS_CSV).parent / "feasts"
+df = pd.read_csv(FEASTS_CSV).to_dict(orient="records")
+
 
 def isnan(x):
     if x is NA:
@@ -34,7 +35,7 @@ for d in df:
         d.pop(p)
 
     # convert fields, if they exist
-    for key in {'month', 'day', 'coeaster', 'coadvent'}:
+    for key in ("month", "day", "coeaster", "coadvent"):
         if key in d:
             d[key] = int(d[key])
 
@@ -49,13 +50,9 @@ for row in df:
         default_flow_style=False,
     )
 
-    sluglist.append(slug := slugify(row['name']))
-    with open(
-        (feastdir / slug).with_suffix('.yaml'),
-        'w'
-    ) as file:
+    sluglist.append(slug := slugify(row["name"]))
+    with open((feastdir / slug).with_suffix(".yaml"), "w") as file:
         file.write(text)
 
-with open(feastdir / '_list.txt', 'w') as f:
-    for x in sluglist:
-        f.write(x + '\n')
+with open(feastdir / "_list.txt", "w") as f:
+    f.writelines(x + "\n" for x in sluglist)

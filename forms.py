@@ -1,48 +1,53 @@
 from flask import request
 from flask_wtf import FlaskForm, Form
-from wtforms import DateField, HiddenField, SelectField, SelectMultipleField, \
-    StringField
 from wtforms import (
+    DateField,
+    FormField,
+    HiddenField,
+    SelectField,
+    SelectMultipleField,
+    StringField,
     TimeField,
-    FormField
 )
 from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea
 
 from models import Feast, Music
 
-hymns = [('', 'None')] + [(h.ref, f'{h.ref} - {h.title}') for h in
-                          Music.neh_hymns()]
+hymns = [("", "None")] + [(h.ref, f"{h.ref} - {h.title}") for h in Music.neh_hymns()]
 
-translations = [('', 'None')] + [(h.translation, f'{h.translation}') for h in
-                          Music.neh_hymns()]
+translations = [("", "None")] + [
+    (h.translation, f"{h.translation}") for h in Music.neh_hymns()
+]
+
 
 class AnthemForm(Form):
-    title = StringField('Anthem')
-    composer = StringField('Anthem composer')
-    lyrics = StringField('Anthem lyrics', widget=TextArea())
-    translation = SelectField('Anthem Translation', choices=translations)
+    title = StringField("Anthem")
+    composer = StringField("Anthem composer")
+    lyrics = StringField("Anthem lyrics", widget=TextArea())
+    translation = SelectField("Anthem Translation", choices=translations)
+
 
 class PewSheetForm(FlaskForm):
-    title = HiddenField('Title')
+    title = HiddenField("Title")
     feasts = Feast.upcoming()
     feast_choices = [(feast.slug, feast.name) for feast in feasts]
     primary_feast = SelectField(
-        'Primary Feast',
+        "Primary Feast",
         choices=feast_choices,
     )
     secondary_feasts = SelectMultipleField(
-        'Secondary Feasts',
-        choices=[('', '')] + feast_choices,
+        "Secondary Feasts",
+        choices=[("", "")] + feast_choices,
     )
-    date = DateField('Date', validators=[DataRequired()])
-    time = TimeField('Time', validators=[DataRequired()])
-    celebrant = StringField('Celebrant')
-    preacher = StringField('Preacher')
+    date = DateField("Date", validators=[DataRequired()])
+    time = TimeField("Time", validators=[DataRequired()])
+    celebrant = StringField("Celebrant")
+    preacher = StringField("Preacher")
 
-    introit_hymn = SelectField('Introit Hymn', choices=hymns)
-    offertory_hymn = SelectField('Offertory Hymn', choices=hymns)
-    recessional_hymn = SelectField('Recessional Hymn', choices=hymns)
+    introit_hymn = SelectField("Introit Hymn", choices=hymns)
+    offertory_hymn = SelectField("Offertory Hymn", choices=hymns)
+    recessional_hymn = SelectField("Recessional Hymn", choices=hymns)
 
     anthem_group = FormField(AnthemForm)
 

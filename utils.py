@@ -1,9 +1,8 @@
 import logging
 import os
-from datetime import timedelta, date
+from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
 
 from appdirs import AppDirs
 
@@ -19,7 +18,7 @@ logger = logging.getLogger("pypew")
 logger.setLevel(logging.INFO)
 
 
-def str2date(s: Optional[str]) -> date:
+def str2date(s: str | None) -> date:
     """Parse the date string if one is given. If None or empty, return
     today.
     """
@@ -28,21 +27,17 @@ def str2date(s: Optional[str]) -> date:
     return date.fromisoformat(s)
 
 
-@lru_cache()
+@lru_cache
 def get_neh_df():
     try:
         import pandas as pd
     except ImportError:
-        raise NoPandasError(
-            'Pandas not available, can\'t load hymn information'
-        )
+        raise NoPandasError("Pandas not available, can't load hymn information")
 
-    df = pd.read_csv(
-        Path(__file__).parent / 'data/neh.csv'
-    )
+    df = pd.read_csv(Path(__file__).parent / "data/neh.csv")
 
-    assert 'number' in df.columns
-    assert 'firstLine' in df.columns
+    assert "number" in df.columns
+    assert "firstLine" in df.columns
     return df
 
 
@@ -61,7 +56,7 @@ def closest_sunday_to(d: date) -> date:
     if dow in {1, 2, 3}:
         return d - timedelta(days=dow)
     if dow in {4, 5, 6}:
-        return d + timedelta(days=7-dow)
+        return d + timedelta(days=7 - dow)
 
     return d
 
@@ -72,6 +67,6 @@ def advent(year: int) -> date:
     # 1 for Monday, 7 for Sunday
     christmas_dow = christmas.isoweekday()
     if christmas_dow != 7:
-        return christmas - timedelta(days=christmas_dow + 7*3)
+        return christmas - timedelta(days=christmas_dow + 7 * 3)
     else:
         return christmas - timedelta(7 * 4)
