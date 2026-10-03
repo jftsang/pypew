@@ -1,20 +1,20 @@
 :: Build directory
 pyinstaller^
     -y^
-    --paths .^
-    --add-data "templates;templates"^
-    --add-data "static;static"^
-    --add-data "data;data"^
-    --icon "static\favicon_io\favicon.ico"^
-    pypew.py
+    --paths src^
+    --add-data "src\pypew\templates;pypew\templates"^
+    --add-data "src\pypew\static;pypew\static"^
+    --add-data "src\pypew\data;pypew\data"^
+    --icon "src\pypew\static\favicon_io\favicon.ico"^
+    src\pypew\__main__.py
 
 :: Build single executable
 pyinstaller^
     -y^
     --onefile^
-    --paths .^
-    --add-data "templates;templates"^
-    --add-data "static;static"^
-    --add-data "data;data"^
-    --icon "static\favicon_io\favicon.ico"^
-    pypew.py
+    --paths src^
+    --add-data "src\pypew\templates;pypew\templates"^
+    --add-data "src\pypew\static;pypew\static"^
+    --add-data "src\pypew\data;pypew\data"^
+    --icon "src\pypew\static\favicon_io\favicon.ico"^
+    src\pypew\__main__.py

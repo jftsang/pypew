@@ -10,6 +10,7 @@ class MultipleReturnedError(Exception):
 
 
 def get(collection, **kwargs):
+    # FIXME(E731): predicate kept inline as a one-expression lambda
     f = lambda x: all(getattr(x, k) == v for k, v in kwargs.items())
     filtered = list(filter(f, collection))
 

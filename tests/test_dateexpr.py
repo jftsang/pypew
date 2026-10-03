@@ -4,22 +4,20 @@ from datetime import date
 from unittest import TestCase
 from unittest.mock import patch
 
-from dateexpr import parse
+from pypew.dateexpr import parse
 
 
 class TestDateExpr(TestCase):
     def test_simple(self):
         orig_dt_date = dt.date
-        with patch('datetime.date') as mock_date:
+        with patch("datetime.date") as mock_date:
             mock_date.today.return_value = date(2026, 4, 5)
             mock_date.side_effect = lambda *args, **kw: orig_dt_date(*args, **kw)
 
             assert parse("Easter") == date(2026, 4, 5)
             assert parse("Easter", 2027) == date(2027, 3, 28)
             assert (
-                parse("Easter Monday")
-                == parse("day after Easter")
-                == date(2026, 4, 6)
+                parse("Easter Monday") == parse("day after Easter") == date(2026, 4, 6)
             )
             assert parse("14 November") == date(2026, 11, 14)
             assert parse("Christmas") == date(2026, 12, 25)
@@ -50,8 +48,7 @@ class TestDateExpr(TestCase):
 
     def test_complex_clauses(self):
         d = parse(
-            "Sunday nearest 2 Mondays after 4th Sunday before Christmas Day",
-            2026
+            "Sunday nearest 2 Mondays after 4th Sunday before Christmas Day", 2026
         )
         assert d == parse("Sunday nearest 2 Mondays after Advent Sunday", 2026)
         assert d == parse("Sunday nearest 7 December")
@@ -59,13 +56,11 @@ class TestDateExpr(TestCase):
 
     def test_complex_clauses_handles_years(self):
         orig_dt_date = dt.date
-        with patch('dateexpr.date') as mock_date:
+        with patch("pypew.dateexpr.date") as mock_date:
             mock_date.today.return_value = date(2012, 4, 5)
             mock_date.side_effect = lambda *args, **kw: orig_dt_date(*args, **kw)
 
-            d = parse(
-                "Sunday nearest 2 Mondays after 4th Sunday before Christmas Day"
-            )
+            d = parse("Sunday nearest 2 Mondays after 4th Sunday before Christmas Day")
             assert d == parse("Sunday nearest 2 Mondays after Advent Sunday")
             assert d == parse("Sunday nearest 7 December")
             assert d == date(2012, 12, 9)
@@ -85,5 +80,5 @@ class TestDateExpr(TestCase):
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

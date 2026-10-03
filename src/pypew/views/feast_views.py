@@ -1,27 +1,29 @@
 import datetime
 import os
 import uuid
-from tempfile import TemporaryDirectory
 
 import cattrs
-from flask import (flash, make_response, render_template, send_file,
-                   request, jsonify)
+from flask import flash, jsonify, make_response, render_template, request, send_file
 
-from filters import english_date
-from models import Feast
-from models_base import NotFoundError, get
-from utils import str2date, cache_dir
+from ..filters import english_date
+from ..models import Feast
+from ..models_base import NotFoundError, get
+from ..utils import cache_dir, str2date
 
-__all__ = ['feast_index_view', 'feast_index_api', 'feast_date_api',
-           'feast_upcoming_api', 'feast_detail_view', 'feast_detail_api',
-           'feast_docx_view']
+__all__ = [
+    "feast_date_api",
+    "feast_detail_api",
+    "feast_detail_view",
+    "feast_docx_view",
+    "feast_index_api",
+    "feast_index_view",
+    "feast_upcoming_api",
+]
 
 
 def feast_index_view():
     feasts = Feast.all()
-    return render_template(
-        'feasts.html', feasts=feasts
-    )
+    return render_template("feasts.html", feasts=feasts)
 
 
 def feast_index_api():
@@ -33,27 +35,33 @@ def feast_upcoming_api():
     """API to get a list of upcoming feasts relative to the specified
     date, with the soonest first.
     """
-    s = request.args.get('date')
+    s = request.args.get("date")
     if s is not None:
         try:
             date = str2date(s)
         except ValueError:
-            return make_response(f'Bad date {s}', 400)
+            return make_response(f"Bad date {s}", 400)
     else:
+        # FIXME(DTZ011): naive local date is correct here
         date = datetime.date.today()
 
     sorted_feasts = enumerate(Feast.upcoming(date))
-    return jsonify([{
-        'index': n,
-        'slug': f.slug,
-        'name': f.name,
-        'next': english_date(f.get_next_date(date))
-    } for n, f in sorted_feasts])
+    return jsonify(
+        [
+            {
+                "index": n,
+                "slug": f.slug,
+                "name": f.name,
+                "next": english_date(f.get_next_date(date)),
+            }
+            for n, f in sorted_feasts
+        ]
+    )
 
 
 def feast_date_api(slug):
     try:
-        year = request.args.get('year')
+        year = request.args.get("year")
         feast = Feast.from_yaml(slug)
         date = feast.get_date(year=year)
         return jsonify(date.isoformat() if date else None)
@@ -66,10 +74,10 @@ def feast_detail_view(slug):
         feasts = Feast.all()
         feast = get(feasts, slug=slug)
     except NotFoundError:
-        flash(f'Feast {slug} not found.', 'warning')
+        flash(f"Feast {slug} not found.", "warning")
         return make_response(feast_index_view(), 404)
 
-    return render_template('feastDetails.html', feast=feast, feasts=feasts)
+    return render_template("feastDetails.html", feast=feast, feasts=feasts)
 
 
 def feast_detail_api(slug):
@@ -77,7 +85,7 @@ def feast_detail_api(slug):
         feasts = Feast.all()
         feast = get(feasts, slug=slug)
     except NotFoundError:
-        flash(f'Feast {slug} not found.', 'warning')
+        flash(f"Feast {slug} not found.", "warning")
         return make_response(feast_index_view(), 404)
 
     return jsonify(cattrs.unstructure(feast))
@@ -87,12 +95,10 @@ def feast_docx_view(slug):
     try:
         feast = Feast.get(slug=slug)
     except NotFoundError:
-        flash(f'Feast {slug} not found.', 'warning')
+        flash(f"Feast {slug} not found.", "warning")
         return make_response(feast_index_view(), 404)
 
-    filename = f'{feast.name}.docx'
-    temp_docx = os.path.join(cache_dir, f"feast_{str(uuid.uuid4())}.docx")
+    filename = f"{feast.name}.docx"
+    temp_docx = os.path.join(cache_dir, f"feast_{uuid.uuid4()!s}.docx")
     feast.create_docx(path=temp_docx)
-    return send_file(
-        temp_docx, as_attachment=True, download_name=filename
-    )
+    return send_file(temp_docx, as_attachment=True, download_name=filename)
