@@ -8,12 +8,12 @@ from dateutil.utils import today
 from flask import url_for
 from parameterized import parameterized
 
-import views
-from filters import english_date
-from models import Feast, Music, Service
-from models_base import get
-from pypew import create_app
-from utils import advent
+from pypew import views
+from pypew.app import create_app
+from pypew.filters import english_date
+from pypew.models import Feast, Music, Service
+from pypew.models_base import get
+from pypew.utils import advent
 
 
 def m_create_docx_impl(path):
@@ -85,6 +85,7 @@ class TestModels(unittest.TestCase):
                 composer=None,
                 lyrics=None,
                 ref="NEH: 1a",
+                # FIXME(E501): long literal, not splittable by the formatter
                 translation="Words/translation available at NEH: 1a, Creator of the stars of night",
             ),
         )
@@ -150,6 +151,7 @@ class TestViews(unittest.TestCase):
         be registered.
         """
         for x in dir(views):
+            # FIXME(PIE810): explicit .endswith chain
             if x.endswith("_view") or x.endswith("_api"):
                 self.assertIn(x, self.app.view_functions)
 

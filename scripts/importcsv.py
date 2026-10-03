@@ -1,3 +1,8 @@
+# FIXME: this script is currently broken and awaiting repair.
+#   - `models.FEASTS_CSV` no longer exists; feast data now lives in
+#     `pypew.paths.FEASTS_DIR` and the source CSV sits beside this script.
+#   - `models` is now the `pypew.models` module inside the installed package.
+
 import math
 from pathlib import Path
 
@@ -6,9 +11,8 @@ import yaml
 from pandas._libs.missing import NA
 from slugify import slugify  # python-slugify, not slugify
 
-from models import FEASTS_CSV
-
-feastdir = Path(FEASTS_CSV).parent / "feasts"
+FEASTS_CSV = Path(__file__).parent / "feasts.csv"
+feastdir = Path(__file__).parent.parent / "src" / "pypew" / "data" / "feasts"
 df = pd.read_csv(FEASTS_CSV).to_dict(orient="records")
 
 

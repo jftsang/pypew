@@ -13,13 +13,39 @@ but it is also possible to run PyPew as a desktop app.
 
 ## Running as a Flask app
 
+The project uses [uv](https://docs.astral.sh/uv/) for dependency
+management. Requires Python 3.12 or later.
+
 1. Edit the variables in `.env` to your taste (the defaults should be
    reasonable)
-2. Install the requirements: `pip install -r requirements.txt`
-3. `python pypew.py`
+2. Install the dependencies: `uv sync`
+3. `uv run pypew`
 
 This should start up the Flask server as well as automatically opening
 up your browser to `http://localhost:5000`.
+
+Add `--debug` to run in Flask debug mode, or `--no-launch` to suppress
+opening the browser.
+
+Alternatively, `uv run python -m pypew` works the same way, and
+`uv run gunicorn pypew.wsgi:app` serves it under gunicorn.
+
+
+## Development
+
+```
+uv sync                        # install runtime + dev dependencies
+uv run pypew --debug           # run from a source checkout
+uv run python -m unittest      # run the test suite
+uv run ruff check .            # lint
+uv run ruff format .           # format
+uv build                       # build a wheel and sdist
+```
+
+The package lives in `src/pypew/`, with the feast data, templates and
+static files bundled inside it. `scripts/` holds development helper
+scripts that are not part of the installed package; install their extra
+with `uv sync --extra scripts` if you need them.
 
 
 ## Packaging
@@ -29,11 +55,9 @@ without needing Python to be setup.
 
 ### Windows
 
-  1. Set up a Python environment with the required packages: `pip install -r requirements.txt`
+  1. Set up the build environment: `uv sync --group build`
 
-  2. `pip install pyinstaller`
-
-  3. Run `build.bat` to create a folder in `dist/pypew`, containing the
+  2. Run `build.bat` to create a folder in `dist/pypew`, containing the
      executable `pypew.exe` as well as all the necessary files and DLLs.
      (This is rather large as it includes an entire Python distribution
      as well as packages like Pandas.)
@@ -46,6 +70,13 @@ without needing Python to be setup.
 
 The `build.sh` script runs PyInstaller to build `dist/pypew.app`, which
 may then be put into your 'Applications' directory.
+
+
+## Deploying
+
+`src/pypew/wsgi.py` exposes the WSGI application as `app`, suitable for
+`gunicorn pypew.wsgi:app`. See `deploy/srcf.sh` for the deployment used
+by the demonstration instance.
 
 
 ## Licensing

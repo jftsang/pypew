@@ -4,7 +4,7 @@ from functools import wraps
 
 from docxtpl import RichText
 
-from models import Service, ServiceItem
+from .models import Service, ServiceItem
 
 
 def nullsafe(f):

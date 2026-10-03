@@ -15,9 +15,9 @@ from flask import (
 )
 from werkzeug.datastructures import ImmutableMultiDict
 
-from forms import PewSheetForm
-from models import Feast, Service
-from utils import cache_dir, logger
+from ..forms import PewSheetForm
+from ..models import Feast, Service
+from ..utils import cache_dir, logger
 
 __all__ = [
     "pew_sheet_clear_history_endpoint",
@@ -56,7 +56,7 @@ def pew_sheet_create_view():
             args = ImmutableMultiDict(parse_qs(x, keep_blank_values=True))
             previous_service = Service.from_form(PewSheetForm(args))
             previous_services.append((urlencode(args), previous_service))
-        except Exception as exc:
+        except Exception as exc:  # FIXME(BLE001): bad history entries are skipped
             logger.warning(exc)
 
     previous_services.sort(key=lambda args_service: args_service[1].date)

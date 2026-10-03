@@ -2,9 +2,10 @@ import logging
 import os
 from datetime import date, timedelta
 from functools import lru_cache
-from pathlib import Path
 
 from appdirs import AppDirs
+
+from .paths import NEH_CSV
 
 
 class NoPandasError(RuntimeError):
@@ -23,6 +24,7 @@ def str2date(s: str | None) -> date:
     today.
     """
     if not s:
+        # FIXME(DTZ011): naive local date is correct here
         return date.today()
     return date.fromisoformat(s)
 
@@ -32,9 +34,10 @@ def get_neh_df():
     try:
         import pandas as pd
     except ImportError:
+        # FIXME(B904): chained exception would be clearer
         raise NoPandasError("Pandas not available, can't load hymn information")
 
-    df = pd.read_csv(Path(__file__).parent / "data/neh.csv")
+    df = pd.read_csv(NEH_CSV)
 
     assert "number" in df.columns
     assert "firstLine" in df.columns

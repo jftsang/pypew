@@ -1,10 +1,8 @@
 import datetime as dt
-import os
 import re
 import typing
 from abc import ABC, abstractmethod
 from functools import lru_cache
-from pathlib import Path
 from typing import Optional
 
 import jinja2
@@ -14,12 +12,12 @@ from dateutil.easter import easter
 from docx import Document
 from docxtpl import DocxTemplate, RichText
 
-from models_base import get
+from .models_base import get
+from .paths import FEASTS_DIR, PEW_SHEET_TEMPLATE
+from .utils import NoPandasError, advent, closest_sunday_to, get_neh_df, logger
 
 if typing.TYPE_CHECKING:
-    from forms import PewSheetForm
-
-from utils import NoPandasError, advent, closest_sunday_to, get_neh_df, logger
+    from .forms import PewSheetForm
 
 feasts_fields = [
     "name",
@@ -40,8 +38,6 @@ feasts_fields = [
     "offertory",
     "communion",
 ]
-DATA_DIR = Path(os.path.dirname(__file__)) / "data" / "feasts"
-PEW_SHEET_TEMPLATE = os.path.join("templates", "pewSheetTemplate.docx")
 
 
 def _none2datemax(d: dt.date | None) -> dt.date:
@@ -59,13 +55,14 @@ class Feast:
 
     @classmethod
     def all(cls):
-        with open(DATA_DIR / "_list.txt") as f:
+        with open(FEASTS_DIR / "_list.txt") as f:
             slugs = [x.strip() for x in f]
             return [cls.from_yaml(slug) for slug in slugs]
 
     @classmethod
     def upcoming(cls, date: dt.date | None = None) -> list["Feast"]:
         if date is None:
+            # FIXME(DTZ011): naive local date is correct here
             date = dt.date.today()
 
         return sorted(Feast.all(), key=lambda f: _none2datemax(f.get_next_date(date)))
@@ -73,6 +70,7 @@ class Feast:
     @classmethod
     def next(cls, date: dt.date | None = None) -> "Feast":
         if date is None:
+            # FIXME(DTZ011): naive local date is correct here
             date = dt.date.today()
 
         return min(Feast.all(), key=lambda f: _none2datemax(f.get_next_date(date)))
@@ -110,6 +108,7 @@ class Feast:
 
     def get_date(self, year=None) -> dt.date | None:
         if year is None:
+            # FIXME(DTZ005): local wall-clock year, timezone irrelevant
             year = dt.datetime.now().year
 
         if self.month is not None and self.day is not None:
@@ -139,6 +138,7 @@ class Feast:
         date, which may be in the next calendar year.
         """
         if d is None:
+            # FIXME(DTZ011): naive local date is correct here
             d = dt.date.today()
 
         next_occurrence = self.get_date(year=d.year)
@@ -183,6 +183,7 @@ class PewSheetItem(ABC):
 
 
 class CharacterStyles:
+    # FIXME(RUF012): these are lookup tables, not per-instance state
     title = {"font": "Merriweather", "size": 20, "bold": True}
     subtitle = {"font": "Raleway", "size": 18, "italic": True}
     paragraph = {"font": "Cambria", "size": 20}
@@ -218,6 +219,7 @@ class Music:
                 composer=None,
                 lyrics=None,
                 ref=f"NEH: {record.number}",
+                # FIXME(E501): long f-string, not splittable by the formatter
                 translation=f"Words/translation available at NEH: {record.number}, {record.firstLine}",
             )
             for record in records
@@ -486,7 +488,7 @@ class Service:
         jinja_env.globals["len"] = len
 
         # local import to avoid circular import
-        from filters import filters_context
+        from .filters import filters_context
 
         jinja_env.filters.update(filters_context)
         doc.render({"service": self}, jinja_env)
@@ -495,6 +497,6 @@ class Service:
 
 @lru_cache
 def _feast_from_yaml(slug: str) -> Feast:
-    with open((DATA_DIR / slug).with_suffix(".yaml")) as f:
+    with open((FEASTS_DIR / slug).with_suffix(".yaml")) as f:
         info = yaml.safe_load(f)
         return Feast(slug=slug, **info)

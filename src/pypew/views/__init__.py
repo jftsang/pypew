@@ -2,11 +2,10 @@ from traceback import format_exc
 
 from flask import make_response, render_template, request
 
-import dateexpr
-from utils import logger
-
-from .feast_views import *
-from .pew_sheet_views import *
+from ..dateexpr import parse
+from ..utils import logger
+from .feast_views import *  # FIXME(F403): re-exported for the app's url rules
+from .pew_sheet_views import *  # FIXME(F403): re-exported for the app's url rules
 
 
 def index_view():
@@ -29,9 +28,9 @@ def not_found_handler(error):
 def dateexpr_view():
     dexpr = request.args.get("dexpr") or ""
     try:
-        date = dateexpr.parse(dexpr) if dexpr else None
+        date = parse(dexpr) if dexpr else None
         error = None
-    except Exception as e:
+    except Exception as e:  # FIXME(BLE001): any parse failure is shown to the user
         date = None
         error = repr(e)
 

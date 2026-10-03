@@ -12,7 +12,7 @@ from wtforms import (
 from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea
 
-from models import Feast, Music
+from .models import Feast, Music
 
 hymns = [("", "None")] + [(h.ref, f"{h.ref} - {h.title}") for h in Music.neh_hymns()]
 
@@ -31,6 +31,7 @@ class AnthemForm(Form):
 class PewSheetForm(FlaskForm):
     title = HiddenField("Title")
     feasts = Feast.upcoming()
+    # FIXME(RUF012): WTForms collects choices as class attributes
     feast_choices = [(feast.slug, feast.name) for feast in feasts]
     primary_feast = SelectField(
         "Primary Feast",
@@ -38,6 +39,7 @@ class PewSheetForm(FlaskForm):
     )
     secondary_feasts = SelectMultipleField(
         "Secondary Feasts",
+        # FIXME(RUF005): explicit concatenation reads better against the label
         choices=[("", "")] + feast_choices,
     )
     date = DateField("Date", validators=[DataRequired()])

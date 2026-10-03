@@ -5,10 +5,10 @@ import uuid
 import cattrs
 from flask import flash, jsonify, make_response, render_template, request, send_file
 
-from filters import english_date
-from models import Feast
-from models_base import NotFoundError, get
-from utils import cache_dir, str2date
+from ..filters import english_date
+from ..models import Feast
+from ..models_base import NotFoundError, get
+from ..utils import cache_dir, str2date
 
 __all__ = [
     "feast_date_api",
@@ -42,6 +42,7 @@ def feast_upcoming_api():
         except ValueError:
             return make_response(f"Bad date {s}", 400)
     else:
+        # FIXME(DTZ011): naive local date is correct here
         date = datetime.date.today()
 
     sorted_feasts = enumerate(Feast.upcoming(date))

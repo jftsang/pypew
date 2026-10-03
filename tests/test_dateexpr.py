@@ -4,7 +4,7 @@ from datetime import date
 from unittest import TestCase
 from unittest.mock import patch
 
-from dateexpr import parse
+from pypew.dateexpr import parse
 
 
 class TestDateExpr(TestCase):
@@ -56,7 +56,7 @@ class TestDateExpr(TestCase):
 
     def test_complex_clauses_handles_years(self):
         orig_dt_date = dt.date
-        with patch("dateexpr.date") as mock_date:
+        with patch("pypew.dateexpr.date") as mock_date:
             mock_date.today.return_value = date(2012, 4, 5)
             mock_date.side_effect = lambda *args, **kw: orig_dt_date(*args, **kw)
 

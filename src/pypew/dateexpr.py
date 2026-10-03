@@ -34,9 +34,11 @@ def parse_simple(expr: str, year=None) -> date:
     if expr in aliases:
         return parse(aliases[expr], year)
 
+    # FIXME(SIM108): if/else reads better than a ternary here
     if year is not None:
         reference = date(year, 1, 1)
     else:
+        # FIXME(DTZ011): naive local date is correct here
         reference = date.today()
 
     if expr == "Easter":

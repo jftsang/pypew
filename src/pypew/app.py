@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 import webbrowser
 from collections.abc import Sequence
 from threading import Thread
@@ -9,9 +8,9 @@ from dotenv import load_dotenv
 from flask import Flask, redirect, request, url_for
 from jinja2 import StrictUndefined
 
-import filters
-import views
-from utils import logger
+from . import filters, views
+from .paths import STATIC_DIR, TEMPLATES_DIR
+from .utils import logger
 
 load_dotenv()
 
@@ -23,15 +22,10 @@ class PyPew:
 
 
 def create_app(pypew: PyPew | None = None, **kwargs) -> Flask:
-    # https://stackoverflow.com/a/50132788
-    base_dir = "."
-    if hasattr(sys, "_MEIPASS"):
-        base_dir = os.path.join(sys._MEIPASS)
-
     app = Flask(
         __name__,
-        static_folder=os.path.join(base_dir, "static"),
-        template_folder=os.path.join(base_dir, "templates"),
+        static_folder=str(STATIC_DIR),
+        template_folder=str(TEMPLATES_DIR),
         **kwargs,
     )
     app.jinja_env.undefined = StrictUndefined
@@ -133,7 +127,3 @@ def main(argv: Sequence[str] | None = None) -> None:
                 webbrowser.open(url_for("index_view"))
 
         pypew.thread.join()
-
-
-if __name__ == "__main__":
-    main()
