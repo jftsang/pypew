@@ -5,9 +5,17 @@
         </div>
         <div class="col-sm-5 d-print-none">
             <p>
-                <a id="copyUrlBtn" class="btn btn-secondary me-1">copy link</a>
-                <a class="btn btn-light me-1 js-print">print</a>
+                <a id="copyUrlBtn" class="btn btn-secondary me-1"
+                   title="copy link" aria-label="copy link"
+                   data-bs-toggle="tooltip" data-bs-placement="top"><span
+                    class="icon icon-link" aria-hidden="true"></span></a>
+                <a class="btn btn-light me-1 js-print"
+                   title="print" aria-label="print"
+                   data-bs-toggle="tooltip" data-bs-placement="top"><span
+                    class="icon icon-print" aria-hidden="true"></span></a>
                 <a id="makeDocxBtn" class="btn btn-primary me-1"
+                   title=".docx" aria-label=".docx"
+                   data-bs-toggle="tooltip" data-bs-placement="top"
                    href="{{ url_for('pew_sheet_docx_view') }}">.docx</a>
             </p>
         </div>
