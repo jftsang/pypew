@@ -6,7 +6,6 @@
                  public domain -->
             <img src="{{ url_for('static', filename='Clemens_Romanus.jpg') }}"
                  alt="Saint Clement"
-                    {#             width="40" #}
                  height="40"
                  class="d-inline-block align-center mx-2"
                  style="border-radius: 10px;">
@@ -34,18 +33,6 @@
                     </a>
                 </li>
             </ul>
-
-            <script>
-                const navLinks = document.getElementsByClassName('nav-link');
-                Array.from(navLinks).forEach(
-                    (e) => {
-                        if (e.href === window.location.href) {
-                            e.classList.add('active');
-                        }
-                    }
-                );
-
-            </script>
         </div>
     </div>
 </nav>

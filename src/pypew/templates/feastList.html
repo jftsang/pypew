@@ -1,99 +1,13 @@
-<div>
+<div id="feastList"
+     data-current-feast="{{ feast_name|default('', true) }}"
+     data-feast-url-template="{{ url_for('feast_detail_view', slug='__slug__') }}"
+     data-index-api-url="{{ url_for('feast_index_api') }}"
+     data-upcoming-api-url="{{ url_for('feast_upcoming_api') }}">
     <a id="sortFeastsByCalendar" class="btn btn-sm btn-secondary"><small>cal</small></a>
     <a id="sortFeastsByName" class="btn btn-sm btn-secondary"><small>A&ndash;Z</small></a>
     <a id="sortFeastsByUpcoming" class="btn btn-sm btn-secondary"><small>soon</small></a>
     <div id="feastListDiv">
-        <ul id="feastList" class="list-unstyled">
+        <ul class="list-unstyled">
         </ul>
     </div>
 </div>
-<script>
-    {% if feast_name %}
-        const currentFeast = "{{ feast_name }}";
-    {% else %}
-        const currentFeast = null;
-    {% endif %}
-
-    function drawFeastsList(feastsArray) {
-        const feastListUl = document.getElementById('feastList');
-
-        feastListUl.replaceChildren();
-        feastsArray.forEach((feast) => {
-            const li = feastListUl.appendChild(document.createElement('li'));
-            const link = li.appendChild(document.createElement('a'));
-            const small = link.appendChild(document.createElement('small'));
-            small.innerText = feast.name;
-
-            link.dataset['feastName'] = feast.name;
-            link.dataset['feastDate'] = feast.next;
-            link.href = feastDetailUrl(feast.slug);
-            link.classList.add('feast-link');
-            link.classList.add('text-decoration-none');
-            if (feast.name === currentFeast || currentFeast === null)
-                link.classList.add('link-info');
-            else
-                link.classList.add('link-secondary');
-
-            addTooltip(link, feast.next, 'right');
-            new bootstrap.Tooltip(link);
-        });
-    }
-
-    function feastDetailUrl(slug) {
-        const feastUrlXXX = "{{ url_for('feast_detail_view', slug='XXX') }}";
-      return feastUrlXXX.replace('XXX', slug);
-    }
-
-    const calendarSortBtn = document.getElementById('sortFeastsByCalendar');
-    addTooltip(calendarSortBtn, 'Sort by calendar order (Advent–Trinity then specials)');
-    const nameSortBtn = document.getElementById('sortFeastsByName');
-    addTooltip(nameSortBtn, 'Sort alphabetically');
-    const upcomingSortBtn = document.getElementById('sortFeastsByUpcoming');
-    addTooltip(upcomingSortBtn, 'Show upcoming feasts');
-
-    const sortBtns = [calendarSortBtn, nameSortBtn, upcomingSortBtn];
-    var currentSortBtn = null;
-
-    function redrawSortBtns() {
-      sortBtns.forEach((btn) => {
-        if (btn === currentSortBtn) {
-          btn.classList.add('btn-light')
-          btn.classList.remove('btn-secondary')
-        } else {
-          btn.classList.remove('btn-light')
-          btn.classList.add('btn-secondary')
-        }
-      });
-    }
-
-    (async () => {
-      calendarSortBtn.onclick = async () => {
-        const feastsApiUrl = "{{ url_for('feast_index_api') }}";
-        const feastsArray = await (await fetch(feastsApiUrl)).json();
-        currentSortBtn = calendarSortBtn;
-        drawFeastsList(feastsArray);
-        redrawSortBtns();
-      };
-
-      nameSortBtn.onclick = async () => {
-        const feastsApiUrl = "{{ url_for('feast_index_api') }}";
-        const feastsArray = (await (await fetch(feastsApiUrl)).json()).slice().sort(
-          function (f, g) {
-            return ('' + f.name).localeCompare(g.name);
-          }
-        );
-        currentSortBtn = nameSortBtn;
-        drawFeastsList(feastsArray);
-        redrawSortBtns();
-      };
-      upcomingSortBtn.onclick = async () => {
-        const feastsApiUrl = "{{ url_for('feast_upcoming_api') }}";
-        const feastsArray = await (await fetch(feastsApiUrl)).json();
-        currentSortBtn = upcomingSortBtn;
-        drawFeastsList(feastsArray);  // default behaviour from the API
-        redrawSortBtns();
-      };
-
-      upcomingSortBtn.click();  // default
-    })();
-</script>

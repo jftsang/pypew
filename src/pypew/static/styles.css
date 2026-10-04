@@ -27,11 +27,12 @@ h2 {
     text-align: center;
 }
 
-ul#flashes {
-}
-
 li.flash {
     list-style: none;
+}
+
+input#dexpr {
+    width: 100%;
 }
 
 @media print {

@@ -20,7 +20,8 @@
 {% block sidebar %}
     <h2>Recent services</h2>
     <ul class="list-unstyled">
-        <li><small>(<a id="clearHistLink" href="#" class="link-warning text-decoration-none">clear history</a>)</small></li>
+        <li><small>(<a id="clearHistLink" href="#" class="link-warning text-decoration-none"
+                      data-clear-history-url="{{ url_for('pew_sheet_clear_history_endpoint') }}">clear history</a>)</small></li>
         {% for args, ps in previous_services %}
             <!-- TODO don't do a server call for each one of these -->
             <li class="previous-service"><small>
@@ -32,23 +33,9 @@
             </li>
         {% endfor %}
     </ul>
+{% endblock %}
 
-    <script>
-        const clearHistLink = document.getElementById('clearHistLink');
-        clearHistLink.onclick = () => {
-            if (!confirm('Clear pew sheet history? This cannot be undone!')) {
-                return;
-            }
-            fetch("{{ url_for('pew_sheet_clear_history_endpoint') }}",
-                {
-                    method: 'delete'
-                }
-            ).then((r) =>
-                {
-                    document.querySelectorAll('li.previous-service').forEach((e) => {e.remove()});
-                    notify({message: 'History cleared.', color: 'success', timeout: 2000});
-                }
-            );
-        };
-    </script>
+{% block scripts %}
+    <script src="{{ url_for('static', filename='serviceForm.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='pewSheet.js') }}" defer></script>
 {% endblock %}

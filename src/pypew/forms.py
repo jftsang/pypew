@@ -1,3 +1,5 @@
+from datetime import time as dt_time
+
 from flask import request
 from flask_wtf import FlaskForm, Form
 from wtforms import (
@@ -43,7 +45,7 @@ class PewSheetForm(FlaskForm):
         choices=[("", "")] + feast_choices,
     )
     date = DateField("Date", validators=[DataRequired()])
-    time = TimeField("Time", validators=[DataRequired()])
+    time = TimeField("Time", validators=[DataRequired()], default=dt_time(11, 0))
     celebrant = StringField("Celebrant")
     preacher = StringField("Preacher")
 
