@@ -27,9 +27,36 @@
       });
   }
 
-  /** Convenience wrapper around the vendored notify.js toast library. */
+  /** Show a Bootstrap toast notification. */
   function toast(message, color) {
-    notify({ message: message, color: color || "default", timeout: 2000 });
+    if (!document.getElementById("pypew-toast-container")) {
+      const container = document.createElement("div");
+      container.id = "pypew-toast-container";
+      container.className =
+        "toast-container position-fixed bottom-0 start-50 translate-middle-x p-3";
+      document.body.appendChild(container);
+    }
+
+    const container = document.getElementById("pypew-toast-container");
+    const toastEl = document.createElement("div");
+    toastEl.className = "toast fade";
+    toastEl.setAttribute("role", "status");
+    toastEl.setAttribute("aria-live", "polite");
+    toastEl.setAttribute("aria-atomic", "true");
+    toastEl.setAttribute("data-bs-autohide", "true");
+    toastEl.setAttribute("data-bs-delay", "2000");
+
+    const body = document.createElement("div");
+    body.className = "toast-body text-dark";
+    body.textContent = message;
+    toastEl.appendChild(body);
+
+    container.appendChild(toastEl);
+    const bsToast = new bootstrap.Toast(toastEl);
+    toastEl.addEventListener("hidden.bs.toast", () => {
+      toastEl.remove();
+    });
+    bsToast.show();
   }
 
   /** Mark the navbar link matching the current URL as active. */

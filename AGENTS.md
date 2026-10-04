@@ -30,7 +30,7 @@ PyPew is a Flask web app for generating Anglican pew sheets from Book of Common 
   - `static/` — CSS/JS/assets (bundled)
     - `pypew.js` — shared frontend helpers loaded on every page (tooltips, print buttons, navbar active state, toasts)
     - `feastList.js`, `serviceForm.js`, `pewSheet.js` — per-page behaviour
-    - `styles.css` — app styles; `bootstrap*`, `notify*`, `favicon_io/` are vendored, do not edit
+    - `styles.css` — app styles; `bootstrap*`, `favicon_io/` are vendored, do not edit
   - `data/` — bundled data files (e.g. `neh.csv`, feast data). Tracked CSVs here are required at runtime and are explicitly included in wheels/sdist by hatch.
 - `tests/` — unittest-based tests
   - `test_pypew.py`, `test_dateexpr.py`
@@ -59,12 +59,12 @@ There is no JS toolchain — no npm, bundler, transpiler, linter or test runner.
 
 - **No inline `<script>` or `<style>` in templates.** Templates render markup and data only. All JS lives in `src/pypew/static/*.js`; app CSS lives in `styles.css`.
 - **Never interpolate Jinja into script source.** Pass server values to JS via `data-*` attributes on an element, then read them with `elem.dataset.*`. For URLs, put a `url_for` template in a data attribute and substitute a placeholder (`slug='__slug__'` → `.replace('__slug__', slug)`). This keeps `url_for` (and therefore `SCRIPT_NAME`/`APPLICATION_ROOT`) authoritative. Note that HTML autoescaping is *not* sufficient protection here — it is the wrong escaping for a JS context (a `<script>` body does not decode entities, so `&#34;` stays literal and protects nothing), and newlines are not escaped at all, so a value containing one terminates the string literal and kills the whole script block. Use `data-*` regardless of whether a value is currently trusted.
-- **Loading**: vendor scripts first, then `pypew.js`, then page scripts. All are `defer`red, which guarantees DOM-readiness and document-order execution — so page scripts can rely on `bootstrap`, `notify` and `window.pypew` existing. Page scripts belong in `{% block scripts %}` of the template that extends `base.html` (not in the `{% include %}`d partial), which is what keeps that ordering intact.
+- **Loading**: vendor scripts first (e.g. `bootstrap.bundle.min.js`), then `pypew.js`, then page scripts. All are `defer`red, which guarantees DOM-readiness and document-order execution — so page scripts can rely on `bootstrap` and `window.pypew` existing. Page scripts belong in `{% block scripts %}` of the template that extends `base.html` (not in the `{% include %}`d partial), which is what keeps that ordering intact.
 - **Module shape**: wrap each file in an IIFE with `"use strict"`, look up your root element first and `return` early if it's absent. This makes a script safe to load on any page and avoids `TypeError`s on `null`.
-- **Shared behaviour goes in `pypew.js`** (exposed as `window.pypew`), not in a new global. Use `pypew.addTooltip` + `pypew.initTooltips` for tooltips, `.js-print` class for print buttons, and `pypew.toast` instead of calling `notify` directly. `initTooltips` is idempotent, so it is safe to call after injecting new elements.
+- **Shared behaviour goes in `pypew.js`** (exposed as `window.pypew`), not in a new global. Use `pypew.addTooltip` + `pypew.initTooltips` for tooltips, `.js-print` class for print buttons, and `pypew.toast` for toasts. `initTooltips` is idempotent, so it is safe to call after injecting new elements.
 - **Data attributes for configuration** should live on the container element the script already needs, named `data-<kebab-name>` in the template and camelCased on `dataset` in JS. Keep element IDs in JS and HTML in sync; if you derive an ID, keep the mapping table explicit rather than relying on case matching.
-- **Progressive enhancement**: prefer a server-side default (e.g. a WTForms `default=`) over JS that sets a field value on load. Render `notify.css` in `<head>` and keep `notify.js` loaded before any page script that toasts.
-- **Vendored assets** (`bootstrap*`, `notify*`, `favicon_io/`) are do-not-edit. Note `notify.js`/`notify.css` (unminified) are the ones actually loaded; there is no minified variant in the tree.
+- **Progressive enhancement**: prefer a server-side default (e.g. a WTForms `default=`) over JS that sets a field value on load. Keep Bootstrap toast styles and behaviour — `pypew.toast` creates its own toast container at runtime. No external toast CSS is loaded.
+- **Vendored assets** (`bootstrap*`, `favicon_io/`) are do-not-edit. Note `notify.js`/`notify.css` (unminified) are the ones actually loaded; there is no minified variant in the tree.
 - **Formatting**: 2-space indent, double quotes, semicolons, trailing commas in multi-line literals.
 - **Verification**: there is no JS linter, so after touching JS run `node --check <file>` if `node` is available, then `uv run python -m unittest`. Smoke-test that pages render (`app.test_client()`), that every `getElementById`/dataset read in a script resolves against the HTML of the pages that load it, and that `defer` ordering still holds.
 
