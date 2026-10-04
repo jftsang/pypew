@@ -17,3 +17,6 @@
         {% include 'feastList.html' %}
     {% endwith %}
 {% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='feastList.js') }}" defer></script>
+{% endblock %}

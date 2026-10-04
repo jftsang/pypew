@@ -1,123 +1,93 @@
-const titleH3 = document.getElementById('titleH3');
-const titleField = document.getElementById('title');
-const primaryFeastField = document.getElementById('primary_feast');
-const secondaryFeastsField = document.getElementById('secondary_feasts');
-const dateField = document.getElementById('date');
-const timeField = document.getElementById('time');
+// Client-side behaviour for the pew sheet form; configured via data-* attributes.
+(function () {
+  "use strict";
 
-const setTitle = () => {
-  let txt;
-  const primaryFeastName = primaryFeastField.selectedOptions[0].innerText;
-  const secondaryFeastsNames = Array.from(secondaryFeastsField.selectedOptions).map(e => e.innerText)
-  if (secondaryFeastsNames.length !== 0)
-    txt = primaryFeastName + ' (' + secondaryFeastsNames.join(", ") + ')';
-  else
-    txt = primaryFeastName;
+  const form = document.getElementById("serviceForm");
+  if (!form) {
+    return;
+  }
 
-  titleH3.innerText = txt;
-  titleField.value = txt;
-};
+  const urlTemplate = form.dataset.feastDateUrlTemplate;
 
-setTitle();
-primaryFeastField.addEventListener('change', setTitle);
-secondaryFeastsField.addEventListener('change', setTitle);
+  const titleField = document.getElementById("title");
+  const titleH3 = document.getElementById("titleH3");
+  const primaryFeastField = document.getElementById("primary_feast");
+  const secondaryFeastsField = document.getElementById("secondary_feasts");
+  const dateField = document.getElementById("date");
 
-const updateDateFromPrimaryFeast = async () => {
-  const url = '/feast/api/' + primaryFeastField.value + '/date';
-  const r = await fetch(url);
-  const j = await r.json();
-  if (j !== null)
-    dateField.value = j;
-};
+  /** Format a Date as YYYY-MM-DD using its local calendar fields. */
+  function toISODate(date) {
+    const mmdd = [date.getMonth() + 1, date.getDate()].map((n) =>
+      String(n).padStart(2, "0")
+    );
+    return [date.getFullYear()].concat(mmdd).join("-");
+  }
 
-updateDateFromPrimaryFeast().then();
-primaryFeastField.addEventListener('change', updateDateFromPrimaryFeast);
+  /** Parse a YYYY-MM-DD string as a local date, avoiding UTC parsing. */
+  function fromISODate(value) {
+    const [y, m, d] = value.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
 
-const today = new Date()
-const day = 1000 * 60 * 60 * 24;  // milliseconds in a day
-const sunday = new Date(today.getTime() + (7 - today.getDay()) * day);
+  function setTitle() {
+    const primary = primaryFeastField.selectedOptions[0].text;
+    const secondary = Array.from(secondaryFeastsField.selectedOptions).map(
+      (opt) => opt.text
+    );
+    const title = secondary.length
+      ? primary + " (" + secondary.join(", ") + ")"
+      : primary;
 
-function toISO(date) {
-  return date.toISOString().split('T')[0];
-}
+    titleH3.textContent = title;
+    titleField.value = title;
+  }
 
-const todayBtn = document.getElementById('today-btn');
-todayBtn.onclick = () => {
-  dateField.value = toISO(today);
-};
+  async function updateDateFromPrimaryFeast() {
+    const response = await fetch(
+      urlTemplate.replace("__slug__", primaryFeastField.value)
+    );
+    if (!response.ok) {
+      return;
+    }
+    const date = await response.json();
+    if (date !== null) {
+      dateField.value = date;
+    }
+  }
 
-const sundayBtn = document.getElementById('sunday-btn');
-sundayBtn.onclick = () => {
-  dateField.value = toISO(sunday);
-};
+  function setDate(date) {
+    dateField.value = toISODate(date);
+  }
 
-const prevWeekBtn = document.getElementById('prev-week-btn');
-prevWeekBtn.onclick = () => {
-  const prevWeek = (new Date(dateField.value)).getTime() - 7 * day;
-  dateField.value = toISO(new Date(prevWeek));
-};
+  function shiftDate(days) {
+    const date = fromISODate(dateField.value);
+    date.setDate(date.getDate() + days);
+    setDate(date);
+  }
 
-const nextWeekBtn = document.getElementById('next-week-btn');
-nextWeekBtn.onclick = () => {
-  const nextWeek = (new Date(dateField.value)).getTime() + 7 * day;
-  dateField.value = toISO(new Date(nextWeek));
-};
+  const today = new Date();
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() + ((7 - today.getDay()) % 7));
 
-/**
- * Cause a class to be applied to the specified fields when the
- * specified element is mouseovered. Note that this overwrites
- * btn.onmouseover and btn.onmouseout, so it can only be used once
- * for each btn.
- *
- * @param btn the element that should highlight when mouseovered, probably a button
- * @param cls the class to apply, e.g. bg-warning
- * @param fields the elements that should be modified, probably input fields
- */
-function highlightOnMouseover(btn, cls, fields) {
-  btn.onmouseover = () => {
-    fields.forEach((e) => {
-      e.classList.add(cls)
-    });
-  };
-  btn.onmouseout = () => {
-    fields.forEach((e) => {
-      e.classList.remove(cls)
-    });
-  };
-}
+  const dateButtons = [
+    ["prev-week-btn", "7 days earlier", () => shiftDate(-7)],
+    ["today-btn", "Set the date to today", () => setDate(today)],
+    ["sunday-btn", "Set the date to this Sunday", () => setDate(sunday)],
+    ["next-week-btn", "7 days later", () => shiftDate(7)],
+  ];
 
-highlightOnMouseover(todayBtn, 'bg-warning', [dateField]);
-highlightOnMouseover(sundayBtn, 'bg-warning', [dateField]);
-highlightOnMouseover(prevWeekBtn, 'bg-warning', [dateField]);
-highlightOnMouseover(nextWeekBtn, 'bg-warning', [dateField]);
-
-addTooltip(prevWeekBtn, '7 days earlier');
-addTooltip(todayBtn, 'Set the date to today');
-addTooltip(sundayBtn, 'Set the date to this Sunday');
-addTooltip(nextWeekBtn, '7 days later');
-
-const hymnFields = Array.prototype.map.call(
-  ['introit_hymn', 'offertory_hymn', 'recessional_hymn'],
-  s => document.getElementById(s)
-);
-
-(() => {
-  setTitle();
-  primaryFeastField.addEventListener('change', setTitle);
-  secondaryFeastsField.addEventListener('change', setTitle);
-
-  updateDateFromPrimaryFeast().then();
-
-  if (timeField.value === '')
-    timeField.value = "11:00";
-
-  hymnFields.forEach(hymnField => {
-    const options = hymnField.options;
-    Array.prototype.forEach.call(options, opt => {
-      opt.dataset['number'] = opt.value;
-      opt.dataset['text'] = opt.text;
-    });
-
-    Array.prototype.sort.call(options,)
+  dateButtons.forEach(([id, tooltip, onClick]) => {
+    const btn = document.getElementById(id);
+    btn.onclick = onClick;
+    btn.onmouseenter = () => dateField.classList.add("bg-warning");
+    btn.onmouseleave = () => dateField.classList.remove("bg-warning");
+    pypew.addTooltip(btn, tooltip);
   });
+
+  setTitle();
+  primaryFeastField.addEventListener("change", setTitle);
+  secondaryFeastsField.addEventListener("change", setTitle);
+
+  updateDateFromPrimaryFeast();
+  primaryFeastField.addEventListener("change", updateDateFromPrimaryFeast);
 })();

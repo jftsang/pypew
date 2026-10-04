@@ -1,7 +1,8 @@
 <form action="{{ url_for('pew_sheet_create_view') }}"
-      class="px-5">
+      id="serviceForm"
+      class="px-5"
+      data-feast-date-url-template="{{ url_for('feast_date_api', slug='__slug__') }}">
     <div class="row mb-3">
-        {#        {{ form.title.label(class='col-sm-2 col-form-label') }}#}
         <h3 id="titleH3"></h3>
         <div class="col-sm-5">
             {{ form.title(class='form-control') }}
@@ -181,5 +182,3 @@
         <input type="submit" class="btn btn-success w-100" value="Create">
     </div>
 </form>
-
-<script src="{{ url_for('static', filename='serviceForm.js') }}"></script>

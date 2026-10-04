@@ -24,13 +24,9 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
-    <script>
-        function addTooltip(elem, text, placement='top') {
-            elem.dataset['bsToggle'] = 'tooltip';
-            elem.dataset['bsPlacement'] = placement;
-            elem.title = text;
-        }
-    </script>
+    <!-- https://github.com/azzalfauzi/notify, https://azzalfauzi.github.io/notify/ -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='notify.css') }}">
 </head>
 <body class="text-light">
 
@@ -45,9 +41,10 @@
 <main>
     <div class="container">
     <div class="row p-2" id="flashes-div">
-    {% if get_flashed_messages() %}
+    {% set flashes = get_flashed_messages(with_categories=True) %}
+    {% if flashes %}
         <ul id="flashes">
-        {% for category, msg in get_flashed_messages(with_categories=True) %}
+        {% for category, msg in flashes %}
             <li class="flash text-{{ category }}">{{ msg }}</li>
         {% endfor %}
         </ul>
@@ -79,21 +76,11 @@
 
 <!-- Bootstrap JS with Popper -->
 <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"
-        crossorigin="anonymous"></script>
+        crossorigin="anonymous" defer></script>
+<script src="{{ url_for('static', filename='notify.js') }}" defer></script>
+<script src="{{ url_for('static', filename='pypew.js') }}" defer></script>
 
-<script>
-    /* Enable tooltips */
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
-</script>
-
-<!-- https://github.com/azzalfauzi/notify, https://azzalfauzi.github.io/notify/ -->
-<link rel="stylesheet"
-      href="{{ url_for('static', filename='notify.css') }}">
-<script src="{{ url_for('static', filename='notify.js') }}"></script>
-
+{% block scripts %}{% endblock %}
 
 </body>
 </html>

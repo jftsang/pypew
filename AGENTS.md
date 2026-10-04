@@ -28,6 +28,9 @@ PyPew is a Flask web app for generating Anglican pew sheets from Book of Common 
   - `paths.py` — filesystem/resource paths
   - `templates/` — Jinja2 templates (bundled)
   - `static/` — CSS/JS/assets (bundled)
+    - `pypew.js` — shared frontend helpers loaded on every page (tooltips, print buttons, navbar active state, toasts)
+    - `feastList.js`, `serviceForm.js`, `pewSheet.js` — per-page behaviour
+    - `styles.css` — app styles; `bootstrap*`, `notify*`, `favicon_io/` are vendored, do not edit
   - `data/` — bundled data files (e.g. `neh.csv`, feast data). Tracked CSVs here are required at runtime and are explicitly included in wheels/sdist by hatch.
 - `tests/` — unittest-based tests
   - `test_pypew.py`, `test_dateexpr.py`
@@ -50,6 +53,21 @@ PyPew is a Flask web app for generating Anglican pew sheets from Book of Common 
 - **Ruff ignores**: Many rules are explicitly ignored in `pyproject.toml` with `# FIXME(<CODE>)` markers. Do not remove/“fix” these ignores unless explicitly instructed; the codebase has deliberate style choices tied to them.
 - **Codebase consistency**: Mimic existing patterns, naming, error handling style, and library choices. When editing, read surrounding context (especially imports) first.
 
+### Frontend (JS/CSS/templates)
+
+There is no JS toolchain — no npm, bundler, transpiler, linter or test runner. Assets are served as-is by Flask from `src/pypew/static/` via `url_for('static', ...)`. Keep it that way unless explicitly asked.
+
+- **No inline `<script>` or `<style>` in templates.** Templates render markup and data only. All JS lives in `src/pypew/static/*.js`; app CSS lives in `styles.css`.
+- **Never interpolate Jinja into script source.** Pass server values to JS via `data-*` attributes on an element, then read them with `elem.dataset.*`. For URLs, put a `url_for` template in a data attribute and substitute a placeholder (`slug='__slug__'` → `.replace('__slug__', slug)`). This keeps `url_for` (and therefore `SCRIPT_NAME`/`APPLICATION_ROOT`) authoritative and removes XSS sinks from string literals.
+- **Loading**: vendor scripts first, then `pypew.js`, then page scripts. All are `defer`red, which guarantees DOM-readiness and document-order execution — so page scripts can rely on `bootstrap`, `notify` and `window.pypew` existing. Page scripts belong in `{% block scripts %}` of the template that extends `base.html` (not in the `{% include %}`d partial), which is what keeps that ordering intact.
+- **Module shape**: wrap each file in an IIFE with `"use strict"`, look up your root element first and `return` early if it's absent. This makes a script safe to load on any page and avoids `TypeError`s on `null`.
+- **Shared behaviour goes in `pypew.js`** (exposed as `window.pypew`), not in a new global. Use `pypew.addTooltip` + `pypew.initTooltips` for tooltips, `.js-print` class for print buttons, and `pypew.toast` instead of calling `notify` directly. `initTooltips` is idempotent, so it is safe to call after injecting new elements.
+- **Data attributes for configuration** should live on the container element the script already needs, named `data-<kebab-name>` in the template and camelCased on `dataset` in JS. Keep element IDs in JS and HTML in sync; if you derive an ID, keep the mapping table explicit rather than relying on case matching.
+- **Progressive enhancement**: prefer a server-side default (e.g. a WTForms `default=`) over JS that sets a field value on load. Render `notify.css` in `<head>` and keep `notify.js` loaded before any page script that toasts.
+- **Vendored assets** (`bootstrap*`, `notify*`, `favicon_io/`) are do-not-edit. Note `notify.js`/`notify.css` (unminified) are the ones actually loaded; there is no minified variant in the tree.
+- **Formatting**: 2-space indent, double quotes, semicolons, trailing commas in multi-line literals.
+- **Verification**: there is no JS linter, so after touching JS run `node --check <file>` if `node` is available, then `uv run python -m unittest`. Smoke-test that pages render (`app.test_client()`), that every `getElementById`/dataset read in a script resolves against the HTML of the pages that load it, and that `defer` ordering still holds.
+
 ### Dependencies
 - Managed with `uv`. Install/runtime deps in `pyproject.toml` dependencies; dev in `[dependency-groups].dev` (includes `ruff`, `parameterized`, `pandas`); build in `[dependency-groups].build` (`pyinstaller>=6`).
 - Optional extras: `hymns` (pandas), `scripts` (pandas, python-slugify).
@@ -61,6 +79,7 @@ PyPew is a Flask web app for generating Anglican pew sheets from Book of Common 
 - **Test discovery**: standard unittest discovery in `tests/`.
 - **Adding tests**: Follow existing test style in `tests/test_pypew.py` and `tests/test_dateexpr.py`. Use fixtures like `tests/feast_dates.json` when applicable.
 - **Verification**: After code changes, run tests. Also run lint/typecheck via ruff (`check`/`format`) as appropriate. If you cannot find the correct verification command, ask.
+- **No frontend tests exist.** There is no JS test runner. Cover frontend changes by rendering pages through `app.test_client()` and asserting on the HTML, not by adding a JS harness.
 
 ### Data & packaging
 - **Bundled data**: Runtime data lives under `src/pypew/data/`. `neh.csv` is tracked and must remain bundled (Hatch forces it into wheel/sdist artifacts).

@@ -9,7 +9,7 @@
         <div class="col-sm-3 d-print-none">
             <p>
                 <a class="btn btn-primary my-1" href="{{ url_for('feast_docx_view', slug=feast.slug) }}">.docx</a>
-                <a id="printBtn" class="btn btn-light m-1">print</a>
+                <a class="btn btn-light m-1 js-print">print</a>
             </p>
         </div>
     </div>
@@ -46,16 +46,12 @@
 
     <h2>Communion</h2>
     <p>{{ feast.communion }}</p>
-
-    <script>
-        const printBtn = document.getElementById('printBtn');
-        printBtn.onclick = () => {
-            window.print();
-        };
-    </script>
 {% endblock %}
 {% block sidebar %}
     {% with feast_name = feast.name %}
         {% include 'feastList.html' %}
     {% endwith %}
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='feastList.js') }}" defer></script>
 {% endblock %}
