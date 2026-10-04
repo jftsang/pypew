@@ -24,6 +24,13 @@ body {
     padding-bottom: calc(0.25rem + 1px);
 }
 
+/* Bootstrap Icons, inlined in templates: size them like the button text */
+.bi {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+}
+
 main {
     padding-bottom: 4em;
 }
