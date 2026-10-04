@@ -4,7 +4,7 @@
       data-feast-date-url-template="{{ url_for('feast_date_api', slug='__slug__') }}">
     <div class="row mb-3">
         <h3 id="titleH3"></h3>
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.title(class='form-control') }}
             {% if form.title.errors %}
                 {% for error in form.title.errors %}
@@ -18,7 +18,7 @@
 
     <div class="row mb-3">
         {{ form.primary_feast.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.primary_feast(class='form-select') }}
             {% if form.primary_feast.errors %}
                 {% for error in form.primary_feast.errors %}
@@ -32,7 +32,7 @@
 
     <div class="row mb-3">
         {{ form.secondary_feasts.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.secondary_feasts(class='form-select') }}
             {% if form.secondary_feasts.errors %}
                 {% for error in form.secondary_feasts.errors %}
@@ -44,13 +44,11 @@
         </div>
     </div>
 
-
     <div class="row mb-3">
-        {{ form.date.label(class='col-sm-1 col-form-label') }}
+        {{ form.date.label(class='col-sm-2 col-form-label') }}
         <div class="col">
             {{ form.date(class='form-date') }}
-            <a class="btn btn-secondary btn-sm px-1"
-               id="prev-week-btn">-week</a>
+            <a class="btn btn-secondary btn-sm px-1" id="prev-week-btn">-week</a>
             <a class="btn btn-secondary btn-sm px-1" id="today-btn">Today</a>
             <a class="btn btn-secondary btn-sm px-1" id="sunday-btn">Sunday</a>
             <a class="btn btn-secondary btn-sm px-1"
@@ -67,7 +65,7 @@
 
     <div class="row mb-3">
         {{ form.time.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.time(class='form-control') }}
             {% if form.time.errors %}
                 {% for error in form.time.errors %}
@@ -81,7 +79,7 @@
 
     <div class="row mb-3">
         {{ form.celebrant.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.celebrant(class='form-control') }}
             {% if form.celebrant.errors %}
                 {% for error in form.celebrant.errors %}
@@ -95,7 +93,7 @@
 
     <div class="row mb-3">
         {{ form.preacher.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.preacher(class='form-control') }}
             {% if form.preacher.errors %}
                 {% for error in form.preacher.errors %}
@@ -124,7 +122,7 @@
 
     <div class="row mb-3">
         {{ form.anthem_group.title.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.anthem_group.title(class='form-control') }}
             {% if form.anthem_group.title.errors %}
                 {% for error in form.anthem_group.title.errors %}
@@ -138,7 +136,7 @@
 
     <div class="row mb-3">
         {{ form.anthem_group.translation.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.anthem_group.translation(class='form-select') }}
             {% if form.anthem_group.translation.errors %}
                 {% for error in form.anthem_group.translation.errors %}
@@ -152,7 +150,7 @@
 
     <div class="row mb-3">
         {{ form.anthem_group.composer.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.anthem_group.composer(class='form-control') }}
             {% if form.anthem_group.composer.errors %}
                 {% for error in form.anthem_group.composer.errors %}
@@ -166,7 +164,7 @@
 
     <div class="row mb-3">
         {{ form.anthem_group.lyrics.label(class='col-sm-2 col-form-label') }}
-        <div class="col-sm-5">
+        <div class="col">
             {{ form.anthem_group.lyrics(class='form-control') }}
             {% if form.anthem_group.lyrics.errors %}
                 {% for error in form.anthem_group.lyrics.errors %}

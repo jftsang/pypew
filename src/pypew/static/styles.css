@@ -1,5 +1,27 @@
 body {
     --bs-body-bg: hsl(38, 23%, 5%);
+    --pypew-radius: 0.125rem;
+}
+
+/* Slimmer, squarer controls than the Bootstrap defaults */
+.btn {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+    border-radius: var(--pypew-radius);
+}
+
+.form-control,
+.form-select,
+.form-date {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    border-radius: var(--pypew-radius);
+}
+
+.col-form-label {
+    padding-top: 1px;
+    margin-right: 1em;
+    padding-bottom: calc(0.25rem + 1px);
 }
 
 main {

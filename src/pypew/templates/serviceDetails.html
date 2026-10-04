@@ -1,13 +1,13 @@
 <div class="container w-print-100">
     <div class="row">
-        <div class="col-sm-9">
+        <div class="col-sm-7">
             <h1>{{ service | service_header }}</h1>
         </div>
-        <div class="col-sm-3 d-print-none">
+        <div class="col-sm-5 d-print-none">
             <p>
-                <a id="copyUrlBtn" class="btn btn-secondary my-1">copy link</a>
-                <a class="btn btn-light m-1 js-print">print</a>
-                <a id="makeDocxBtn" class="btn btn-primary my-1"
+                <a id="copyUrlBtn" class="btn btn-secondary me-1">copy link</a>
+                <a class="btn btn-light me-1 js-print">print</a>
+                <a id="makeDocxBtn" class="btn btn-primary me-1"
                    href="{{ url_for('pew_sheet_docx_view') }}">.docx</a>
             </p>
         </div>

@@ -8,8 +8,9 @@
         </div>
         <div class="col-sm-3 d-print-none">
             <p>
-                <a class="btn btn-primary my-1" href="{{ url_for('feast_docx_view', slug=feast.slug) }}">.docx</a>
                 <a class="btn btn-light m-1 js-print">print</a>
+                <a class="btn btn-primary my-1"
+                   href="{{ url_for('feast_docx_view', slug=feast.slug) }}">.docx</a>
             </p>
         </div>
     </div>
