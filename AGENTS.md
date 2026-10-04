@@ -72,4 +72,5 @@ PyPew is a Flask web app for generating Anglican pew sheets from Book of Common 
 - **Keep changes minimal and focused.** Avoid broad refactors unless necessary.
 - **References**: When referencing code, include `file_path:line_number` (e.g. `src/pypew/models.py:123`) to help navigation.
 - **Commit policy**: Never commit unless explicitly asked. Inspect `git status/diff` and stage only intended files.
+- **Git workflow**: This repository has branch protection on `main`. **You cannot push directly to `main`**. You must push changes to a side branch and open a pull request (PR). Agents may merge PRs as soon as they pass CI.
 - **Local vs installed package**: Source lives in `src/pypew/`; imports should resolve from the package (src layout). The root `views/` is not part of the installed package.
