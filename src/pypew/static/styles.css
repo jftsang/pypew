@@ -24,11 +24,25 @@ body {
     padding-bottom: calc(0.25rem + 1px);
 }
 
-/* Bootstrap Icons, inlined in templates: size them like the button text */
-.bi {
-    width: 1em;
-    height: 1em;
-    vertical-align: -0.125em;
+/* Bootstrap Icons, drawn with CSS masks so they take the button's colour */
+.icon {
+    display: inline-block;
+    width: 1.1em;
+    height: 1.1em;
+    background-color: currentColor;
+    vertical-align: middle;
+    -webkit-mask: center / contain no-repeat;
+    mask: center / contain no-repeat;
+}
+
+.icon-link {
+    -webkit-mask-image: url(link-45deg.svg);
+    mask-image: url(link-45deg.svg);
+}
+
+.icon-print {
+    -webkit-mask-image: url(printer-fill.svg);
+    mask-image: url(printer-fill.svg);
 }
 
 main {
