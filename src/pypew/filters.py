@@ -4,7 +4,7 @@ from functools import wraps
 
 from docxtpl import RichText
 
-from .models import Service, ServiceItem
+from .models import PewSheetItem, Service
 
 
 def nullsafe(f):
@@ -15,7 +15,7 @@ def nullsafe(f):
     return ns
 
 
-def as_richtext(item: ServiceItem) -> RichText:
+def as_richtext(item: PewSheetItem) -> RichText:
     return item.as_richtext()
 
 

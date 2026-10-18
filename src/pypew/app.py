@@ -57,19 +57,25 @@ def create_app(pypew: PyPew | None = None, **kwargs) -> Flask:
         "/pewSheet",
         "pew_sheet_create_view",
         views.pew_sheet_create_view,
-        methods=["GET"],
+        methods=["GET", "POST"],
     )
     app.add_url_rule(
         "/pewSheet/docx",
         "pew_sheet_docx_view",
         views.pew_sheet_docx_view,
-        methods=["GET"],
+        methods=["GET", "POST"],
     )
     app.add_url_rule(
         "/pewSheet/clearHistory",
         "pew_sheet_clear_history_endpoint",
         views.pew_sheet_clear_history_endpoint,
         methods=["DELETE"],
+    )
+    app.add_url_rule(
+        "/pewSheet/default-items",
+        "pew_sheet_default_items_endpoint",
+        views.pew_sheet_default_items_endpoint,
+        methods=["GET", "POST"],
     )
     app.url_map.strict_slashes = False
 

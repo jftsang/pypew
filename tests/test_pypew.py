@@ -13,7 +13,17 @@ from pydantic import ValidationError
 from pypew import views
 from pypew.app import create_app
 from pypew.filters import english_date
-from pypew.models import Feast, Music, Service
+from pypew.models import (
+    AnthemItem,
+    CollectItem,
+    Feast,
+    HymnItem,
+    Music,
+    ProperItem,
+    ReadingItem,
+    Service,
+    ServiceItem,
+)
 from pypew.models_base import get
 
 # The date each feast falls on, as an ISO string or null, keyed by slug and
@@ -181,6 +191,164 @@ class TestModels(unittest.TestCase):
         lent1 = get(Feast.all(), name="Lent I")
         service = Service(title="", date=today(), primary_feast=lent1)
         self.assertListEqual(service.collects, [lent1.collect, ash_wednesday.collect])
+
+
+class TestServiceItems(unittest.TestCase):
+    """The service item hierarchy, and the polymorphism around it."""
+
+    def setUp(self) -> None:
+        self.primary = get(Feast.all(), name="Septuagesima")
+
+    def service(self, **kwargs) -> Service:
+        return Service(title="", date=today(), primary_feast=self.primary, **kwargs)
+
+    def test_default_items_are_polymorphic(self):
+        service = self.service(
+            introit_hymn=Music(title="Amazing Grace", category="Hymn", ref="NEH: 1a"),
+            offertory_hymn=Music(title="Old Hundredth", category="Hymn", ref="NEH: 2"),
+            anthem=Music(title="Anthem X", category="Anthem", composer="Someone"),
+        )
+        self.assertListEqual(
+            [type(i) for i in service.items],
+            [
+                HymnItem,
+                ProperItem,
+                CollectItem,
+                ReadingItem,
+                ProperItem,
+                ReadingItem,
+                ProperItem,
+                HymnItem,
+                ProperItem,
+                AnthemItem,
+            ],
+        )
+
+    def test_optional_items_are_left_out(self):
+        """No introit hymn, no offertory hymn and no anthem means no items
+        of those kinds, as before.
+        """
+        service = self.service()
+        kinds = [type(i) for i in service.items]
+        self.assertNotIn(HymnItem, kinds)
+        self.assertNotIn(AnthemItem, kinds)
+
+    def test_items_round_trip(self):
+        service = self.service(
+            introit_hymn=Music(title="Amazing Grace", category="Hymn", ref="NEH: 1a"),
+            anthem=Music(title="Anthem X", category="Anthem", composer="Someone"),
+        )
+        restored = Service.model_validate_json(service.model_dump_json())
+        self.assertListEqual(
+            [type(i) for i in restored.items], [type(i) for i in service.items]
+        )
+        self.assertListEqual(restored.items, service.items)
+
+    def test_explicit_items_are_kept_as_given(self):
+        """A service built from an item list keeps that list, even when it
+        says nothing like what the feast would have produced.
+        """
+        service = self.service(
+            items=[
+                ReadingItem(
+                    reading_type="gospel",
+                    title="Gospel",
+                    paragraphs=["In the beginning"],
+                    subtitle="St. John 1:1",
+                ),
+                CollectItem(collects=["A collect."]),
+                ServiceItem(title="Notice", paragraphs=["Bring chairs."]),
+            ]
+        )
+        self.assertListEqual(
+            [type(i) for i in service.items],
+            [ReadingItem, CollectItem, ServiceItem],
+        )
+
+    @parameterized.expand(
+        [
+            ({"type": "nope"}, "an unknown kind of item"),
+            ({"type": "reading", "title": "Gospel"}, "a reading with no reading_type"),
+            ({"type": "hymn", "title": "Hymn"}, "a hymn with no music"),
+            ({"type": "proper", "title": "Introit"}, "a proper with no proper_type"),
+            (
+                {"type": "anthem", "title": "A", "bogus": 1},
+                "a field that doesn't exist",
+            ),
+        ]
+    )
+    def test_bad_items_are_rejected(self, item, _why):
+        with self.assertRaises(ValidationError):
+            self.service(items=[item])
+
+    def test_getters_read_from_the_items(self):
+        """The convenience getters describe the items, so they follow a
+        hand-edited service rather than its feast.
+        """
+        service = self.service(
+            items=[
+                ProperItem(
+                    proper_type="introit",
+                    title="Introit Proper",
+                    paragraphs=["Custom introit."],
+                ),
+                CollectItem(collects=["Custom collect."]),
+                ReadingItem(
+                    reading_type="epistle",
+                    title="Epistle",
+                    paragraphs=["Custom epistle."],
+                    subtitle="Somewhere 1:1",
+                ),
+                ProperItem(
+                    proper_type="gat", title="Gradual", paragraphs=["Custom gradual."]
+                ),
+            ]
+        )
+        self.assertEqual(service.introit_proper, "Custom introit.")
+        self.assertListEqual(service.collects, ["Custom collect."])
+        self.assertEqual(service.epistle, "Custom epistle.")
+        self.assertEqual(service.epistle_ref, "Somewhere 1:1")
+        self.assertEqual(service.gat, "Gradual")
+        self.assertListEqual(service.gat_propers, ["Custom gradual."])
+        self.assertIsNone(service.gospel)
+        self.assertIsNone(service.offertory_proper)
+
+    def test_getters_of_an_empty_service(self):
+        """An empty service has no items, so the getters find nothing
+        rather than falling back on the feast.
+        """
+        service = self.service(items=[CollectItem(collects=[])])
+        self.assertIsNone(service.introit_proper)
+        self.assertIsNone(service.epistle)
+        self.assertIsNone(service.gospel)
+        self.assertEqual(service.gat, "")
+        self.assertListEqual(service.collects, [])
+
+    def test_default_items_match_the_feast(self):
+        """The traditional order of service still comes out of the feast."""
+        service = self.service()
+        self.assertEqual(service.introit_proper, self.primary.introit)
+        self.assertEqual(service.epistle, self.primary.epistle)
+        self.assertEqual(service.epistle_ref, self.primary.epistle_ref)
+        self.assertEqual(service.gospel, self.primary.gospel)
+        self.assertEqual(service.gospel_ref, self.primary.gospel_ref)
+        self.assertEqual(service.offertory_proper, self.primary.offertory)
+        self.assertEqual(service.communion_proper, self.primary.communion)
+        self.assertEqual(service.gat, self.primary.gat)
+
+    def test_items_are_richtext(self):
+        """Every item kind can render itself for the docx template."""
+        for item in self.service().items:
+            with self.subTest(type=type(item).__name__):
+                self.assertIsNotNone(item.as_richtext())
+
+    def test_anthem_shows_its_name_and_composer(self):
+        service = self.service(
+            anthem=Music(title="Anthem X", category="Anthem", composer="Someone")
+        )
+        (anthem,) = [i for i in service.items if isinstance(i, AnthemItem)]
+        self.assertEqual(anthem.name, "Anthem X")
+        self.assertEqual(anthem.subtitle, "Anthem X. Someone")
 
 
 class TestViews(unittest.TestCase):

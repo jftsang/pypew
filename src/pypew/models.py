@@ -3,13 +3,19 @@ import re
 import typing
 from abc import ABC, abstractmethod
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Literal
 
 import jinja2
 import yaml
 from docx import Document
 from docxtpl import DocxTemplate, RichText
-from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from .dateexpr import parse
 from .models_base import NotFoundError, get
@@ -160,11 +166,39 @@ class PewSheetItem(PypewModel, ABC):
     Subclasses expose ``title``, ``subtitle`` and ``paragraphs``, either as
     fields or as computed properties, so that jinja templates and the
     docx renderer can treat every block the same way.
+
+    ``type`` names the concrete kind of item, both to tell the kinds apart
+    in the user interface and to pick the right class when a serialised
+    service is read back in.
     """
+
+    type: str
 
     @abstractmethod
     def as_richtext(self) -> RichText:
         raise NotImplementedError
+
+
+def _text_richtext(
+    title: str, subtitle: str | None, paragraphs: typing.Iterable[typing.Any]
+) -> RichText:
+    """Render a heading, an optional subtitle and some paragraphs.
+
+    This is how nearly every item is set, so they all share it; only items
+    that style their text differently -- hymns, whose title is italicised
+    -- render themselves.
+    """
+    rt = RichText()
+    rt.add(title, **CharacterStyles.title)
+    if subtitle is not None:
+        rt.add("\a")
+        rt.add(subtitle, **CharacterStyles.subtitle)
+
+    for paragraph in paragraphs:
+        rt.add("\a")
+        rt.add(paragraph, **CharacterStyles.paragraph)
+
+    return rt
 
 
 class CharacterStyles:
@@ -238,39 +272,29 @@ class Music(PypewModel):
 
 
 class ServiceItem(PewSheetItem):
+    """An item that doesn't fit any of the more specific categories."""
+
+    type: Literal["misc"] = "misc"
     title: str = ""
     paragraphs: list[typing.Any] = Field(default_factory=list)
     subtitle: str | None = None
 
     def as_richtext(self) -> RichText:
-
-        rt = RichText()
-        rt.add(self.title, **CharacterStyles.title)
-        if self.subtitle is not None:
-            rt.add("\a")
-            rt.add(self.subtitle, **CharacterStyles.subtitle)
-
-        for paragraph in self.paragraphs:
-            rt.add("\a")
-            rt.add(paragraph, **CharacterStyles.paragraph)
-
-        return rt
+        return _text_richtext(self.title, self.subtitle, self.paragraphs)
 
 
 class CollectItem(PewSheetItem):
+    type: Literal["collect"] = "collect"
     collects: list[str] = Field(default_factory=list)
 
-    @computed_field  # type: ignore[prop-decorator]
     @property
     def title(self) -> str:
         return "Collect" if len(self.collects) == 1 else "Collects"
 
-    @computed_field  # type: ignore[prop-decorator]
     @property
     def subtitle(self) -> str | None:
         return None
 
-    @computed_field  # type: ignore[prop-decorator]
     @property
     def paragraphs(self) -> list[str]:
         return self.collects
@@ -288,16 +312,50 @@ class CollectItem(PewSheetItem):
         return rt
 
 
-class MusicItem(PewSheetItem):
-    title: str
-    music: Music
+class ProperItem(PewSheetItem):
+    """One of the sung or said texts of the proper of the day."""
 
-    @computed_field  # type: ignore[prop-decorator]
+    type: Literal["proper"] = "proper"
+    proper_type: str
+    title: str = ""
+    paragraphs: list[typing.Any] = Field(default_factory=list)
+    subtitle: str | None = None
+
+    def as_richtext(self) -> RichText:
+        return _text_richtext(self.title, self.subtitle, self.paragraphs)
+
+
+class ReadingItem(PewSheetItem):
+    """A reading of the scriptures: Old Testament, Epistle or Gospel."""
+
+    type: Literal["reading"] = "reading"
+    reading_type: str
+    title: str = ""
+    paragraphs: list[typing.Any] = Field(default_factory=list)
+    subtitle: str | None = None
+
+    def as_richtext(self) -> RichText:
+        return _text_richtext(self.title, self.subtitle, self.paragraphs)
+
+
+class MusicItem(PewSheetItem, ABC):
+    """An item of music sung during the service."""
+
+    title: str
+
     @property
     def subtitle(self) -> str | None:
         return None
 
-    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def paragraphs(self) -> list[str]:
+        raise NotImplementedError
+
+
+class HymnItem(MusicItem):
+    type: Literal["hymn"] = "hymn"
+    music: Music
+
     @property
     def paragraphs(self) -> list[str]:
         return [str(self.music)]
@@ -308,6 +366,39 @@ class MusicItem(PewSheetItem):
         rt.add("\a")
         rt.add(self.music.as_richtext())
         return rt
+
+
+class AnthemItem(MusicItem):
+    """An anthem, as opposed to a hymn: named and attributed to a composer
+    rather than picked out of a hymnal.
+
+    ``title`` names the place the anthem occupies in the service, and
+    ``name`` is the anthem itself.
+    """
+
+    type: Literal["anthem"] = "anthem"
+    name: str | None = None
+    composer: str | None = None
+    lyrics: str | None = None
+    translation: str | None = None
+
+    @property
+    def paragraphs(self) -> list[str]:
+        return [p for p in (self.lyrics, self.translation) if p]
+
+    @property
+    def subtitle(self) -> str | None:
+        parts = [p for p in (self.name, self.composer) if p]
+        return ". ".join(parts) or None
+
+    def as_richtext(self) -> RichText:
+        return _text_richtext(self.title, self.subtitle, self.paragraphs)
+
+
+PewSheetItemUnion = Annotated[
+    ServiceItem | CollectItem | ProperItem | ReadingItem | HymnItem | AnthemItem,
+    Field(discriminator="type"),
+]
 
 
 class Service(PypewModel):
@@ -324,12 +415,103 @@ class Service(PypewModel):
     recessional_hymn: Music | None = None
     anthem: Music | None = None
     service_type: str = "Sung Mass"
+    items: list[PewSheetItemUnion] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _default_items(self) -> "Service":
+        """Fall back on the traditional order of service.
+
+        A service that doesn't say what its items are gets the ones implied
+        by its feast and its musical choices, so that the traditional form
+        and an explicit item list produce the same sheet.
+        """
+        if not self.items:
+            self.items = self.default_items()
+        return self
 
     # One can't call methods in jinja2 templates, so one must provide
-    # everything as member properties instead.
+    # everything as member properties instead. These read back out of
+    # ``items``, so they describe whatever the service actually contains
+    # rather than what its feast happens to say.
+
+    def _proper(self, proper_type: str) -> ProperItem | None:
+        for item in self.items:
+            if isinstance(item, ProperItem) and item.proper_type == proper_type:
+                return item
+        return None
+
+    def _reading(self, reading_type: str) -> ReadingItem | None:
+        for item in self.items:
+            if isinstance(item, ReadingItem) and item.reading_type == reading_type:
+                return item
+        return None
+
+    @property
+    def _collect_item(self) -> CollectItem | None:
+        for item in self.items:
+            if isinstance(item, CollectItem):
+                return item
+        return None
+
+    @staticmethod
+    def _first(item: PewSheetItem | None) -> typing.Any:
+        """The one paragraph of a single-paragraph item, if it has one."""
+        if item is None or not item.paragraphs:
+            return None
+        return item.paragraphs[0]
 
     @property
     def collects(self) -> list[str]:
+        item = self._collect_item
+        return list(item.collects) if item else []
+
+    # TODO primary or secondary?
+    @property
+    def introit_proper(self) -> str | None:
+        return self._first(self._proper("introit"))
+
+    @property
+    def gat(self) -> str:
+        item = self._proper("gat")
+        return item.title if item else ""
+
+    @property
+    def gat_propers(self) -> list[str]:
+        item = self._proper("gat")
+        return list(item.paragraphs) if item else []
+
+    @property
+    def offertory_proper(self) -> str | None:
+        return self._first(self._proper("offertory"))
+
+    @property
+    def communion_proper(self) -> str | None:
+        return self._first(self._proper("communion"))
+
+    @property
+    def epistle_ref(self) -> str | None:
+        item = self._reading("epistle")
+        return item.subtitle if item else None
+
+    @property
+    def epistle(self) -> str | None:
+        return self._first(self._reading("epistle"))
+
+    @property
+    def gospel_ref(self) -> str | None:
+        item = self._reading("gospel")
+        return item.subtitle if item else None
+
+    @property
+    def gospel(self) -> str | None:
+        return self._first(self._reading("gospel"))
+
+    def _feast_collects(self) -> list[str]:
+        """The collects the traditional order of service would use.
+
+        This reads the feasts directly rather than going through
+        ``collects``, which in turn reads the items this builds.
+        """
         out = []
         if self.primary_feast.collect:
             out.append(self.primary_feast.collect)
@@ -350,102 +532,99 @@ class Service(PypewModel):
 
         return out
 
-    # TODO primary or secondary?
-    @property
-    def introit_proper(self) -> str | None:
-        return self.primary_feast.introit
-
-    @property
-    def gat(self) -> str:
-        assert self.primary_feast.gat is not None
-        return self.primary_feast.gat
-
-    @property
-    def gat_propers(self) -> list[str]:
+    def _feast_gat_propers(self) -> list[str]:
+        """The gradual/alleluia/tract texts the feast calls for."""
         propers = []
-        if "Gradual" in self.primary_feast.gat:
+        gat = self.primary_feast.gat
+        if "Gradual" in gat:
             assert self.primary_feast.gradual is not None
             propers.append(self.primary_feast.gradual)
-        if "Alleluia" in self.primary_feast.gat:
+        if "Alleluia" in gat:
             assert self.primary_feast.alleluia is not None
             propers.append(self.primary_feast.alleluia)
-        if "Tract" in self.primary_feast.gat:
+        if "Tract" in gat:
             assert self.primary_feast.tract is not None
             propers.append(self.primary_feast.tract)
         return propers
 
-    @property
-    def offertory_proper(self) -> str | None:
-        return self.primary_feast.offertory
+    def default_items(self) -> list[PewSheetItemUnion]:
+        """The items of the traditional order of service.
 
-    @property
-    def communion_proper(self) -> str | None:
-        return self.primary_feast.communion
-
-    @property
-    def epistle_ref(self) -> str | None:
-        return self.primary_feast.epistle_ref
-
-    @property
-    def epistle(self) -> str | None:
-        return self.primary_feast.epistle
-
-    @property
-    def gospel_ref(self) -> str | None:
-        return self.primary_feast.gospel_ref
-
-    @property
-    def gospel(self) -> str | None:
-        return self.primary_feast.gospel
-
-    @property
-    def items(self) -> list[PewSheetItem]:
-        items: list[PewSheetItem] = []
+        This is what a service gets when it is built from the feast and the
+        handful of musical choices, rather than from an explicit list of
+        items.
+        """
+        f = self.primary_feast
+        items: list[PewSheetItemUnion] = []
         if self.introit_hymn:
-            items.append(MusicItem(title="Introit Hymn", music=self.introit_hymn))
+            items.append(HymnItem(title="Introit Hymn", music=self.introit_hymn))
         items.append(
-            ServiceItem(title="Introit Proper", paragraphs=[self.introit_proper])
+            ProperItem(
+                proper_type="introit",
+                title="Introit Proper",
+                paragraphs=[f.introit],
+            )
         )
 
-        collects = CollectItem(collects=self.collects)
-        items.append(collects)
+        items.append(CollectItem(collects=self._feast_collects()))
 
         items.append(
-            ServiceItem(
+            ReadingItem(
+                reading_type="epistle",
                 title="Epistle",
-                paragraphs=[self.epistle],
-                subtitle=self.epistle_ref,
+                paragraphs=[f.epistle],
+                subtitle=f.epistle_ref,
             )
         )
-        items.append(ServiceItem(title=self.gat, paragraphs=self.gat_propers))
+        assert f.gat is not None
         items.append(
-            ServiceItem(
-                title="Gospel", paragraphs=[self.gospel], subtitle=self.gospel_ref
+            ProperItem(
+                proper_type="gat",
+                title=f.gat,
+                paragraphs=self._feast_gat_propers(),
+            )
+        )
+        items.append(
+            ReadingItem(
+                reading_type="gospel",
+                title="Gospel",
+                paragraphs=[f.gospel],
+                subtitle=f.gospel_ref,
             )
         )
 
         items.append(
-            ServiceItem(title="Offertory Proper", paragraphs=[self.offertory_proper])
+            ProperItem(
+                proper_type="offertory",
+                title="Offertory Proper",
+                paragraphs=[f.offertory],
+            )
         )
         if self.offertory_hymn:
-            items.append(MusicItem(title="Offertory Hymn", music=self.offertory_hymn))
+            items.append(HymnItem(title="Offertory Hymn", music=self.offertory_hymn))
 
         items.append(
-            ServiceItem(title="Communion Proper", paragraphs=[self.communion_proper])
+            ProperItem(
+                proper_type="communion",
+                title="Communion Proper",
+                paragraphs=[f.communion],
+            )
         )
 
         if self.anthem:
             items.append(
-                ServiceItem(
+                AnthemItem(
                     title="Anthem",
-                    paragraphs=[self.anthem.lyrics, self.anthem.translation],
-                    subtitle=f"{self.anthem.title}. {self.anthem.composer}",
+                    name=self.anthem.title,
+                    composer=self.anthem.composer,
+                    lyrics=self.anthem.lyrics,
+                    translation=self.anthem.translation,
                 )
             )
 
         if self.recessional_hymn:
             items.append(
-                MusicItem(title="Recessional Hymn", music=self.recessional_hymn)
+                HymnItem(title="Recessional Hymn", music=self.recessional_hymn)
             )
 
         return items
