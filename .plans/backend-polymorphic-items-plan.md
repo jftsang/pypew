@@ -61,7 +61,8 @@ from pydantic import Field, Discriminator
 
 
 class BaseItem(PewSheetItem):
-    item_type: Literal['misc'] = 'misc'
+    item_type: Literal["misc"] = "misc"
+
 
 # etc., then union: Item = Annotated[Union[ServiceItem, CollectItem, ...], Field(discriminator='item_type')]
 ```
@@ -87,7 +88,7 @@ So modify Service to have something like:
 ```python
 items: list[ServiceItemUnion] = Field(
     default_factory=lambda: _default_items_from_traditional(...)
-    )  # but need context
+)  # but need context
 # or compute in model_validator? Or have a way to build defaults
 ```
 
