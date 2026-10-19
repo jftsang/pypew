@@ -354,17 +354,18 @@ class MusicItem(PewSheetItem, ABC):
 
 class HymnItem(MusicItem):
     type: Literal["hymn"] = "hymn"
-    music: Music
+    music: Music | None = None
 
     @property
     def paragraphs(self) -> list[str]:
-        return [str(self.music)]
+        return [str(self.music)] if self.music else []
 
     def as_richtext(self) -> RichText:
         rt = RichText()
         rt.add(self.title, font="Merriweather", size=20, bold=True)
-        rt.add("\a")
-        rt.add(self.music.as_richtext())
+        if self.music is not None:
+            rt.add("\a")
+            rt.add(self.music.as_richtext())
         return rt
 
 
@@ -556,8 +557,9 @@ class Service(PypewModel):
         """
         f = self.primary_feast
         items: list[PewSheetItemUnion] = []
-        if self.introit_hymn:
-            items.append(HymnItem(title="Introit Hymn", music=self.introit_hymn))
+        items.append(
+            HymnItem(title="Introit Hymn", music=self.introit_hymn)
+        )
         items.append(
             ProperItem(
                 proper_type="introit",
@@ -600,8 +602,7 @@ class Service(PypewModel):
                 paragraphs=[f.offertory],
             )
         )
-        if self.offertory_hymn:
-            items.append(HymnItem(title="Offertory Hymn", music=self.offertory_hymn))
+        items.append(HymnItem(title="Offertory Hymn", music=self.offertory_hymn))
 
         items.append(
             ProperItem(
@@ -611,21 +612,19 @@ class Service(PypewModel):
             )
         )
 
-        if self.anthem:
-            items.append(
-                AnthemItem(
-                    title="Anthem",
-                    name=self.anthem.title,
-                    composer=self.anthem.composer,
-                    lyrics=self.anthem.lyrics,
-                    translation=self.anthem.translation,
-                )
+        items.append(
+            AnthemItem(
+                title="Anthem",
+                name=self.anthem.title if self.anthem else None,
+                composer=self.anthem.composer if self.anthem else None,
+                lyrics=self.anthem.lyrics if self.anthem else None,
+                translation=self.anthem.translation if self.anthem else None,
             )
+        )
 
-        if self.recessional_hymn:
-            items.append(
-                HymnItem(title="Recessional Hymn", music=self.recessional_hymn)
-            )
+        items.append(
+            HymnItem(title="Recessional Hymn", music=self.recessional_hymn)
+        )
 
         return items
 

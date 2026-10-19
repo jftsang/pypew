@@ -221,17 +221,18 @@ class TestServiceItems(unittest.TestCase):
                 HymnItem,
                 ProperItem,
                 AnthemItem,
+                HymnItem,
             ],
         )
 
-    def test_optional_items_are_left_out(self):
-        """No introit hymn, no offertory hymn and no anthem means no items
-        of those kinds, as before.
+    def test_placeholder_items_are_present(self):
+        """Even without hymns/anthem the traditional layout keeps placeholder
+        cards for them, so the user can fill them in.
         """
         service = self.service()
         kinds = [type(i) for i in service.items]
-        self.assertNotIn(HymnItem, kinds)
-        self.assertNotIn(AnthemItem, kinds)
+        self.assertIn(HymnItem, kinds)
+        self.assertIn(AnthemItem, kinds)
 
     def test_items_round_trip(self):
         service = self.service(
@@ -269,7 +270,6 @@ class TestServiceItems(unittest.TestCase):
         [
             ({"type": "nope"}, "an unknown kind of item"),
             ({"type": "reading", "title": "Gospel"}, "a reading with no reading_type"),
-            ({"type": "hymn", "title": "Hymn"}, "a hymn with no music"),
             ({"type": "proper", "title": "Introit"}, "a proper with no proper_type"),
             (
                 {"type": "anthem", "title": "A", "bogus": 1},

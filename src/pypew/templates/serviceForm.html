@@ -1,7 +1,10 @@
 <form action="{{ url_for('pew_sheet_create_view') }}"
       id="serviceForm"
       class="px-5"
-      data-feast-date-url-template="{{ url_for('feast_date_api', slug='__slug__') }}">
+      data-feast-date-url-template="{{ url_for('feast_date_api', slug='__slug__') }}"
+      data-default-items-url="{{ url_for('pew_sheet_default_items_endpoint') }}"
+      data-service-json="{{ service.model_dump_json() if service else '' }}"
+      data-hymns='{{ hymns | tojson }}'>
     <div class="row mb-3">
         <h3 id="titleH3"></h3>
         <div class="col">
@@ -106,75 +109,15 @@
     </div>
 
     <div class="row mb-3">
-        <div class="col-4">
-            {{ form.introit_hymn.label }}
-            {{ form.introit_hymn(class='form-select') }}
-        </div>
-        <div class="col-4">
-            {{ form.offertory_hymn.label }}
-            {{ form.offertory_hymn(class='form-select') }}
-        </div>
-        <div class="col-4">
-            {{ form.recessional_hymn.label }}
-            {{ form.recessional_hymn(class='form-select') }}
+        <div class="col">
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    id="regenerateItemsBtn">
+                Regenerate items from feast
+            </button>
         </div>
     </div>
 
-    <div class="row mb-3">
-        {{ form.anthem_group.title.label(class='col-sm-2 col-form-label') }}
-        <div class="col">
-            {{ form.anthem_group.title(class='form-control') }}
-            {% if form.anthem_group.title.errors %}
-                {% for error in form.anthem_group.title.errors %}
-                    <small class="font-small text-danger">
-                        {{ error }}
-                    </small>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="row mb-3">
-        {{ form.anthem_group.translation.label(class='col-sm-2 col-form-label') }}
-        <div class="col">
-            {{ form.anthem_group.translation(class='form-select') }}
-            {% if form.anthem_group.translation.errors %}
-                {% for error in form.anthem_group.translation.errors %}
-                    <small class="font-small text-danger">
-                        {{ error }}
-                    </small>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="row mb-3">
-        {{ form.anthem_group.composer.label(class='col-sm-2 col-form-label') }}
-        <div class="col">
-            {{ form.anthem_group.composer(class='form-control') }}
-            {% if form.anthem_group.composer.errors %}
-                {% for error in form.anthem_group.composer.errors %}
-                    <small class="font-small text-danger">
-                        {{ error }}
-                    </small>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="row mb-3">
-        {{ form.anthem_group.lyrics.label(class='col-sm-2 col-form-label') }}
-        <div class="col">
-            {{ form.anthem_group.lyrics(class='form-control') }}
-            {% if form.anthem_group.lyrics.errors %}
-                {% for error in form.anthem_group.lyrics.errors %}
-                    <small class="font-small text-danger">
-                        {{ error }}
-                    </small>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
+    <div id="serviceItemsEditor" class="mb-3"></div>
 
     <div class="row">
         <input type="submit" class="btn btn-success w-100" value="Create">

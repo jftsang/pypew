@@ -54,6 +54,9 @@ def pew_sheet_create_view():
             a = data.get("anthem")
             if isinstance(a, dict):
                 data["anthem"] = Music(**a)
+            # The frontend sends anthem_group (a flat-form artifact) too; drop
+            # it so extra="forbid" doesn't reject the request.
+            data.pop("anthem_group", None)
             service = Service.model_validate(data)
         except ValidationError as exc:
             flash("Sorry, I could not create a service from that data.", "danger")
@@ -110,7 +113,8 @@ def pew_sheet_create_view():
     previous_services.sort(key=lambda args_service: args_service[1].date)
 
     return render_template(
-        "pewSheet.html", form=form, service=service, previous_services=previous_services
+        "pewSheet.html", form=form, service=service, previous_services=previous_services,
+        hymns=[{"ref": h.ref, "title": h.title} for h in Music.neh_hymns()]
     )
 
 
@@ -140,6 +144,9 @@ def pew_sheet_docx_view():
             a = data.get("anthem")
             if isinstance(a, dict):
                 data["anthem"] = Music(**a)
+            # The frontend sends anthem_group (a flat-form artifact) too; drop
+            # it so extra="forbid" doesn't reject the request.
+            data.pop("anthem_group", None)
             service = Service.model_validate(data)
         except ValidationError as exc:
             flash("Sorry, I could not create a service from that data.", "danger")

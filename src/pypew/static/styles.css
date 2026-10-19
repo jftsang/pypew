@@ -98,3 +98,31 @@ input#dexpr {
     max-height: 70vh;
     overflow: auto !important;
 }
+
+/* Service item editor cards */
+#serviceItemsEditor .card {
+    background-color: #2b2b2b;
+    color: #e8e8e8;
+    border-color: #444;
+}
+
+#serviceItemsEditor .card-header {
+    background-color: #3a3a3a;
+    border-color: #444;
+}
+
+#serviceItemsEditor .card-body {
+    padding: 0.4rem 0.75rem;
+}
+
+#serviceItemsEditor .form-label.small {
+    font-size: 0.7rem;
+    margin-bottom: 0.15rem;
+}
+
+#serviceItemsEditor .form-control,
+#serviceItemsEditor .form-select {
+    background-color: #1e1e1e;
+    color: #e8e8e8;
+    border-color: #555;
+}
