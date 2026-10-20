@@ -89,17 +89,50 @@
         render();
       }
     });
-    const addBelow = btn("+", "Add item below", function () {
-      items.splice(index + 1, 0, emptyItem("misc"));
-      render();
+    const addBelowWrap = document.createElement("span");
+    addBelowWrap.className = "position-relative d-inline-block";
+    const addBelow = btn("+", "Add item below", function () {});
+    const menu = document.createElement("div");
+    menu.className = "dropdown-menu";
+    menu.style.display = "none";
+    menu.style.position = "absolute";
+    menu.style.right = "0";
+    menu.style.top = "100%";
+    menu.style.zIndex = "1000";
+    [
+      { value: "collect", label: "Collect" },
+      { value: "proper", label: "Proper" },
+      { value: "reading", label: "Reading" },
+      { value: "hymn", label: "Hymn" },
+      { value: "anthem", label: "Anthem" },
+      { value: "misc", label: "Miscellaneous" },
+    ].forEach(function (opt) {
+      const a = document.createElement("a");
+      a.className = "dropdown-item";
+      a.href = "#";
+      a.textContent = opt.label;
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        items.splice(index + 1, 0, emptyItem(opt.value));
+        render();
+      });
+      menu.appendChild(a);
     });
+    addBelow.addEventListener("mouseenter", function () {
+      menu.style.display = "block";
+    });
+    addBelowWrap.addEventListener("mouseleave", function () {
+      menu.style.display = "none";
+    });
+    addBelowWrap.appendChild(addBelow);
+    addBelowWrap.appendChild(menu);
     const remove = btn("×", "Remove", function () {
       items.splice(index, 1);
       render();
     });
     controls.appendChild(up);
     controls.appendChild(down);
-    controls.appendChild(addBelow);
+    controls.appendChild(addBelowWrap);
     controls.appendChild(remove);
     header.appendChild(controls);
     el.appendChild(header);
