@@ -9,9 +9,10 @@ from wtforms import (
     SelectField,
     SelectMultipleField,
     StringField,
+    TextAreaField,
     TimeField,
 )
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Regexp
 from wtforms.widgets import TextArea
 
 from .models import Feast, Music
@@ -61,3 +62,33 @@ class PewSheetForm(FlaskForm):
     # https://discord.com/channels/531221516914917387/590290790241009673/948217938459107339
     def is_submitted(self):
         return bool(request.args)
+
+
+class FeastForm(FlaskForm):
+    slug = StringField(
+        "Slug",
+        validators=[
+            DataRequired(),
+            Regexp(
+                r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                message="Use lowercase letters, digits and hyphens, e.g. st-mark.",
+            ),
+        ],
+    )
+    name = StringField("Name", validators=[DataRequired()])
+    dateexpr = StringField("Date expression")
+    introit = TextAreaField("Introit")
+    collect = TextAreaField("Collect")
+    epistle_ref = StringField("Epistle reference")
+    epistle = TextAreaField("Epistle")
+    gat = StringField("Gradual / Alleluia / Tract")
+    gradual = TextAreaField("Gradual")
+    alleluia = TextAreaField("Alleluia")
+    tract = TextAreaField("Tract")
+    gospel_ref = StringField("Gospel reference")
+    gospel = TextAreaField("Gospel")
+    offertory = TextAreaField("Offertory")
+    communion = TextAreaField("Communion")
+
+    class Meta:
+        csrf = False

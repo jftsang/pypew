@@ -45,13 +45,42 @@ def create_app(pypew: PyPew | None = None, **kwargs) -> Flask:
         "/dateexpr", "dateexpr_view", views.dateexpr_view, methods=["GET", "POST"]
     )
     app.add_url_rule("/feasts", "feast_index_view", views.feast_index_view)
+    app.add_url_rule(
+        "/feasts/order",
+        "feast_order_view",
+        views.feast_order_view,
+        methods=["GET", "POST"],
+    )
     app.add_url_rule("/feasts/api", "feast_index_api", views.feast_index_api)
     app.add_url_rule(
         "/feasts/api/upcoming", "feast_upcoming_api", views.feast_upcoming_api
     )
-    app.add_url_rule("/feast/<slug>", "feast_detail_view", views.feast_detail_view)
-    app.add_url_rule("/feast/api/<slug>", "feast_detail_api", views.feast_detail_api)
+    app.add_url_rule(
+        "/feast/api/order", "feast_order_api", views.feast_order_api, methods=["POST"]
+    )
+    app.add_url_rule(
+        "/feast/api/new", "feast_create_api", views.feast_create_api, methods=["POST"]
+    )
+    app.add_url_rule(
+        "/feast/api/<slug>",
+        "feast_detail_api",
+        views.feast_detail_api,
+        methods=["GET", "PUT"],
+    )
     app.add_url_rule("/feast/api/<slug>/date", "feast_date_api", views.feast_date_api)
+    app.add_url_rule(
+        "/feast/new",
+        "feast_create_view",
+        views.feast_create_view,
+        methods=["GET", "POST"],
+    )
+    app.add_url_rule(
+        "/feast/<slug>/edit",
+        "feast_edit_view",
+        views.feast_edit_view,
+        methods=["GET", "POST"],
+    )
+    app.add_url_rule("/feast/<slug>", "feast_detail_view", views.feast_detail_view)
     app.add_url_rule("/feast/<slug>/docx", "feast_docx_view", views.feast_docx_view)
     app.add_url_rule(
         "/pewSheet",

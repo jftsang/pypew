@@ -6,6 +6,17 @@ import dateutil
 import dateutil.parser
 from dateutil.easter import easter
 
+EXAMPLES = [
+    "4th Sunday before Christmas",
+    "Epiphany",
+    "1st Sunday after 13 days after Christmas",
+    "Easter",
+    "Easter Monday",
+    "17 weeks after Easter",
+    "11 November",
+    "Remembrance Sunday",
+]
+
 aliases = {
     "Christmas": "25 December",
     "Christmas Day": "Christmas",

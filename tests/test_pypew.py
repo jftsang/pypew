@@ -1,4 +1,5 @@
 import json
+import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
@@ -519,6 +520,240 @@ class TestViews(unittest.TestCase):
             r.headers["Content-Type"],
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
+
+
+class TestFeastPersistence(unittest.TestCase):
+    def setUp(self) -> None:
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.dir = Path(tmp.name)
+        patcher = patch("pypew.models.FEASTS_DIR", self.dir)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_save_yaml_round_trip(self):
+        feast = Feast(
+            slug="save-yaml-test",
+            name="Save YAML Test",
+            dateexpr="1 January",
+            collect="A collect.",
+        )
+        feast.save_yaml()
+        self.assertEqual(Feast.from_yaml("save-yaml-test"), feast)
+
+    def test_save_yaml_leaves_out_unset_fields(self):
+        feast = Feast(
+            slug="save-yaml-test", name="Save YAML Test", dateexpr="1 January"
+        )
+        feast.save_yaml()
+        text = (self.dir / "save-yaml-test.yaml").read_text()
+        self.assertNotIn("introit", text)
+        self.assertNotIn("gat", text)
+        self.assertIn("name: Save YAML Test", text)
+
+    def test_save_order(self):
+        Feast.save_order(["first-feast", "second-feast"])
+        self.assertEqual(Feast.slugs(), ["first-feast", "second-feast"])
+        self.assertEqual(
+            (self.dir / "_list.txt").read_text(), "first-feast\nsecond-feast\n"
+        )
+
+
+class TestFeastAdminViews(unittest.TestCase):
+    def setUp(self) -> None:
+        self.app = create_app()
+        self.app.config["SERVER_NAME"] = "localhost:5000"
+        self.app.app_context().push()
+        self.client = self.app.test_client()
+
+    def test_feast_index_view_links_to_management_pages(self):
+        r = self.client.get(url_for("feast_index_view"))
+        self.assertEqual(200, r.status_code)
+        self.assertIn(b'href="/feast/new"', r.data)
+        self.assertIn(b'href="/feasts/order"', r.data)
+
+    def test_feast_detail_view_links_to_edit(self):
+        r = self.client.get(url_for("feast_detail_view", slug="christmas-day"))
+        self.assertEqual(200, r.status_code)
+        self.assertIn(b'href="/feast/christmas-day/edit"', r.data)
+
+    def test_feast_create_view_get(self):
+        r = self.client.get(url_for("feast_create_view"))
+        self.assertEqual(200, r.status_code)
+        self.assertIn(b"dateexprExamples", r.data)
+        self.assertIn(
+            b'placeholder="e.g. 25 December, Easter, 17 weeks after Easter"', r.data
+        )
+
+    def test_feast_edit_view_get(self):
+        r = self.client.get(url_for("feast_edit_view", slug="christmas-day"))
+        self.assertEqual(200, r.status_code)
+        self.assertIn(b"Edit Christmas Day", r.data)
+        self.assertIn(b"Christmas Day", r.data)
+
+    def test_feast_edit_view_handles_not_found(self):
+        r = self.client.get(url_for("feast_edit_view", slug="notmas-day"))
+        self.assertEqual(404, r.status_code)
+
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_edit_view_saves(self, m_save_yaml):
+        r = self.client.post(
+            url_for("feast_edit_view", slug="christmas-day"),
+            data={
+                "slug": "christmas-day",
+                "name": "Christmas Day",
+                "dateexpr": "25 December",
+                "collect": "A new collect.",
+            },
+        )
+        self.assertEqual(302, r.status_code)
+        self.assertEqual("/feast/christmas-day", r.headers["Location"])
+        m_save_yaml.assert_called_once()
+        saved = m_save_yaml.call_args[0][0]
+        self.assertEqual(saved.slug, "christmas-day")
+        self.assertEqual(saved.collect, "A new collect.")
+
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_edit_view_rejects_bad_dateexpr(self, m_save_yaml):
+        r = self.client.post(
+            url_for("feast_edit_view", slug="christmas-day"),
+            data={
+                "slug": "christmas-day",
+                "name": "Christmas Day",
+                "dateexpr": "whenever I feel like it",
+            },
+        )
+        self.assertEqual(200, r.status_code)
+        m_save_yaml.assert_not_called()
+        self.assertIn(b"invalid date expression", r.data)
+
+    @patch.object(Feast, "save_order")
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_create_view_saves(self, m_save_yaml, m_save_order):
+        r = self.client.post(
+            url_for("feast_create_view"),
+            data={"slug": "test-feast", "name": "Test Feast", "dateexpr": "1 January"},
+        )
+        self.assertEqual(302, r.status_code)
+        self.assertEqual("/feast/test-feast", r.headers["Location"])
+        m_save_yaml.assert_called_once()
+        m_save_order.assert_called_once()
+        self.assertEqual(m_save_order.call_args[0][0][-1], "test-feast")
+
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_create_view_rejects_duplicate_slug(self, m_save_yaml):
+        r = self.client.post(
+            url_for("feast_create_view"),
+            data={"slug": "christmas-day", "name": "Duplicate"},
+        )
+        self.assertEqual(200, r.status_code)
+        m_save_yaml.assert_not_called()
+        self.assertIn(b"already exists", r.data)
+
+    def test_feast_order_view_get(self):
+        r = self.client.get(url_for("feast_order_view"))
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(r.data.count(b'draggable="true"'), len(Feast.slugs()))
+
+    @patch.object(Feast, "save_order")
+    def test_feast_order_view_saves(self, m_save_order):
+        reordered = list(reversed(Feast.slugs()))
+        r = self.client.post(
+            url_for("feast_order_view"), data={"order": json.dumps(reordered)}
+        )
+        self.assertEqual(302, r.status_code)
+        m_save_order.assert_called_once_with(reordered)
+
+    @patch.object(Feast, "save_order")
+    def test_feast_order_view_rejects_partial_order(self, m_save_order):
+        r = self.client.post(
+            url_for("feast_order_view"), data={"order": json.dumps(["advent-i"])}
+        )
+        self.assertEqual(200, r.status_code)
+        m_save_order.assert_not_called()
+        self.assertIn(b"exactly once", r.data)
+
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_detail_api_put(self, m_save_yaml):
+        r = self.client.put(
+            url_for("feast_detail_api", slug="christmas-day"),
+            json={
+                "name": "Christmas Day",
+                "dateexpr": "25 December",
+                "collect": "Edited collect.",
+            },
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertTrue(r.is_json)
+        self.assertEqual(r.get_json()["collect"], "Edited collect.")
+        m_save_yaml.assert_called_once()
+
+    def test_feast_detail_api_put_unknown_feast(self):
+        r = self.client.put(
+            url_for("feast_detail_api", slug="notmas-day"), json={"name": "Nope"}
+        )
+        self.assertEqual(404, r.status_code)
+
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_detail_api_put_rejects_bad_dateexpr(self, m_save_yaml):
+        r = self.client.put(
+            url_for("feast_detail_api", slug="christmas-day"),
+            json={"name": "Christmas Day", "dateexpr": "whenever I feel like it"},
+        )
+        self.assertEqual(400, r.status_code)
+        self.assertIn("validation_error", r.get_json())
+        m_save_yaml.assert_not_called()
+
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_detail_api_put_rejects_slug_mismatch(self, m_save_yaml):
+        r = self.client.put(
+            url_for("feast_detail_api", slug="christmas-day"),
+            json={"name": "Christmas Day", "slug": "easter-day"},
+        )
+        self.assertEqual(400, r.status_code)
+        m_save_yaml.assert_not_called()
+
+    @patch.object(Feast, "save_order")
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_create_api(self, m_save_yaml, m_save_order):
+        r = self.client.post(
+            url_for("feast_create_api"),
+            json={"slug": "test-feast", "name": "Test Feast", "dateexpr": "1 January"},
+        )
+        self.assertEqual(201, r.status_code)
+        self.assertEqual(r.get_json()["slug"], "test-feast")
+        m_save_yaml.assert_called_once()
+        m_save_order.assert_called_once()
+        self.assertEqual(m_save_order.call_args[0][0][-1], "test-feast")
+
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_create_api_requires_slug(self, m_save_yaml):
+        r = self.client.post(url_for("feast_create_api"), json={"name": "No Slug"})
+        self.assertEqual(400, r.status_code)
+        self.assertIn("validation_error", r.get_json())
+        m_save_yaml.assert_not_called()
+
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_create_api_rejects_duplicate_slug(self, m_save_yaml):
+        r = self.client.post(
+            url_for("feast_create_api"),
+            json={"slug": "christmas-day", "name": "Duplicate"},
+        )
+        self.assertEqual(400, r.status_code)
+        m_save_yaml.assert_not_called()
+
+    @patch.object(Feast, "save_order")
+    def test_feast_order_api(self, m_save_order):
+        reordered = list(reversed(Feast.slugs()))
+        r = self.client.post(url_for("feast_order_api"), json={"slugs": reordered})
+        self.assertEqual(200, r.status_code)
+        m_save_order.assert_called_once_with(reordered)
+
+    @patch.object(Feast, "save_order")
+    def test_feast_order_api_rejects_partial_order(self, m_save_order):
+        r = self.client.post(url_for("feast_order_api"), json={"slugs": ["advent-i"]})
+        self.assertEqual(400, r.status_code)
+        m_save_order.assert_not_called()
 
 
 if __name__ == "__main__":

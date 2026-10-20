@@ -23,7 +23,7 @@ from .paths import FEASTS_DIR, PEW_SHEET_TEMPLATE
 from .utils import NoPandasError, get_neh_df, logger
 
 if typing.TYPE_CHECKING:
-    from .forms import PewSheetForm
+    from .forms import FeastForm, PewSheetForm
 
 # Any one year will do for validating a date expression, so pin one to keep
 # the verdict from depending on when the feast files happen to be loaded.
@@ -73,11 +73,54 @@ class Feast(PypewModel):
     def from_yaml(cls, slug: str) -> "Feast":
         return _feast_from_yaml(slug)
 
+    def save_yaml(self) -> None:
+        path = (FEASTS_DIR / self.slug).with_suffix(".yaml")
+        data = self.model_dump(exclude={"slug"}, exclude_none=True)
+        if not data.get("gat"):
+            data.pop("gat", None)
+        with open(path, "w") as f:
+            yaml.safe_dump(data, f, sort_keys=False, allow_unicode=True)
+        _feast_from_yaml.cache_clear()
+
+    @classmethod
+    def from_form(cls, form: "FeastForm", slug: str | None = None) -> "Feast":
+        def text(field) -> str | None:
+            value = (field.data or "").strip()
+            return value or None
+
+        return cls.model_validate(
+            {
+                "slug": (slug or form.slug.data or "").strip(),
+                "name": (form.name.data or "").strip(),
+                "dateexpr": text(form.dateexpr),
+                "introit": text(form.introit),
+                "collect": text(form.collect),
+                "epistle_ref": text(form.epistle_ref),
+                "epistle": text(form.epistle),
+                "gat": (form.gat.data or "").strip(),
+                "gradual": text(form.gradual),
+                "alleluia": text(form.alleluia),
+                "tract": text(form.tract),
+                "gospel_ref": text(form.gospel_ref),
+                "gospel": text(form.gospel),
+                "offertory": text(form.offertory),
+                "communion": text(form.communion),
+            }
+        )
+
+    @classmethod
+    def slugs(cls) -> list[str]:
+        with open(FEASTS_DIR / "_list.txt") as f:
+            return [slug.strip() for slug in f if slug.strip()]
+
+    @classmethod
+    def save_order(cls, slugs: list[str]) -> None:
+        with open(FEASTS_DIR / "_list.txt", "w") as f:
+            f.write("\n".join(slugs) + "\n")
+
     @classmethod
     def all(cls) -> list["Feast"]:
-        with open(FEASTS_DIR / "_list.txt") as f:
-            slugs = [x.strip() for x in f]
-            return [cls.from_yaml(slug) for slug in slugs]
+        return [cls.from_yaml(slug) for slug in cls.slugs()]
 
     @classmethod
     def upcoming(cls, date: dt.date | None = None) -> list["Feast"]:

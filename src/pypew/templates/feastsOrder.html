@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Order feasts{% endblock %}
+
+{% block content %}
+    <h1>Order feasts</h1>
+
+    <p>Drag the feasts into the order in which they should appear in the
+        feast list, then save. Every feast must appear exactly once.
+    </p>
+
+    <form method="post" action="{{ url_for('feast_order_view') }}"
+          id="feastOrderForm">
+        {% set slugs = feasts | map(attribute='slug') | list %}
+        <input type="hidden" name="order" id="feastOrderInput"
+               value='{{ slugs | tojson }}'>
+        <ul id="feastOrderList" class="list-group mb-3">
+            {% for feast in feasts %}
+                <li class="list-group-item feast-order-item"
+                    draggable="true"
+                    data-slug="{{ feast.slug }}">{{ feast.name }}
+                    <small class="text-secondary">({{ feast.slug }})</small></li>
+            {% endfor %}
+        </ul>
+        <div class="row">
+            <input type="submit" class="btn btn-success w-100" value="Save order">
+        </div>
+    </form>
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='feastsOrder.js') }}" defer></script>
+{% endblock %}

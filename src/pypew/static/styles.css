@@ -126,3 +126,12 @@ input#dexpr {
     color: #e8e8e8;
     border-color: #555;
 }
+
+/* Feast order editor */
+#feastOrderList .feast-order-item {
+    cursor: grab;
+}
+
+#feastOrderList .feast-order-item.feast-dragging {
+    opacity: 0.5;
+}

@@ -2,7 +2,7 @@ from traceback import format_exc
 
 from flask import make_response, render_template, request
 
-from ..dateexpr import parse
+from ..dateexpr import EXAMPLES, parse
 from ..utils import logger
 from .feast_views import *  # FIXME(F403): re-exported for the app's url rules
 from .pew_sheet_views import *  # FIXME(F403): re-exported for the app's url rules
@@ -34,16 +34,6 @@ def dateexpr_view():
         date = None
         error = repr(e)
 
-    examples = [
-        "4th Sunday before Christmas",
-        "Epiphany",
-        "1st Sunday after 13 days after Christmas",
-        "Easter",
-        "Easter Monday",
-        "17 weeks after Easter",
-        "11 November",
-        "Remembrance Sunday",
-    ]
     return render_template(
-        "dateexpr.html", dexpr=dexpr or "", date=date, error=error, examples=examples
+        "dateexpr.html", dexpr=dexpr or "", date=date, error=error, examples=EXAMPLES
     )

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit ' ~ feast.name if feast else 'New feast' }}{% endblock %}
+
+{% block content %}
+    <h1>{{ 'Edit ' ~ feast.name if feast else 'New feast' }}</h1>
+
+    <form method="post"
+          action="{{ url_for('feast_edit_view', slug=feast.slug) if feast else url_for('feast_create_view') }}"
+          id="feastForm">
+        <div class="row mb-3">
+            {{ form.slug.label(class='col-sm-2 col-form-label') }}
+            <div class="col">
+                {{ form.slug(class='form-control', readonly=true) }}
+                {% if form.slug.errors %}
+                    {% for error in form.slug.errors %}
+                        <small class="font-small text-danger">{{ error }}</small>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            {{ form.name.label(class='col-sm-2 col-form-label') }}
+            <div class="col">
+                {{ form.name(class='form-control') }}
+                {% if form.name.errors %}
+                    {% for error in form.name.errors %}
+                        <small class="font-small text-danger">{{ error }}</small>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            {{ form.dateexpr.label(class='col-sm-2 col-form-label') }}
+            <div class="col">
+                <datalist id="dateexprExamples">
+                    {% for example in examples %}
+                        <option value="{{ example }}">{{ example }}</option>
+                    {% endfor %}
+                </datalist>
+                {{ form.dateexpr(class='form-control',
+                                 list='dateexprExamples',
+                                 placeholder='e.g. 25 December, Easter, 17 weeks after Easter') }}
+                {% if form.dateexpr.errors %}
+                    {% for error in form.dateexpr.errors %}
+                        <small class="font-small text-danger">{{ error }}</small>
+                    {% endfor %}
+                {% endif %}
+                <small class="form-text text-secondary">
+                    Leave blank for a feast that is not tied to a date.
+                </small>
+            </div>
+        </div>
+
+        {% for field in [form.introit, form.collect, form.epistle_ref, form.epistle,
+                         form.gat, form.gradual, form.alleluia, form.tract,
+                         form.gospel_ref, form.gospel, form.offertory, form.communion] %}
+            <div class="row mb-3">
+                {{ field.label(class='col-sm-2 col-form-label') }}
+                <div class="col">
+                    {% if field.type == 'TextAreaField' %}
+                        {{ field(class='form-control', rows='4') }}
+                    {% else %}
+                        {{ field(class='form-control') }}
+                    {% endif %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <small class="font-small text-danger">{{ error }}</small>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="row">
+            <input type="submit" class="btn btn-success w-100" value="Save">
+        </div>
+    </form>
+{% endblock %}
+{% block sidebar %}
+    {% with feast_name = feast.name if feast else None %}
+        {% include 'feastList.html' %}
+    {% endwith %}
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='feastList.js') }}" defer></script>
+{% endblock %}

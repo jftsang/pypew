@@ -11,6 +11,13 @@
         celebrate two feasts, in which case the texts from the two
         feasts are combined with each other.
     </p>
+
+    <p>
+        <a class="btn btn-sm btn-outline-light"
+           href="{{ url_for('feast_create_view') }}">New feast</a>
+        <a class="btn btn-sm btn-outline-light"
+           href="{{ url_for('feast_order_view') }}">Reorder feasts</a>
+    </p>
 {% endblock %}
 {% block sidebar %}
     {% with feast_name = None %}
