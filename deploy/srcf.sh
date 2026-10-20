@@ -8,7 +8,7 @@ export SCRIPT_NAME=/pypew
 
 . /home/jmft2/venvs/py312/bin/activate
 
-cd "$(dirname "$files")"
+cd "$(dirname "$files")"/src
 
 # `wsgi:app` became `pypew.wsgi:app` in the src/ restructure. The package is
 # no longer importable from the repo root alone, so make sure it is installed

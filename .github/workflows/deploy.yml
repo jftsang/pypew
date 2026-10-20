@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - staging
+      - main
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  deploy:
+    name: Restart ${{ github.ref_name }}
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      SERVICE: ${{ github.ref_name == 'main' && 'pypew.service' || 'pypew-staging.service' }}
+      SSH_HOST: jmft2.user.srcf.net
+    steps:
+    - name: Set up SSH
+      env:
+        SSH_KEY: ${{ secrets.SRCF_SSH_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        if [ -z "$SSH_KEY" ]; then
+          echo "::error::SRCF_SSH_KEY secret is not set"
+          exit 1
+        fi
+        printf '%s\n' "$SSH_KEY" > ~/.ssh/id_srcf
+        chmod 600 ~/.ssh/id_srcf
+        printf '%s\n' 'jmft2.user.srcf.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFBnct1yDbnSYVChtezZQZkcsxU+LSDhEqyCkHrtcMX5' >> ~/.ssh/known_hosts
+    - name: Restart service
+      run: |
+        ssh -i ~/.ssh/id_srcf -o BatchMode=yes -o IdentitiesOnly=yes \
+          "jmft2@$SSH_HOST" "systemctl restart --user $SERVICE"
