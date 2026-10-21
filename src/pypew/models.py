@@ -600,9 +600,7 @@ class Service(PypewModel):
         """
         f = self.primary_feast
         items: list[PewSheetItemUnion] = []
-        items.append(
-            HymnItem(title="Introit Hymn", music=self.introit_hymn)
-        )
+        items.append(HymnItem(title="Introit Hymn", music=self.introit_hymn))
         items.append(
             ProperItem(
                 proper_type="introit",
@@ -665,9 +663,7 @@ class Service(PypewModel):
             )
         )
 
-        items.append(
-            HymnItem(title="Recessional Hymn", music=self.recessional_hymn)
-        )
+        items.append(HymnItem(title="Recessional Hymn", music=self.recessional_hymn))
 
         return items
 

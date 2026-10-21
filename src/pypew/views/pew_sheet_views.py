@@ -113,8 +113,11 @@ def pew_sheet_create_view():
     previous_services.sort(key=lambda args_service: args_service[1].date)
 
     return render_template(
-        "pewSheet.html", form=form, service=service, previous_services=previous_services,
-        hymns=[{"ref": h.ref, "title": h.title} for h in Music.neh_hymns()]
+        "pewSheet.html",
+        form=form,
+        service=service,
+        previous_services=previous_services,
+        hymns=[{"ref": h.ref, "title": h.title} for h in Music.neh_hymns()],
     )
 
 
