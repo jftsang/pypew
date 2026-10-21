@@ -584,12 +584,16 @@ class TestFeastAdminViews(unittest.TestCase):
         self.assertIn(
             b'placeholder="e.g. 25 December, Easter, 17 weeks after Easter"', r.data
         )
+        self.assertIn(b"readonly", r.data)
+        self.assertNotIn(b"feastForm.js", r.data)
 
     def test_feast_edit_view_get(self):
         r = self.client.get(url_for("feast_edit_view", slug="christmas-day"))
         self.assertEqual(200, r.status_code)
         self.assertIn(b"Edit Christmas Day", r.data)
         self.assertIn(b"Christmas Day", r.data)
+        self.assertIn(b"readonly", r.data)
+        self.assertNotIn(b"feastForm.js", r.data)
 
     def test_feast_edit_view_handles_not_found(self):
         r = self.client.get(url_for("feast_edit_view", slug="notmas-day"))
@@ -612,6 +616,18 @@ class TestFeastAdminViews(unittest.TestCase):
         saved = m_save_yaml.call_args[0][0]
         self.assertEqual(saved.slug, "christmas-day")
         self.assertEqual(saved.collect, "A new collect.")
+
+    @patch.object(Feast, "save_yaml", autospec=True)
+    def test_feast_edit_view_ignores_submitted_slug(self, m_save_yaml):
+        """The slug comes from the path, so editing cannot rename a feast."""
+        r = self.client.post(
+            url_for("feast_edit_view", slug="christmas-day"),
+            data={"slug": "christmas", "name": "Christmas", "dateexpr": "25 December"},
+        )
+        self.assertEqual(302, r.status_code)
+        self.assertEqual("/feast/christmas-day", r.headers["Location"])
+        m_save_yaml.assert_called_once()
+        self.assertEqual(m_save_yaml.call_args[0][0].slug, "christmas-day")
 
     @patch.object(Feast, "save_yaml", autospec=True)
     def test_feast_edit_view_rejects_bad_dateexpr(self, m_save_yaml):
