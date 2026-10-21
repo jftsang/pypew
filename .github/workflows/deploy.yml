@@ -31,10 +31,24 @@ jobs:
           echo "::error::SRCF_SSH_KEY secret is not set"
           exit 1
         fi
-        printf '%s\n' "$SSH_KEY" > ~/.ssh/id_srcf
+        python3 -c 'import os; open(os.path.expanduser("~/.ssh/id_srcf"), "w").write(os.environ["SSH_KEY"].replace("\r", "").replace("\\n", "\n").rstrip("\n") + "\n")'
         chmod 600 ~/.ssh/id_srcf
+        first="$(head -n1 ~/.ssh/id_srcf)"
+        case "$first" in
+          "-----BEGIN"*) ;;
+          *)
+            echo "::error::SRCF_SSH_KEY does not look like a PEM private key (first line is not a -----BEGIN header). Paste the full private key, including the -----BEGIN/END lines."
+            exit 1
+            ;;
+        esac
+        if ! ssh-keygen -y -f ~/.ssh/id_srcf > ~/.ssh/id_srcf.pub 2> ~/.ssh/keyerr; then
+          echo "::error::SRCF_SSH_KEY is not a loadable OpenSSH private key: $(tr -d '\n' < ~/.ssh/keyerr)"
+          exit 1
+        fi
+        echo "Offered key fingerprint: $(ssh-keygen -lf ~/.ssh/id_srcf.pub)"
         printf '%s\n' 'jmft2.user.srcf.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFBnct1yDbnSYVChtezZQZkcsxU+LSDhEqyCkHrtcMX5' >> ~/.ssh/known_hosts
     - name: Restart service
       run: |
         ssh -i ~/.ssh/id_srcf -o BatchMode=yes -o IdentitiesOnly=yes \
+          -o StrictHostKeyChecking=yes \
           "jmft2@$SSH_HOST" "systemctl restart --user $SERVICE"
